@@ -3,7 +3,6 @@ import rev
 import ctre
 
 from magicbot import MagicRobot
-
 from robotpy_ext.autonomous.selector import AutonomousModeSelector
 
 from networktables import NetworkTables
@@ -62,11 +61,11 @@ class MyRobot(MagicRobot):
         sd_prefix="RearRight_Module", zero=4.76, inverted=False, allow_reverse=True
     )
 
-    # Decleare motors for the shooter component
-    shooter_leftShooterMotor: ctre.WPI_VictorSPX
-    shooter_rightShooterMotor: ctre.WPI_VictorSPX
-    shooter_intakeMotor: ctre.WPI_VictorSPX
-    shooter_beltMotor: ctre.WPI_VictorSPX
+    # # Decleare motors for the shooter component
+    # shooter_leftShooterMotor: rev.CANSparkMax
+    # shooter_rightShooterMotor: rev.CANSparkMax
+    # shooter_intakeMotor: rev.CANSparkMax
+    # shooter_beltMotor: rev.CANSparkMax
 
     # Create common components
     # vision: vision.Vision
@@ -81,20 +80,35 @@ class MyRobot(MagicRobot):
         self.sd = NetworkTables.getTable("SmartDashboard")
 
         # Gamepad
-        self.gamempad = wpilib.Joystick(0)
-        self.gamempad2 = wpilib.Joystick(1)
+        self.xbox = wpilib.XboxController(0)
 
         # Drive Motors
-        self.frontLeftModule_driveMotor = rev.CANSparkMax(1)
-        self.frontRightModule_driveMotor = ctre.WPI_VictorSPX(3)
-        self.rearLeftModule_driveMotor = ctre.WPI_VictorSPX(5)
-        self.rearRightModule_driveMotor = ctre.WPI_VictorSPX(7)
+        self.frontLeftModule_driveMotor = rev.CANSparkMax(
+            deviceID=1, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
+        self.frontRightModule_driveMotor = rev.CANSparkMax(
+            deviceID=3, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
+        self.rearLeftModule_driveMotor = rev.CANSparkMax(
+            deviceID=5, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
+        self.rearRightModule_driveMotor = rev.CANSparkMax(
+            deviceID=7, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
 
         # Rotate Motors
-        self.frontLeftModule_rotateMotor = ctre.WPI_VictorSPX(2)
-        self.frontRightModule_rotateMotor = ctre.WPI_VictorSPX(4)
-        self.rearLeftModule_rotateMotor = ctre.WPI_VictorSPX(6)
-        self.rearRightModule_rotateMotor = ctre.WPI_VictorSPX(8)
+        self.frontLeftModule_rotateMotor = rev.CANSparkMax(
+            deviceID=2, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
+        self.frontRightModule_rotateMotor = rev.CANSparkMax(
+            deviceID=4, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
+        self.rearLeftModule_rotateMotor = rev.CANSparkMax(
+            deviceID=6, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
+        self.rearRightModule_rotateMotor = rev.CANSparkMax(
+            deviceID=8, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+        )
 
         # Encoders
         self.frontLeftModule_encoder = wpilib.AnalogInput(0)
@@ -124,22 +138,24 @@ class MyRobot(MagicRobot):
         # Limit Switch
         self.switch = wpilib.DigitalInput(0)
 
-        # PDP
-        self.pdp = wpilib.PowerDistributionPanel(0)
+        # # PDP
+        self.pdp = wpilib.PowerDistribution(
+            module=9, moduleType=wpilib.PowerDistribution.ModuleType.kRev
+        )
 
     def disabledPeriodic(self):
         # Update the dashboard, even when the robot is disabled.
         self.update_sd()
 
-    def autonomousInit(self):
-        # Reset the drive when the auto starts.
-        self.drive.flush()
-        self.drive.threshold_input_vectors = True
+    # def autonomousInit(self):
+    #     # Reset the drive when the auto starts.
+    #     self.drive.flush()
+    #     self.drive.threshold_input_vectors = True
 
-    def autonomous(self):
-        # For auto, use MagicBot's auto mode.
-        # This will load the ./autonomous folder.
-        super().autonomous()
+    # def autonomous(self):
+    #     # For auto, use MagicBot's auto mode.
+    #     # This will load the ./autonomous folder.
+    #     super().autonomous()
 
     def teleopInit(self):
         # Reset the drive when the teleop starts.
@@ -155,7 +171,7 @@ class MyRobot(MagicRobot):
         :param rcw: Velocity in z axis [-1, 1]
         """
 
-        if self.gamempad.getRawButton(3):
+        if self.xbox.getLeftBumper():
             # If the button is pressed, lower the rotate speed.
             rcw *= 0.7
 
@@ -164,67 +180,24 @@ class MyRobot(MagicRobot):
     def teleopPeriodic(self):
         # Drive
         self.move(
-            self.gamempad.getRawAxis(5),
-            self.gamempad.getRawAxis(4),
-            self.gamempad.getRawAxis(0),
+            self.xbox.getRawAxis(5),  # Right stick Y-axis
+            self.xbox.getRawAxis(4),  # Right stick X-axis
+            self.xbox.getRawAxis(0),  # Left stick X-axis
         )
 
         # Lock
-        if self.gamempad.getRawButton(1):
+        if self.xbox.getRawButton(1):  # A button
             self.drive.request_wheel_lock = True
 
         # Vectoral Button Drive
-        if self.gamempad.getPOV() == 0:
+        if self.xbox.getRawAxis(1) < 0:  # Left stick up
             self.drive.set_raw_fwd(-0.35)
-        elif self.gamempad.getPOV() == 180:
+        elif self.xbox.getRawAxis(1) > 0:  # Left stick down
             self.drive.set_raw_fwd(0.35)
-        elif self.gamempad.getPOV() == 90:
+        elif self.xbox.getRawAxis(0) > 0:  # Left stick right
             self.drive.set_raw_strafe(0.35)
-        elif self.gamempad.getPOV() == 270:
+        elif self.xbox.getRawAxis(0) < 0:  # Left stick left
             self.drive.set_raw_strafe(-0.35)
-
-        # # Climber
-        # if self.gamempad2.getRawButton(1):
-        #     self.climbingMotor.set(1)
-        # else:
-        #     self.climbingMotor.set(0)
-
-        # # Hook
-        # if self.gamempad2.getRawAxis(5) < 0 and not self.switch.get():
-        #     self.hookMotor.set(self.gamempad2.getRawAxis(5))
-        # elif self.gamempad2.getRawAxis(5) > 0:
-        #     self.hookMotor.set(self.gamempad2.getRawAxis(5))
-        # else:
-        #     self.hookMotor.set(0)
-
-        # # Shooter
-        # if self.gamempad.getRawAxis(3) > 0:
-        #     self.shooter.shoot()
-        # elif self.gamempad.getRawButton(6):
-        #     self.shooter.align()
-        # elif self.gamempad.getRawButton(5) or self.gamempad2.getRawAxis(2) > 0:
-        #     self.shooter.unload()
-        # elif self.gamempad.getRawAxis(2) > 0 or self.gamempad2.getRawAxis(3) > 0:
-        #     self.shooter.intake()
-        # else:
-        #     self.shooter.stop()
-
-        # # WoF
-        # if self.gamempad2.getRawButton(3):
-        #     self.wof.handleFirstStage()
-        # elif self.gamempad2.getRawButton(2):
-        #     self.wof.handleSecondStage()
-        # elif self.gamempad2.getRawButton(4):
-        #     self.wof.reset()
-        # elif self.gamempad2.getRawButton(5):
-        #     self.wof.manualTurn(1)
-        # elif self.gamempad2.getRawButton(6):
-        #     self.wof.manualTurn(-1)
-        # else:
-        #     self.wof.manualTurn(0)
-
-        # # Update smartdashboard
-        # self.update_sd()
 
     def update_sd(self):
         """
@@ -234,9 +207,15 @@ class MyRobot(MagicRobot):
         self.sd.putNumber("Climb_Current_Draw", self.pdp.getCurrent(10))
 
         self.drive.update_smartdash()
-        # self.colorSensor.updateSD()
-        # self.wof.updateSD()
-        # self.vision.updateTable()
+        # self.colorSensor.updateSD()  # Decleare motors for the shooter component
+
+    # shooter_leftShooterMotor: rev.CANSparkMax
+    # shooter_rightShooterMotor: rev.CANSparkMax
+    # shooter_intakeMotor: rev.CANSparkMax
+    # shooter_beltMotor: rev.CANSparkMax
+
+    # self.wof.updateSD()
+    # self.vision.updateTable()
 
 
 if __name__ == "__main__":

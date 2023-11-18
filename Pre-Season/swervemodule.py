@@ -1,7 +1,8 @@
 import math
 
 import wpilib
-import ctre
+
+# import ctre
 import rev
 
 from networktables import NetworkTables
@@ -19,7 +20,7 @@ MAX_VOLTAGE = 5  # Absolute encoder measures from 0V to 5V
 class SwerveModule:
     # Get the motors, encoder and config from injection
     driveMotor: rev.CANSparkMax
-    rotateMotor: ctre.WPI_VictorSPX
+    rotateMotor: rev.CANSparkMax
 
     encoder: wpilib.AnalogInput
 
