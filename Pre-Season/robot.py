@@ -110,7 +110,7 @@ class MyRobot(MagicRobot):
             deviceID=8, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
         )
 
-        # Encoders
+        #! Encoders (Probably needs fixed) and/or is not needed
         self.frontLeftModule_encoder = wpilib.AnalogInput(0)
         self.frontRightModule_encoder = wpilib.AnalogInput(3)
         self.rearLeftModule_encoder = wpilib.AnalogInput(1)
@@ -138,7 +138,7 @@ class MyRobot(MagicRobot):
         # Limit Switch
         self.switch = wpilib.DigitalInput(0)
 
-        # # PDP
+        # # PDP #? Not sure if this is right
         self.pdp = wpilib.PowerDistribution(
             module=9, moduleType=wpilib.PowerDistribution.ModuleType.kRev
         )
