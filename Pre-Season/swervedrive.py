@@ -223,6 +223,7 @@ class SwerveDrive:
         Calculate the requested speed and angle of each modules from self._requested_vectors and store them in
         self._requested_speeds and self._requested_angles dictionaries.
         """
+        # Normalize the vectors
         (
             self._requested_vectors["fwd"],
             self._requested_vectors["strafe"],
@@ -236,6 +237,7 @@ class SwerveDrive:
         )
 
         # Does nothing if the values are lower than the input thresh
+        # Deadzones the inputs
         if self.threshold_input_vectors:
             if abs(self._requested_vectors["fwd"]) < self.lower_input_thresh:
                 self._requested_vectors["fwd"] = 0
