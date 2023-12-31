@@ -1,20 +1,14 @@
-import wpilib
 import rev
-import ctre
-
+import wpilib
 from magicbot import MagicRobot
-from robotpy_ext.autonomous.selector import AutonomousModeSelector
-
 from networktables import NetworkTables
-from networktables.util import ntproperty
+
+import swervedrive  # shooter, wof
+import swervemodule
 
 # from rev.color import ColorSensorV3, ColorMatch
 
-import swervedrive, swervemodule  # shooter, wof
-
 # from common import color_sensor, vision
-
-from collections import namedtuple
 
 # Get the config preset from the swervemodule
 ModuleConfig = swervemodule.ModuleConfig
@@ -32,7 +26,7 @@ class MyRobot(MagicRobot):
     Using equal sign for variable decleration like "shooter_beltMotor = ctre.WPI_VictorSPX(11)" creates the actual object.
     When beltMotor is called from the shooter component, it's going to be a VictorSPX at the can port 11.
 
-    Use the equal sign (mostly) in the #createObjects function so they can be correctly injected to their parent components.
+    Use the equal sign (mostly) in the #createObjects function, so they can be correctly injected to their parent components.
 
     For more info refer to https://robotpy.readthedocs.io/en/stable/frameworks/magicbot.html
     """
@@ -47,7 +41,8 @@ class MyRobot(MagicRobot):
     rearLeftModule: swervemodule.SwerveModule
     rearRightModule: swervemodule.SwerveModule
 
-    # Create configs for each module. This is before #createObjects because modules need these configs to be initialized.
+    # Create configs for each module. This is before #createObjects because modules need these configs to be
+    # initialized.
     frontLeftModule_cfg = ModuleConfig(
         sd_prefix="FrontLeft_Module", zero=2.97, inverted=True, allow_reverse=True
     )
@@ -61,7 +56,7 @@ class MyRobot(MagicRobot):
         sd_prefix="RearRight_Module", zero=4.76, inverted=False, allow_reverse=True
     )
 
-    # # Decleare motors for the shooter component
+    # Declare motors for the shooter component
     # shooter_leftShooterMotor: rev.CANSparkMax
     # shooter_rightShooterMotor: rev.CANSparkMax
     # shooter_intakeMotor: rev.CANSparkMax
@@ -166,8 +161,8 @@ class MyRobot(MagicRobot):
     def move(self, x, y, rcw):
         """
         This function is ment to be used by the teleOp.
-        :param x: Velocity in x axis [-1, 1]
-        :param y: Velocity in y axis [-1, 1]
+        :param x: Velocity in x-axis [-1, 1]
+        :param y: Velocity in y-axis [-1, 1]
         :param rcw: Velocity in z axis [-1, 1]
         """
 
