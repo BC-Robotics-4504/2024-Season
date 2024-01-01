@@ -14,10 +14,10 @@ import swervemodule
 ModuleConfig = swervemodule.ModuleConfig
 
 
+# noinspection PyAttributeOutsideInit
 class MyRobot(MagicRobot):
     """
     After creating low-level components like "shooter", use component's name and an underscore
-    to inject objects to the component.
 
     e.g.
     Using variable annotation like "shooter_beltMotor: ctre.WPI_VictorSPX" decleares the type of the variable.
@@ -105,7 +105,7 @@ class MyRobot(MagicRobot):
             deviceID=8, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
         )
 
-        #! Encoders (Probably needs fixed) and/or is not needed
+        # ! Encoders (Probably needs fixed) and/or is not needed
         self.frontLeftModule_encoder = wpilib.AnalogInput(0)
         self.frontRightModule_encoder = wpilib.AnalogInput(3)
         self.rearLeftModule_encoder = wpilib.AnalogInput(1)
