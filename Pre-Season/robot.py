@@ -1,20 +1,16 @@
-import rev
 import wpilib
+import rev
 from magicbot import MagicRobot
 from networktables import NetworkTables
 
-import swervedrive  # shooter, wof
+import swervedrive
 import swervemodule
 
-# from rev.color import ColorSensorV3, ColorMatch
-
-# from common import color_sensor, vision
 
 # Get the config preset from the swervemodule
 ModuleConfig = swervemodule.ModuleConfig
 
 
-# noinspection PyAttributeOutsideInit
 class MyRobot(MagicRobot):
     """
     After creating low-level components like "shooter", use component's name and an underscore
@@ -33,8 +29,6 @@ class MyRobot(MagicRobot):
 
     # Create low-level object
     drive: swervedrive.SwerveDrive
-    # shooter: shooter.Shooter
-    # wof: wof.WheelOfFortune
 
     frontLeftModule: swervemodule.SwerveModule
     frontRightModule: swervemodule.SwerveModule
@@ -57,14 +51,12 @@ class MyRobot(MagicRobot):
     )
 
     # Declare motors for the shooter component
-    # shooter_leftShooterMotor: rev.CANSparkMax
-    # shooter_rightShooterMotor: rev.CANSparkMax
-    # shooter_intakeMotor: rev.CANSparkMax
-    # shooter_beltMotor: rev.CANSparkMax
+
+    # *Still need to be created
 
     # Create common components
-    # vision: vision.Vision
-    # colorSensor: color_sensor.ColorSensor
+
+    # *Still need to be created
 
     def createObjects(self):
         """
@@ -79,30 +71,30 @@ class MyRobot(MagicRobot):
 
         # Drive Motors
         self.frontLeftModule_driveMotor = rev.CANSparkMax(
-            deviceID=1, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=1, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
         self.frontRightModule_driveMotor = rev.CANSparkMax(
-            deviceID=3, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=3, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
         self.rearLeftModule_driveMotor = rev.CANSparkMax(
-            deviceID=5, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=5, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
         self.rearRightModule_driveMotor = rev.CANSparkMax(
-            deviceID=7, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=7, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
 
         # Rotate Motors
         self.frontLeftModule_rotateMotor = rev.CANSparkMax(
-            deviceID=2, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=2, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
         self.frontRightModule_rotateMotor = rev.CANSparkMax(
-            deviceID=4, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=4, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
         self.rearLeftModule_rotateMotor = rev.CANSparkMax(
-            deviceID=6, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=6, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
         self.rearRightModule_rotateMotor = rev.CANSparkMax(
-            deviceID=8, type=rev.CANSparkMaxLowLevel.MotorType.kBrushless
+            deviceID=8, type=rev.CANSparkLowLevel.MotorType.kBrushless
         )
 
         # ! Encoders (Probably needs fixed) and/or is not needed
