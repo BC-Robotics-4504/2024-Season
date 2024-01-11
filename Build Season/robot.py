@@ -3,8 +3,8 @@ import rev
 from magicbot import MagicRobot
 from networktables import NetworkTables
 
-import swerveDrive.swervedrive
-import swervemodule
+from swerveDrive.swervedrive import SwerveDrive
+from swerveDrive import swervemodule
 
 
 # Get the config preset from the swervemodule
@@ -28,7 +28,7 @@ class MyRobot(MagicRobot):
     """
 
     # Create low-level object
-    drive: swervedrive.SwerveDrive
+    drive: SwerveDrive
 
     frontLeftModule: swervemodule.SwerveModule
     frontRightModule: swervemodule.SwerveModule
