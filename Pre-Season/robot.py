@@ -103,25 +103,6 @@ class MyRobot(MagicRobot):
         self.rearLeftModule_encoder = wpilib.AnalogInput(1)
         self.rearRightModule_encoder = wpilib.AnalogInput(2)
 
-        # # Shooter
-        # self.shooter_leftShooterMotor = ctre.WPI_VictorSPX(6)
-        # self.shooter_rightShooterMotor = ctre.WPI_VictorSPX(7)
-        # self.shooter_beltMotor = ctre.WPI_VictorSPX(11)
-        # self.shooter_intakeMotor = ctre.WPI_VictorSPX(0)
-
-        # # Wheel of Fortune
-        # self.wof_motor = ctre.WPI_VictorSPX(13)
-
-        # # Climber
-        # self.climbingMotor = ctre.WPI_VictorSPX(10)
-        # self.hookMotor = ctre.WPI_VictorSPX(1)
-
-        # Color Sensor
-        # self.colorSensor = color_sensor.ColorSensor()
-
-        # Vision
-        # self.vision = vision.Vision()
-
         # Limit Switch
         self.switch = wpilib.DigitalInput(0)
 
@@ -186,23 +167,15 @@ class MyRobot(MagicRobot):
         elif self.xbox.getRawAxis(0) < 0:  # Left stick left
             self.drive.set_raw_strafe(-0.35)
 
-    def update_sd(self):
-        """
-        Calls each component's own update function
-        and puts data to the smartdashboard.
-        """
-        self.sd.putNumber("Climb_Current_Draw", self.pdp.getCurrent(10))
+    # def update_sd(self):
+    #     """
+    #     Calls each component's own update function
+    #     and puts data to the smartdashboard.
+    #     """
+    #     self.sd.putNumber("Climb_Current_Draw", self.pdp.getCurrent(10))
 
-        self.drive.update_smartdash()
-        # self.colorSensor.updateSD()  # Decleare motors for the shooter component
-
-    # shooter_leftShooterMotor: rev.CANSparkMax
-    # shooter_rightShooterMotor: rev.CANSparkMax
-    # shooter_intakeMotor: rev.CANSparkMax
-    # shooter_beltMotor: rev.CANSparkMax
-
-    # self.wof.updateSD()
-    # self.vision.updateTable()
+    #     self.drive.update_smartdash()
+    #     # self.colorSensor.updateSD()  # Decleare motors for the shooter component
 
 
 if __name__ == "__main__":
