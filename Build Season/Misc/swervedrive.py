@@ -1,10 +1,56 @@
 import math
 
 from magicbot import magiccomponent
-import swervemodule
+from swervemodule import SwerveModule
 
-from networktables import NetworkTables
-from networktables.util import ntproperty
+class SwerveDrive:
+    frontLeftModule: swervemodule.SwerveModule
+    frontRightModule: swervemodule.SwerveModule
+    rearLeftModule: swervemodule.SwerveModule
+    rearRightModule: swervemodule.SwerveModule
+
+    @staticmethod
+    def normalize(data):
+        """
+        Get the maximum value in the data. If the max is more than 1,
+        divide each data by that max.
+        :param data: The data to be normalized
+        :returns: The normalized data
+        """
+        maxMagnitude = max(abs(x) for x in data)
+
+        if maxMagnitude > 1.0:
+            for i in range(len(data)):
+                data[i] = data[i] / maxMagnitude
+
+        return data
+
+    def setup(self):
+
+    def __getAngleSpeed__(self, front_rear, right_left):
+        speed = math.hypot(front_rear, right_left)
+        angle = math.degrees(math.atan2(front_rear, right_left))
+        return speed, angle
+
+    def move(self, Lx, Ly, Rx, Ry):
+        fwd = Ly
+        strafe = Lx
+        rcw = math.atan2(Ry, Rx)
+
+        max_mag = max([abs(fwd), abs(strafe), abs(rcw)]
+        
+
+        frontX = strafe - rcw * self.chasis_length / self.ratio
+        rearX = strafe + rcw * self.chasis_length / self.ratio
+        leftY = fwd - rcw * self.chasis_width / self.ratio
+        rightY = fwd + rcw * self.chasis_width / self.ratio
+
+        frontLeft_speed, frontLeft_angle = self.__getAngleSpeed__(frontX, rightY)
+        frontRight_speed, frontRight_angle = self.__getAngleSpeed__(frontX, leftY)
+        rearLeft_speed, rearLeft_angle = self.__getAngleSpeed__(rearX, rightY)
+        frontRight_speed, frontRight_angle = self.__getAngleSpeed__(rearX, leftY)
+
+        return False
 
 
 class SwerveDrive:

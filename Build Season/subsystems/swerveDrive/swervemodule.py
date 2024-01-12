@@ -1,16 +1,5 @@
-# import ctre
-import rev
-from wpimath.controller import PIDController
-from wpilib import SmartDashboard
-
 import math
-
-# from componentsHMI_xbox import XboxHMI, HMIModule
-
-# # from componentsHMI import FlightStickHMI, HMIModule
-# # from componentsIMU import IMUModule
-# from componentsElevator import ElevatorModule
-
+import rev
 
 class MySparkMax:
     # PID coefficients
@@ -114,7 +103,6 @@ class MySparkMax:
         )
         return False
 
-
 class SwerveModule:
     angleMotor: MySparkMax
     speedMotor: MySparkMax
@@ -123,36 +111,92 @@ class SwerveModule:
 
     def __init__(self):
         self.target_angle = 0
-        self.angle_changed = False
-
         self.target_speed = 0
-        self.speed_changed = False
 
         self.target_distance = 0
         self.tolerance = 0.001
 
         self.auto_lockout = 0
 
-    def angleChanged(self):
-        return self.angle_changed
+    def getEncoder(self):
+        return 0.0
 
-    def speedChanged(self):
-        return self.speed_changed
+    def resetEncoder(self):
+        return 0.0
 
-    def setSwerve(self, Lx, Rx, Ly, Ry):
-        fwd = Ly
+    def move(self, speed, angle):
+        self.angleMotor.setDistance(angle)
+        self.speedMotor.setPercent(speed)
+        return False
+
+class SwerveDrive:
+    frontLeftModule: SwerveModule
+    frontRightModule: SwerveModule
+    rearLeftModule: SwerveModule
+    rearRightModule: SwerveModule
+
+    front_left_speed: float = 0
+    front_left_angle: float = 0
+    front_right_speed: float = 0
+    front_right_angle: float = 0
+    rear_left_speed: float = 0
+    rear_left_angle: float = 0
+    rear_right_speed: float = 0
+    rear_right_angle: float = 0
+
+    movement_changed: bool = False
+
+    def setup(self):
+
+    @staticmethod
+    def __calcAngleSpeed__(self, front_rear, right_left):
+        """
+        :param front_rear:
+        :param right_left: 
+        :returns: 
+        """
+        speed = math.hypot(front_rear, right_left)
+        angle = math.degrees(math.atan2(front_rear, right_left))
+        return speed, angle
+
+    @property
+    def isMoveChanged(self):
+        return self.move_changed
+
+    def move(self, Lx, Ly, Rx, Ry):
+        """
+        :param front_rear:
+        :param right_left: 
+        :returns: 
+        """
         strafe = Lx
+        fwd = Ly
         rcw = math.atan2(Ry, Rx)
-        frontX = strafe - rcw * (self.chasis_length / self.ratio)
-        rearX = strafe + rcw * (self.chasis_length / self.ratio)
-        leftY = fwd - rcw * (self.width / self.ratio)
-        rightX = fwd + rcw * (self.chasis_width / self.ratio)
 
+        # TODO: optimize this normalization routine
+        movement_arr = [fwd, strafe, rcw]
+        max_mag = max([abs(move_val) for move_val in movement_arr]])
+        if max_mag > 1:
+            for i,_ in range(len(move_vals):
+                movement_arr[i] = movement_arr[i] / max_mag
+        fwd, strafe, rcw = movement_arr
+
+        frontX = strafe - rcw * self.chasis_length / self.ratio
+        rearX = strafe + rcw * self.chasis_length / self.ratio
+        leftY = fwd - rcw * self.chasis_width / self.ratio
+        rightY = fwd + rcw * self.chasis_width / self.ratio
+
+        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
+        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
+        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
+        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
+        self.move_changed = True
         return False
 
     def execute(self):
-        # if not self.auto_lockout:
-        # TODO: put code to run the swerve module here!!!
 
-        if self.angleChanged() or self.speedChanged():
-            return False
+        if self.isMoveChanged():
+            self.frontLeftModule.move(front_left_speed, front_left_angle)
+            self.frontRightModule.move(front_right_speed, front_right_angle)
+            self.rearLeftModule.move(rear_left_speed, rear_left_angle)
+            self.rearRightModule.move(rear_right_speed, rear_right_angle)
