@@ -20,14 +20,7 @@ class SparkMax:
     minVel = 0
     allowedErr = 0
 
-    def __init__(
-        self,
-        canID,
-        motorType="brushless",
-        inverted=False,
-        gear_ratio=1,
-        wheel_diameter=1,
-    ):
+    def __init__(self, canID, motorType="brushless", inverted=False, gear_ratio=1,wheel_diameter=1):
         self.canID = canID
         self.gear_ratio = gear_ratio
         self.inverted = inverted
@@ -99,7 +92,7 @@ class SparkMax:
         return False
 
     def setDistance(self, distance):
-        rotations = distance * self.distance_to_rotations
+        rotations = distance /(2*math.pi *self.wheel_diameter / self.gear_ratio)
         self.controller.setReference(
             -rotations, rev.CANSparkMax.ControlType.kSmartMotion
         )
@@ -151,9 +144,9 @@ class SwerveModule:
         return 0.0
 
     def getSpeedAngle(self):
-        self.angleMotor.getRotation()
-        self.speedMotor.getDistance()
-        retrun speed, angle
+        angle = self.angleMotor.getRotation()
+        speed = self.speedMotor.getDistance()
+        return speed, angle
 
     def move(self, speed, angle):
         self.angleMotor.setDistance(angle)
@@ -209,9 +202,9 @@ class SwerveDrive:
 
         # TODO: optimize this normalization routine
         movement_arr = [fwd, strafe, rcw]
-        max_mag = max([abs(move_val) for move_val in movement_arr]])
+        max_mag = max([abs(move_val) for move_val in movement_arr])
         if max_mag > 1:
-            for i,_ in range(len(move_vals):
+            for i,_ in range(3):
                 movement_arr[i] = movement_arr[i] / max_mag
         fwd, strafe, rcw = movement_arr
 
