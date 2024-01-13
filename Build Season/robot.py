@@ -1,9 +1,11 @@
 import wpilib
 from magicbot import MagicRobot
+from SwerveDrive.swervemodule import SwerveModule
 
 class MyRobot(MagicRobot):
 
     def createObjects(self):
+        self.frontLeft_swerveModule = SwerveModule(1, 2)
         pass
 
     def disabledPeriodic(self):

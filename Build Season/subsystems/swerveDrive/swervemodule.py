@@ -1,7 +1,9 @@
 import math
+
+import math
 import rev
 
-class MySparkMax:
+class SparkMax:
     # PID coefficients
     kP = 5e-5
     kI = 1e-6
@@ -25,19 +27,13 @@ class MySparkMax:
         inverted=False,
         gear_ratio=1,
         wheel_diameter=1,
-        chasis_width=1,
-        chasis_length=1,
     ):
         self.canID = canID
         self.gear_ratio = gear_ratio
         self.inverted = inverted
         self.motorType = motorType
         self.gear_ratio = gear_ratio
-        self.chasis_length = chasis_length
-        self.chasis_width = chasis_width
         self.wheel_diameter = wheel_diameter
-        self.distance_to_rotations = gear_ratio / (math.pi * wheel_diameter)
-        self.ratio = math.hypot(chasis_length, chasis_width)
 
         if motorType == "brushless":
             mtype = rev.CANSparkMax.MotorType.kBrushless
@@ -89,8 +85,14 @@ class MySparkMax:
         return vel
 
     def getDistance(self):
-        pos = -self.encoder.getPosition() / self.distance_to_rotations
-        return pos
+        distance =  self.getRotation() 
+        distance *= self.wheel_diameter / self.gear_ratio
+        return distance
+
+    def getRotation(self):
+        rotation = -self.encoder.getPosition()
+        rotation *= 2*math.pi # Conver to radians
+        return rotation
 
     def resetDistance(self):
         self.encoder.setPosition(0)
@@ -104,12 +106,36 @@ class MySparkMax:
         return False
 
 class SwerveModule:
-    angleMotor: MySparkMax
-    speedMotor: MySparkMax
+    angleMotor: SparkMax
+    speedMotor: SparkMax
 
     CLAMP = 0.2
 
-    def __init__(self):
+    def __init__(self, 
+        angle_canID, 
+        speed_canID,
+        speed_motorType="brushless",
+        speed_inverted=False,
+        speed_gear_ratio=1,
+        speed_wheel_diameter=1,
+        angle_motorType="brushless",
+        angle_inverted=False,
+        angle_gear_ratio=1,
+        angle_wheel_diameter=1,
+    ):
+
+        self.angleMotor = SparkMax(angle_canID, 
+                                   motorType=angle_motorType,
+                                   inverted=angle_inverted,
+                                   gear_ratio=angle_gear_ratio,
+                                   wheel_diameter=angle_wheel_diameter)
+
+        self.speedMotor = SparkMax(speed_canID, 
+                                   motorType=speed_motorType,
+                                   inverted=speed_inverted,
+                                   gear_ratio=speed_gear_ratio,
+                                   wheel_diameter=speed_wheel_diameter)
+
         self.target_angle = 0
         self.target_speed = 0
 
@@ -123,6 +149,11 @@ class SwerveModule:
 
     def resetEncoder(self):
         return 0.0
+
+    def getSpeedAngle(self):
+        self.angleMotor.getRotation()
+        self.speedMotor.getDistance()
+        retrun speed, angle
 
     def move(self, speed, angle):
         self.angleMotor.setDistance(angle)
@@ -146,7 +177,10 @@ class SwerveDrive:
 
     movement_changed: bool = False
 
-    def setup(self):
+    def setup(self, chasis_length=1, chasis_width=1):
+        self.chasis_length = chasis_length
+        self.chasis_width = chasis_width
+        self.ratio = math.hypot(chasis_length, chasis_width)
 
     @staticmethod
     def __calcAngleSpeed__(self, front_rear, right_left):
