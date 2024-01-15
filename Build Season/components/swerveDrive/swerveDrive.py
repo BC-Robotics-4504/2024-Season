@@ -37,7 +37,8 @@ class SparkMax:
     minVel = 0
     allowedErr = 0
 
-    def __init__(self, canID, motorType="brushless", inverted=False, gear_ratio=1, wheel_diameter=1):
+    def __init__(self, canID, motorType="brushless", inverted=False, gear_ratio=1, wheel_diameter=1,
+                 absolute_encoder=False):
         self.canID = canID
         self.gear_ratio = gear_ratio
         self.inverted = inverted
@@ -51,14 +52,18 @@ class SparkMax:
             mtype = rev.CANSparkMax.MotorType.kBrushed  # FIXME!: Is this right?
 
         self.motor = rev.CANSparkMax(canID, mtype)
+        
         self.motor.restoreFactoryDefaults()
         self.motor.setInverted(inverted)
-        self.controller, self.encoder = self.__configureEncoder__(self.motor)
+        self.controller, self.encoder = self.__configureEncoder__(self.motor, absolute_encoder=absolute_encoder)
         self.resetDistance()
 
-    def __configureEncoder__(self, motor, smartMotionSlot=0):
+    def __configureEncoder__(self, motor, smartMotionSlot=0, absolute_encoder=False):
         controller = motor.getPIDController()
-        encoder = motor.getEncoder()
+        if absolute_encoder:
+            encoder = motor.getAbsoluteEncoder()
+        else:
+            encoder = motor.getEncoder()
 
         # PID parameters
         controller.setP(self.kP)

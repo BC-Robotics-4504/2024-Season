@@ -1,7 +1,7 @@
 import wpilib
 from magicbot import MagicRobot
 
-from components.swerveDrive.SwerveDrive import SwerveModule, SwerveDrive, SparkMax, DriveConfig
+from components.swerveDrive.swerveDrive import SwerveModule, SwerveDrive, SparkMax, DriveConfig
 from components.hmi.hmi import HMI
 
 class MyRobot(MagicRobot):
@@ -10,7 +10,7 @@ class MyRobot(MagicRobot):
     '''
     
     # Swerve Drive Component Code
-    DriveConfig = DriveConfig(1.0, 1.0)s
+    DriveConfig = DriveConfig(1.0, 1.0)
     SwerveDrive: SwerveDrive
     FrontLeft_SwerveModule: SwerveModule
     FrontRight_SwerveModule: SwerveModule
@@ -23,17 +23,21 @@ class MyRobot(MagicRobot):
 
     def createObjects(self):
         # Swerve Drive Hardware Config
-        self.FrontLeft_SwerveModule_angleMotor = SparkMax(6, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.FrontLeft_SwerveModule_angleMotor = SparkMax(6, inverted=False, gear_ratio=1, wheel_diameter=1,
+                                                          absolute_encoder=True)
         self.FrontLeft_SwerveModule_speedMotor = SparkMax(5, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         self.FrontRight_SwerveModule_angleMotor = SparkMax(4, inverted=False, gear_ratio=1, wheel_diameter=1)
-        self.FrontRight_SwerveModule_speedMotor = SparkMax(3, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.FrontRight_SwerveModule_speedMotor = SparkMax(3, inverted=False, gear_ratio=1, wheel_diameter=1,
+                                                          absolute_encoder=True)
 
         self.RearLeft_SwerveModule_angleMotor = SparkMax(8, inverted=False, gear_ratio=1, wheel_diameter=1)
-        self.RearLeft_SwerveModule_speedMotor = SparkMax(7, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.RearLeft_SwerveModule_speedMotor = SparkMax(7, inverted=False, gear_ratio=1, wheel_diameter=1,
+                                                          absolute_encoder=True)
 
         self.RearRight_SwerveModule_angleMotor = SparkMax(2, inverted=False, gear_ratio=1, wheel_diameter=1)
-        self.RearRight_SwerveModule_speedMotor = SparkMax(1, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.RearRight_SwerveModule_speedMotor = SparkMax(1, inverted=False, gear_ratio=1, wheel_diameter=1,
+                                                          absolute_encoder=True)
 
         # Launcher Hardware Config
 
