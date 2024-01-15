@@ -12,8 +12,8 @@ class DriveConfig:
     Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
     REFERENCE: https://docs.python.org/3/library/dataclasses.html
     '''
-    chasis_length: 1.0
-    chasis_width: 1.0
+    chasis_length: float
+    chasis_width: float
 
     @property
     def ratio(self):
