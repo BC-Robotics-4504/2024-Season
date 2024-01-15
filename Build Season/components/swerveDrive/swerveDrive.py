@@ -229,7 +229,6 @@ class SwerveDrive:
         return False
 
     def execute(self):
-
         if self.isMoveChanged():
             self.frontLeftModule.move(front_left_speed, front_left_angle)
             self.frontRightModule.move(front_right_speed, front_right_angle)
