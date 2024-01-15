@@ -161,10 +161,10 @@ class SwerveModule:
         return False
 
 class SwerveDrive:
-    frontLeftModule: SwerveModule
-    frontRightModule: SwerveModule
-    rearLeftModule: SwerveModule
-    rearRightModule: SwerveModule
+    frontLeft_swerveModule: SwerveModule
+    frontRight_swerveModule: SwerveModule
+    rearLeft_swerveModule: SwerveModule
+    rearRight_swerveModule: SwerveModule
     hmi: HMI
 
     front_left_speed: float = 0
@@ -206,7 +206,7 @@ class SwerveDrive:
         """
         strafe = Lx
         fwd = Ly
-        rcw = math.atan2(Ry, Rx)
+        rcw = Rx
 
         # TODO: optimize this normalization routine
         movement_arr = [fwd, strafe, rcw]
@@ -230,7 +230,7 @@ class SwerveDrive:
 
     def execute(self):
         if self.isMoveChanged():
-            self.frontLeftModule.move(front_left_speed, front_left_angle)
-            self.frontRightModule.move(front_right_speed, front_right_angle)
-            self.rearLeftModule.move(rear_left_speed, rear_left_angle)
-            self.rearRightModule.move(rear_right_speed, rear_right_angle)
+            self.frontLeft_swerveModule.move(front_left_speed, front_left_angle)
+            self.frontRight_swerveModule.move(front_right_speed, front_right_angle)
+            self.rearLeft_swerveModule.move(rear_left_speed, rear_left_angle)
+            self.rearRight_swerveModule.move(rear_right_speed, rear_right_angle)

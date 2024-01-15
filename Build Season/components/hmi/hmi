@@ -136,7 +136,7 @@ class HMIModule:
             return value
         return False
 
-    def is_changed(self):
+    def newInputs(self):
         return self.changed
     
     def execute(self):     

@@ -25,7 +25,8 @@ class MyRobot(MagicRobot):
         pass
 
     def teleopPeriodic(self):
-        pass
+        # 1.) Check HMI has been updated (new inputs detected)
+        # 2.) If something has happened, do the thing
 
 
 if __name__ == "__main__":
