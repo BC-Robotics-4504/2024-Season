@@ -60,6 +60,7 @@ class SparkMax:
 
     def __configureEncoder__(self, motor, smartMotionSlot=0, absolute_encoder=False):
         controller = motor.getPIDController()
+        
         if absolute_encoder:
             encoder = motor.getAbsoluteEncoder()
         else:
