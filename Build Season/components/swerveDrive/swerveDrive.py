@@ -10,6 +10,7 @@ from components.hmi.hmi import HMI
 class DriveConfig:
     ''' Drivetrain Configuration
     Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
+    REFERENCE: https://docs.python.org/3/library/dataclasses.html
     '''
     chasis_length: 1.0
     chasis_width: 1.0
