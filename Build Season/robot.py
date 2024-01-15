@@ -21,10 +21,13 @@ class MyRobot(MagicRobot):
         # Swerve Drive Hardware Config
         self.FrontLeft_SwerveModule_angleMotor = SparkMax(6, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.FrontLeft_SwerveModule_speedMotor = SparkMax(5, inverted=False, gear_ratio=1, wheel_diameter=1)
+
         self.FrontRight_SwerveModule_angleMotor = SparkMax(4, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.FrontRight_SwerveModule_speedMotor = SparkMax(3, inverted=False, gear_ratio=1, wheel_diameter=1)
+
         self.RearLeft_SwerveModule_angleMotor = SparkMax(8, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.RearLeft_SwerveModule_speedMotor = SparkMax(7, inverted=False, gear_ratio=1, wheel_diameter=1)
+        
         self.RearRight_SwerveModule_angleMotor = SparkMax(2, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.RearRight_SwerveModule_speedMotor = SparkMax(1, inverted=False, gear_ratio=1, wheel_diameter=1)
 
