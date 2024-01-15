@@ -1,7 +1,8 @@
 import math
 
-import math
 import rev
+
+from components.hmi.hmi import HMI
 
 class SparkMax:
     # PID coefficients
@@ -105,8 +106,8 @@ class SwerveModule:
     CLAMP = 0.2
 
     def __init__(self, 
-        angle_canID, 
-        speed_canID,
+        angle_canID=None, 
+        speed_canID=None,
         speed_motorType="brushless",
         speed_inverted=False,
         speed_gear_ratio=1,
@@ -116,18 +117,24 @@ class SwerveModule:
         angle_gear_ratio=1,
         angle_wheel_diameter=1,
     ):
+        if angle_canID:
+            self.angleMotor = SparkMax(angle_canID, 
+                                    motorType=angle_motorType,
+                                    inverted=angle_inverted,
+                                    gear_ratio=angle_gear_ratio,
+                                    wheel_diameter=angle_wheel_diameter)
+        else:
+            print(f'[+] WARNING: No CAN Bus ID for angle motor controller.')
+                                    
+        if speed_canID:
+            self.speedMotor = SparkMax(speed_canID, 
+                                    motorType=speed_motorType,
+                                    inverted=speed_inverted,
+                                    gear_ratio=speed_gear_ratio,
+                                    wheel_diameter=speed_wheel_diameter)
 
-        self.angleMotor = SparkMax(angle_canID, 
-                                   motorType=angle_motorType,
-                                   inverted=angle_inverted,
-                                   gear_ratio=angle_gear_ratio,
-                                   wheel_diameter=angle_wheel_diameter)
-
-        self.speedMotor = SparkMax(speed_canID, 
-                                   motorType=speed_motorType,
-                                   inverted=speed_inverted,
-                                   gear_ratio=speed_gear_ratio,
-                                   wheel_diameter=speed_wheel_diameter)
+        else:
+            print(f'[+] WARNING: No CAN Bus ID for speed motor controller.')
 
         self.target_angle = 0
         self.target_speed = 0
@@ -158,6 +165,7 @@ class SwerveDrive:
     frontRightModule: SwerveModule
     rearLeftModule: SwerveModule
     rearRightModule: SwerveModule
+    hmi: HMI
 
     front_left_speed: float = 0
     front_left_angle: float = 0

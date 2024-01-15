@@ -1,14 +1,17 @@
 import wpilib
 from magicbot import MagicRobot
+
 from components.swerveDrive.swervemodule import SwerveModule
+from components.hmi.hmi import HMI
 
 class MyRobot(MagicRobot):
 
     def createObjects(self):
-        self.frontLeft_swerveModule = SwerveModule(6, 5)
-        self.frontRight_swerveModule = SwerveModule(4, 3)
-        self.rearRight_swerveModule = SwerveModule(2, 1)
-        self.rearLeft_swerveModule = SwerveModule(8, 7)
+        self.frontLeft_swerveModule = SwerveModule(angle_canID=6, speed_canID=5)
+        self.frontRight_swerveModule = SwerveModule(angle_canID=4, speed_canID=3)
+        self.rearRight_swerveModule = SwerveModule(angle_canID=2, speed_canID=1)
+        self.rearLeft_swerveModule = SwerveModule(angle_canID=8, speed_canID=7)
+        self.HMI = HMI(controllerID=0)
         pass
 
     def disabledPeriodic(self):
