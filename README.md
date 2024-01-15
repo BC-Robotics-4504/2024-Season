@@ -6,9 +6,11 @@ BC Robotics (Team #4504) has designed their 2024 FIRST Robotics submission using
 
 ```sh
 python -m pip install --upgrade pip
-python -m pip install robotpy
-python -m robotpy_installer download robotpy
-python -m robotpy_installer install robotpy
+python -m pip install robotpy wpilib
+robotpy installer download-python
+robotpy installer install-python
+robotpy installer download robotpy[all]
+robotpy installer install robotpy[all]
 ```
 
 ## Hardware Configuration
