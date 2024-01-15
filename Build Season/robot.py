@@ -6,12 +6,16 @@ from components.hmi.hmi import HMI
 
 class MyRobot(MagicRobot):
     # Swerve Drive Component Code
+    DriveConfig = DriveConfig(1.0, 1.0)s
     SwerveDrive: SwerveDrive
     FrontLeft_SwerveModule: SwerveModule
     FrontRight_SwerveModule: SwerveModule
     RearLeft_SwerveModule: SwerveModule
     RearRight_SwerveModule: SwerveModule
-    DriveConfig = DriveConfig(1.0, 1.0)
+
+    # Launcher Component Code
+
+    # Climber Component Code    
 
     def createObjects(self):
         # Swerve Drive Hardware Config
