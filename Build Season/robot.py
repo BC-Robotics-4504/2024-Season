@@ -5,6 +5,10 @@ from components.swerveDrive.SwerveDrive import SwerveModule, SwerveDrive, SparkM
 from components.hmi.hmi import HMI
 
 class MyRobot(MagicRobot):
+    ''' MagicRobot Framework
+    REFERENCE: https://robotpy.readthedocs.io/en/stable/frameworks/magicbot.html
+    '''
+    
     # Swerve Drive Component Code
     DriveConfig = DriveConfig(1.0, 1.0)s
     SwerveDrive: SwerveDrive
@@ -27,7 +31,7 @@ class MyRobot(MagicRobot):
 
         self.RearLeft_SwerveModule_angleMotor = SparkMax(8, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.RearLeft_SwerveModule_speedMotor = SparkMax(7, inverted=False, gear_ratio=1, wheel_diameter=1)
-        
+
         self.RearRight_SwerveModule_angleMotor = SparkMax(2, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.RearRight_SwerveModule_speedMotor = SparkMax(1, inverted=False, gear_ratio=1, wheel_diameter=1)
 

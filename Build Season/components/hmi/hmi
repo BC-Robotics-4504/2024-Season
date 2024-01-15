@@ -2,6 +2,9 @@ import wpilib
 
 
 class HMI:
+    ''' HMI (Human Machine Interface) -- Xbox 360/One Controller
+    REFERENCE: https://robotpy.readthedocs.io/projects/wpilib/en/latest/wpilib/XboxController.html#wpilib.XboxController
+    '''
     def __init__(self, controllerID=0):
         self.XboxController = wpilib.XboxController(controllerID)
         self.changed = True
