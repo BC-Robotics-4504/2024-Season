@@ -3,8 +3,6 @@ from dataclasses import dataclass
 
 import rev
 
-from components.hmi.hmi import HMI
-
 # Drivetrain configuration parameters
 @dataclass
 class DriveConfig:
