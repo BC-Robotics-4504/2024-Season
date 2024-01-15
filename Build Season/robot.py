@@ -1,7 +1,7 @@
 import wpilib
 from magicbot import MagicRobot
 
-from components.swerveDrive.swervemodule import SwerveModule, SwerveDrive, SparkMax, DriveConfig
+from components.swerveDrive.SwerveDrive import SwerveModule, SwerveDrive, SparkMax, DriveConfig
 from components.hmi.hmi import HMI
 
 class MyRobot(MagicRobot):
