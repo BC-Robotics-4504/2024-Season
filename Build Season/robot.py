@@ -1,16 +1,34 @@
 import wpilib
 from magicbot import MagicRobot
 
-from components.swerveDrive.swervemodule import SwerveModule
+from components.swerveDrive.swervemodule import SwerveModule, SwerveDrive, SparkMax, DriveConfig
 from components.hmi.hmi import HMI
 
 class MyRobot(MagicRobot):
+    # Swerve Drive Component Code
+    SwerveDrive: SwerveDrive
+    FrontLeft_SwerveModule: SwerveModule
+    FrontRight_SwerveModule: SwerveModule
+    RearLeft_SwerveModule: SwerveModule
+    RearRight_SwerveModule: SwerveModule
+    DriveConfig = DriveConfig(1.0, 1.0)
 
     def createObjects(self):
-        self.frontLeft_swerveModule = SwerveModule(angle_canID=6, speed_canID=5)
-        self.frontRight_swerveModule = SwerveModule(angle_canID=4, speed_canID=3)
-        self.rearRight_swerveModule = SwerveModule(angle_canID=2, speed_canID=1)
-        self.rearLeft_swerveModule = SwerveModule(angle_canID=8, speed_canID=7)
+        # Swerve Drive Hardware Config
+        self.FrontLeft_SwerveModule_angleMotor = SparkMax(6, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.FrontLeft_SwerveModule_speedMotor = SparkMax(5, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.FrontRight_SwerveModule_angleMotor = SparkMax(4, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.FrontRight_SwerveModule_speedMotor = SparkMax(3, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.RearLeft_SwerveModule_angleMotor = SparkMax(8, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.RearLeft_SwerveModule_speedMotor = SparkMax(7, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.RearRight_SwerveModule_angleMotor = SparkMax(2, inverted=False, gear_ratio=1, wheel_diameter=1)
+        self.RearRight_SwerveModule_speedMotor = SparkMax(1, inverted=False, gear_ratio=1, wheel_diameter=1)
+
+        # Launcher Hardware Config
+
+        # Climber Hardware Config
+
+        # HMI Hardware Config
         self.HMI = HMI(controllerID=0)
         pass
 
@@ -18,15 +36,16 @@ class MyRobot(MagicRobot):
         pass
 
     def teleopInit(self):
-        self.frontLeft_swerveModule.move(0.1, 3)
-        self.frontRight_swerveModule.move(0.1, 3)
-        self.rearLeft_swerveModule.move(0.1, 3)
-        self.rearRight_swerveModule.move(0.1, 3)
+        # Define relationships between controller input events and what they're supposed to trigger
+        # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
         pass
 
     def teleopPeriodic(self):
-        # 1.) Check HMI has been updated (new inputs detected)
-        # 2.) If something has happened, do the thing
+        # 1.) Poll position of Left X/Y and Right X/Y from controller
+        Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
+
+        # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
+        self.SwerveDrive.move(Lx, Ly, Rx, Ry)
 
 
 if __name__ == "__main__":

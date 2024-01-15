@@ -1,10 +1,27 @@
 import math
+from dataclasses import dataclass
 
 import rev
 
 from components.hmi.hmi import HMI
 
+# Drivetrain configuration parameters
+@dataclass
+class DriveConfig:
+    ''' Drivetrain Configuration
+    Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
+    '''
+    chasis_length: 1.0
+    chasis_width: 1.0
+
+    @property
+    def ratio(self):
+        return math.hypot(self.chasis_length, self.chasis_width)
+
 class SparkMax:
+    ''' Swerve Drive SparkMax Class
+    Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
+    '''
     # PID coefficients
     kP = 5e-5
     kI = 1e-6
@@ -21,7 +38,7 @@ class SparkMax:
     minVel = 0
     allowedErr = 0
 
-    def __init__(self, canID, motorType="brushless", inverted=False, gear_ratio=1,wheel_diameter=1):
+    def __init__(self, canID, motorType="brushless", inverted=False, gear_ratio=1, wheel_diameter=1):
         self.canID = canID
         self.gear_ratio = gear_ratio
         self.inverted = inverted
@@ -105,36 +122,7 @@ class SwerveModule:
 
     CLAMP = 0.2
 
-    def __init__(self, 
-        angle_canID=None, 
-        speed_canID=None,
-        speed_motorType="brushless",
-        speed_inverted=False,
-        speed_gear_ratio=1,
-        speed_wheel_diameter=1,
-        angle_motorType="brushless",
-        angle_inverted=False,
-        angle_gear_ratio=1,
-        angle_wheel_diameter=1,
-    ):
-        if angle_canID:
-            self.angleMotor = SparkMax(angle_canID, 
-                                    motorType=angle_motorType,
-                                    inverted=angle_inverted,
-                                    gear_ratio=angle_gear_ratio,
-                                    wheel_diameter=angle_wheel_diameter)
-        else:
-            print(f'[+] WARNING: No CAN Bus ID for angle motor controller.')
-                                    
-        if speed_canID:
-            self.speedMotor = SparkMax(speed_canID, 
-                                    motorType=speed_motorType,
-                                    inverted=speed_inverted,
-                                    gear_ratio=speed_gear_ratio,
-                                    wheel_diameter=speed_wheel_diameter)
-
-        else:
-            print(f'[+] WARNING: No CAN Bus ID for speed motor controller.')
+    def __init__(self):
 
         self.target_angle = 0
         self.target_speed = 0
@@ -161,11 +149,11 @@ class SwerveModule:
         return False
 
 class SwerveDrive:
-    frontLeft_swerveModule: SwerveModule
-    frontRight_swerveModule: SwerveModule
-    rearLeft_swerveModule: SwerveModule
-    rearRight_swerveModule: SwerveModule
-    hmi: HMI
+    DriveConfig: DriveConfig
+    FrontLeft_SwerveModule: SwerveModule
+    FrontRight_SwerveModule: SwerveModule
+    RearLeft_SwerveModule: SwerveModule
+    RearRight_SwerveModule: SwerveModule
 
     front_left_speed: float = 0
     front_left_angle: float = 0
@@ -177,11 +165,6 @@ class SwerveDrive:
     rear_right_angle: float = 0
 
     movement_changed: bool = False
-
-    def setup(self, chasis_length=1, chasis_width=1):
-        self.chasis_length = chasis_length
-        self.chasis_width = chasis_width
-        self.ratio = math.hypot(chasis_length, chasis_width)
 
     @staticmethod
     def __calcAngleSpeed__(self, front_rear, right_left):
@@ -216,10 +199,10 @@ class SwerveDrive:
                 movement_arr[i] = movement_arr[i] / max_mag
         fwd, strafe, rcw = movement_arr
 
-        frontX = strafe - rcw * self.chasis_length / self.ratio
-        rearX = strafe + rcw * self.chasis_length / self.ratio
-        leftY = fwd - rcw * self.chasis_width / self.ratio
-        rightY = fwd + rcw * self.chasis_width / self.ratio
+        frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
+        rearX = strafe + rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
+        leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
+        rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
 
         self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
         self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
@@ -230,7 +213,8 @@ class SwerveDrive:
 
     def execute(self):
         if self.isMoveChanged():
-            self.frontLeft_swerveModule.move(front_left_speed, front_left_angle)
-            self.frontRight_swerveModule.move(front_right_speed, front_right_angle)
-            self.rearLeft_swerveModule.move(rear_left_speed, rear_left_angle)
-            self.rearRight_swerveModule.move(rear_right_speed, rear_right_angle)
+            self.FrontLeft_SwerveModule.move(front_left_speed, front_left_angle)
+            self.FrontRight_SwerveModule.move(front_right_speed, front_right_angle)
+            self.RearLeft_SwerveModule.move(rear_left_speed, rear_left_angle)
+            self.RearRight_SwerveModule.move(rear_right_speed, rear_right_angle)
+            self.move_changed = False
