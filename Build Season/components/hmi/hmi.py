@@ -7,7 +7,7 @@ class HMI:
     '''
     controller: wpilib.XboxController
     
-    def __init__(self, controllerID=0):
+    def __init__(self):
         # self.XboxController = wpilib.XboxController(controllerID)
         self.changed = True
         

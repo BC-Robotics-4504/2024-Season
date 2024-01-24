@@ -34,7 +34,7 @@ class MyRobot(MagicRobot):
                                                           absolute_encoder=True)
         self.FrontRight_SwerveModule_speedMotor = SparkMax(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
-        self.RearLeft_SwerveModule_angleMotor = SparkMax(8, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.RearLeft_SwerveModule_angleMotor = SparkMax(8, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.RearLeft_SwerveModule_speedMotor = SparkMax(7, inverted=False, gear_ratio=1, wheel_diameter=1)
 
@@ -56,6 +56,7 @@ class MyRobot(MagicRobot):
     def teleopInit(self):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
+        self.SwerveDrive.clearFaults()
         pass
 
     def teleopPeriodic(self):

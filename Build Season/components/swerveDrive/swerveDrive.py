@@ -24,7 +24,7 @@ class SparkMax:
     """Swerve Drive SparkMax Class
     Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
     """
-
+    
     # PID coefficients
     kP = 5e-5
     kI = 1e-6
@@ -53,6 +53,7 @@ class SparkMax:
         self.canID = canID
         self.gear_ratio = gear_ratio
         self.inverted = inverted
+        self.absolute = absolute_encoder
         self.motorType = motorType
         self.gear_ratio = gear_ratio
         self.wheel_diameter = wheel_diameter
@@ -62,13 +63,15 @@ class SparkMax:
         else:
             mtype = rev.CANSparkMax.MotorType.kBrushed  # FIXME!: Is this right?
 
-        self.motor = rev.CANSparkMax(canID, mtype)
+        self.motor = rev.CANSparkMax(canID, mtype)        
 
         self.motor.restoreFactoryDefaults()
         self.motor.setInverted(inverted)
+        
         self.controller, self.encoder = self.__configureEncoder__(
             self.motor, absolute_encoder=absolute_encoder
         )
+
         # self.resetDistance()
         self.clearFaults()
 
@@ -77,9 +80,18 @@ class SparkMax:
 
         if absolute_encoder:
             encoder = motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
-
+            encoder.setAverageDepth(8)
+            encoder.setPositionConversionFactor(1.0)
+            encoder.setVelocityConversionFactor(1.0)
+                
         else:
             encoder = motor.getEncoder()
+            
+        controller.setFeedbackDevice(encoder)
+        
+        # Encoder parameters 
+        # https://docs.reduxrobotics.com/canandcoder/spark-max
+        # https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
 
         # PID parameters
         controller.setP(self.kP)
@@ -96,6 +108,12 @@ class SparkMax:
         controller.setSmartMotionAllowedClosedLoopError(
             self.allowedErr, smartMotionSlot
         )
+
+        if absolute_encoder:
+            controller.setPositionPIDWrappingEnabled(True)
+            controller.setPositionPIDWrappingMinInput(0.0)
+            controller.setPositionPIDWrappingMaxInput(2*math.pi)        
+
         return controller, encoder
 
     def resetDistance(self):
@@ -138,6 +156,14 @@ class SparkMax:
             -rotations, rev.CANSparkMax.ControlType.kSmartMotion
         )
         return False
+    
+    def setAbsPosition(self, position):
+        self.controller.setReference(position, rev.CANSparkMax.ControlType.kDutyCycle)
+        return False
+    
+    def getAbsPosition(self):
+        rotation = self.encoder.getPosition()
+        return rotation
 
 
 class SwerveModule:
@@ -159,10 +185,15 @@ class SwerveModule:
 
     def resetEncoder(self):
         return 0.0
+    
+    def clearFaults(self):
+        self.angleMotor.clearFaults()
+        self.speedMotor.clearFaults()
+        return False
 
     def getSpeedAngle(self):
         angle = self.angleMotor.getRotation()
-        speed = self.speedMotor.getDistance()
+        speed = self.speedMotor.getAbsPosition()
         return speed, angle
 
     def move(self, speed, angle):
@@ -172,7 +203,7 @@ class SwerveModule:
     
     def execute(self):
         print(f'speed:{self.target_speed}    angle:{self.target_angle}')
-        self.angleMotor.setDistance(self.target_angle)
+        self.angleMotor.setAbsPosition(self.target_angle)
         self.speedMotor.setPercent(self.target_speed)        
 
 
@@ -208,6 +239,13 @@ class SwerveDrive:
     # @property
     def isMoveChanged(self):
         return self.move_changed
+    
+    def clearFaults(self):
+        self.RearLeft_SwerveModule.clearFaults()
+        self.RearRight_SwerveModule.clearFaults()
+        self.FrontLeft_SwerveModule.clearFaults()
+        self.FrontRight_SwerveModule.clearFaults()
+        return False
 
     def move(self, Lx, Ly, Rx, Ry):
         """
@@ -220,12 +258,12 @@ class SwerveDrive:
         rcw = Rx
 
         # TODO: optimize this normalization routine
-        movement_arr = [fwd, strafe, rcw]
-        max_mag = max([abs(move_val) for move_val in movement_arr])
-        if max_mag > 1:
-            for i, _ in range(3):
-                movement_arr[i] = movement_arr[i] / max_mag
-        fwd, strafe, rcw = movement_arr
+        # movement_arr = [fwd, strafe, rcw]
+        # max_mag = max([abs(move_val) for move_val in movement_arr])
+        # if max_mag > 1:
+        #     for i, _ in range(3):
+        #         movement_arr[i] = movement_arr[i] / max_mag
+        # fwd, strafe, rcw = movement_arr
 
         frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
         rearX = strafe + rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
