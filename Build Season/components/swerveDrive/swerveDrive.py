@@ -3,7 +3,6 @@ from dataclasses import dataclass  # * Why do we need this import statement?
 
 import rev
 
-
 # Drivetrain configuration parameters
 @dataclass
 class DriveConfig:
@@ -14,6 +13,7 @@ class DriveConfig:
 
     chasis_length: float
     chasis_width: float
+    speed_clamp: float = 0.1
 
     @property
     def ratio(self):
@@ -69,13 +69,15 @@ class SparkMax:
         self.controller, self.encoder = self.__configureEncoder__(
             self.motor, absolute_encoder=absolute_encoder
         )
-        self.resetDistance()
+        # self.resetDistance()
+        self.clearFaults()
 
     def __configureEncoder__(self, motor, smartMotionSlot=0, absolute_encoder=False):
         controller = self.motor.getPIDController()
 
         if absolute_encoder:
-            encoder = motor.getAbsoluteEncoder()
+            encoder = motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+
         else:
             encoder = motor.getEncoder()
 
@@ -103,6 +105,9 @@ class SparkMax:
     def setPercent(self, value):
         self.motor.set(value)
         return False
+    
+    def clearFaults(self):
+        self.motor.clearFaults()
 
     def setMaxAccel(self, value):
         self.maxAcc = value
@@ -139,7 +144,6 @@ class SwerveModule:
     angleMotor: SparkMax
     speedMotor: SparkMax
 
-    CLAMP = 0.2
 
     def __init__(self):
         self.target_angle = 0
@@ -162,9 +166,14 @@ class SwerveModule:
         return speed, angle
 
     def move(self, speed, angle):
-        self.angleMotor.setDistance(angle)
-        self.speedMotor.setPercent(speed)
+        self.target_speed = speed
+        self.target_angle = angle
         return False
+    
+    def execute(self):
+        print(f'speed:{self.target_speed}    angle:{self.target_angle}')
+        self.angleMotor.setDistance(self.target_angle)
+        self.speedMotor.setPercent(self.target_speed)        
 
 
 class SwerveDrive:
@@ -185,7 +194,7 @@ class SwerveDrive:
 
     movement_changed: bool = False
 
-    @staticmethod
+    # @staticmethod
     def __calcAngleSpeed__(self, front_rear, right_left):
         """
         :param front_rear:
@@ -193,14 +202,14 @@ class SwerveDrive:
         :returns:
         """
         speed = math.hypot(front_rear, right_left)
-        angle = math.degrees(math.atan2(front_rear, right_left))
+        angle = math.atan2(front_rear, right_left)
         return speed, angle
 
-    @property
+    # @property
     def isMoveChanged(self):
         return self.move_changed
 
-    def move(self, Lx, Ly, Rx, Ry):  # ? Why is `Ry` not used?
+    def move(self, Lx, Ly, Rx, Ry):
         """
         :param front_rear:
         :param right_left:
@@ -223,31 +232,25 @@ class SwerveDrive:
         leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
         rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
 
-        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(
-            frontX, rightY
-        )
-        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(
-            frontX, leftY
-        )
-        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(
-            rearX, rightY
-        )
-        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(
-            rearX, leftY
-        )
+        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
+        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
+        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
+        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
         self.move_changed = True
         return False
 
     def execute(self):
         if self.isMoveChanged():
             self.FrontLeft_SwerveModule.move(
-                self.front_left_speed, self.front_left_angle
+                self.DriveConfig.speed_clamp*self.front_left_speed, self.front_left_angle
             )
             self.FrontRight_SwerveModule.move(
-                self.front_right_speed, self.front_right_angle
+                self.DriveConfig.speed_clamp*self.front_right_speed, self.front_right_angle
             )
-            self.RearLeft_SwerveModule.move(self.rear_left_speed, self.rear_left_angle)
+            self.RearLeft_SwerveModule.move(
+                self.DriveConfig.speed_clamp*self.rear_left_speed, self.rear_left_angle
+            )
             self.RearRight_SwerveModule.move(
-                self.rear_right_speed, self.rear_right_angle
+                self.DriveConfig.speed_clamp*self.rear_right_speed, self.rear_right_angle
             )
             self.move_changed = False

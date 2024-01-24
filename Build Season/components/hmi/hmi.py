@@ -5,8 +5,10 @@ class HMI:
     ''' HMI (Human Machine Interface) -- Xbox 360/One Controller
     REFERENCE: https://robotpy.readthedocs.io/projects/wpilib/en/latest/wpilib/XboxController.html#wpilib.XboxController
     '''
+    controller: wpilib.XboxController
+    
     def __init__(self, controllerID=0):
-        self.XboxController = wpilib.XboxController(controllerID)
+        # self.XboxController = wpilib.XboxController(controllerID)
         self.changed = True
         
         self.leftX = 0.
@@ -17,10 +19,10 @@ class HMI:
 
     def updateAnalogSticks(self):
         # Get input from analog sticks 
-        self.leftX = self.XboxController.getLeftX()
-        self.leftY = self.XboxController.getLeftY()
-        self.rightX = self.XboxController.getRightX()
-        self.rightY = self.XboxController.getRigthY()
+        self.leftX = self.controller.getLeftX()
+        self.leftY = self.controller.getLeftY()
+        self.rightX = self.controller.getRightX()
+        self.rightY = self.controller.getRightY()
         return False
 
     def getAnalogSticks(self):

@@ -16,6 +16,9 @@ class MyRobot(MagicRobot):
     FrontRight_SwerveModule: SwerveModule
     RearLeft_SwerveModule: SwerveModule
     RearRight_SwerveModule: SwerveModule
+    
+    # Controller Component Code
+    HMI: HMI
 
     # Launcher Component Code
 
@@ -44,7 +47,7 @@ class MyRobot(MagicRobot):
         # Climber Hardware Config
 
         # HMI Hardware Config
-        self.HMI = HMI(controllerID=0)
+        self.HMI_controller = wpilib.XboxController(0)
         pass
 
     def disabledPeriodic(self):
@@ -58,7 +61,7 @@ class MyRobot(MagicRobot):
     def teleopPeriodic(self):
         # 1.) Poll position of Left X/Y and Right X/Y from controller
         Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
-
+        
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx, Ry)
 
