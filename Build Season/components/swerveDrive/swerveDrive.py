@@ -19,8 +19,7 @@ class DriveConfig:
     def ratio(self):
         return math.hypot(self.chasis_length, self.chasis_width)
 
-
-class SparkMax:
+class SparkMaxTurning:
     """Swerve Drive SparkMax Class
     Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
     """
@@ -44,7 +43,6 @@ class SparkMax:
     def __init__(
         self,
         canID,
-        motorType="brushless",
         inverted=False,
         gear_ratio=1,
         wheel_diameter=1,
@@ -54,108 +52,42 @@ class SparkMax:
         self.gear_ratio = gear_ratio
         self.inverted = inverted
         self.absolute = absolute_encoder
-        self.motorType = motorType
         self.gear_ratio = gear_ratio
         self.wheel_diameter = wheel_diameter
 
-        if motorType == "brushless":
-            mtype = rev.CANSparkMax.MotorType.kBrushless
-        else:
-            mtype = rev.CANSparkMax.MotorType.kBrushed  # FIXME!: Is this right?
-
-        self.motor = rev.CANSparkMax(canID, mtype)        
-
-        self.motor.restoreFactoryDefaults()
-        self.motor.setInverted(inverted)
-        
-        self.controller, self.encoder = self.__configureEncoder__(
-            self.motor, absolute_encoder=absolute_encoder
-        )
-
-        # self.resetDistance()
-        self.clearFaults()
-
-    def __configureEncoder__(self, motor, smartMotionSlot=0, absolute_encoder=False):
-        controller = self.motor.getPIDController()
-
-        if absolute_encoder:
-            encoder = motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
-            encoder.setAverageDepth(8)
-            encoder.setPositionConversionFactor(1.0)
-            encoder.setVelocityConversionFactor(1.0)
-                
-        else:
-            encoder = motor.getEncoder()
-            
-        controller.setFeedbackDevice(encoder)
-        
         # Encoder parameters 
         # https://docs.reduxrobotics.com/canandcoder/spark-max
         # https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
 
+        self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
+        self.motor.restoreFactoryDefaults()
+         
+        self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+        self.controller = self.motor.getPIDController()
+        self.controller.setFeedbackDevice(self.encoder)
+        
+        self.encoder.setPositionConversionFactor(1.0)
+        self.encoder.setVelocityConversionFactor(1.0)
+        self.encoder.setInverted(inverted)
+        self.controller.setPositionPIDWrappingEnabled(True)
+        self.controller.setPositionPIDWrappingMinInput(0.0)
+        self.controller.setPositionPIDWrappingMaxInput(2*math.pi)
         # PID parameters
-        controller.setP(self.kP)
-        controller.setI(self.kI)
-        controller.setD(self.kD)
-        controller.setIZone(self.kIz)
-        controller.setFF(self.kFF)
-        controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
+        self.controller.setP(self.kP)
+        self.controller.setI(self.kI)
+        self.controller.setD(self.kD)
+        self.controller.setFF(self.kFF)
+        self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
+        
+        self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
+        self.motor.setSmartCurrentLimit(40)
+        
+        #self.controller.burnFlash()    
 
-        # Smart Motion Parameters
-        controller.setSmartMotionMaxVelocity(self.maxVel, smartMotionSlot)
-        controller.setSmartMotionMinOutputVelocity(self.minVel, smartMotionSlot)
-        controller.setSmartMotionMaxAccel(self.maxAcc, smartMotionSlot)
-        controller.setSmartMotionAllowedClosedLoopError(
-            self.allowedErr, smartMotionSlot
-        )
-
-        if absolute_encoder:
-            controller.setPositionPIDWrappingEnabled(True)
-            controller.setPositionPIDWrappingMinInput(0.0)
-            controller.setPositionPIDWrappingMaxInput(2*math.pi)        
-
-        return controller, encoder
-
-    def resetDistance(self):
-        self.encoder.setPosition(0)
-        return False
-
-    def setPercent(self, value):
-        self.motor.set(value)
-        return False
+        self.clearFaults()
     
     def clearFaults(self):
         self.motor.clearFaults()
-
-    def setMaxAccel(self, value):
-        self.maxAcc = value
-        self.controller.setSmartMotionMaxAccel(self.maxAcc, 0)
-        return False
-
-    def getVelocity(self):
-        vel = -self.encoder.getVelocity()  # rpm
-        return vel
-
-    def getDistance(self):
-        distance = self.getRotation()
-        distance *= self.wheel_diameter / self.gear_ratio
-        return distance
-
-    def getRotation(self):
-        rotation = -self.encoder.getPosition()
-        rotation *= 2 * math.pi  # Conver to radians
-        return rotation
-
-    def resetDistance(self):
-        self.encoder.setPosition(0)
-        return False
-
-    def setDistance(self, distance):
-        rotations = distance / (2 * math.pi * self.wheel_diameter / self.gear_ratio)
-        self.controller.setReference(
-            -rotations, rev.CANSparkMax.ControlType.kSmartMotion
-        )
-        return False
     
     def setAbsPosition(self, position):
         self.controller.setReference(position, rev.CANSparkMax.ControlType.kDutyCycle)
@@ -165,10 +97,86 @@ class SparkMax:
         rotation = self.encoder.getPosition()
         return rotation
 
+class SparkMaxDriving:
+    """Swerve Drive SparkMax Class
+    Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
+    """
+    
+    # PID coefficients
+    kP = 5e-5
+    kI = 1e-6
+    kD = 0
+    kIz = 0
+    kFF = 0.000156
+    kMaxOutput = 1
+    kMinOutput = -1
+    maxRPM = 5700
 
+    # Smart Motion Coefficients
+    maxVel = 2000  # rpm
+    maxAcc = 1000
+    minVel = 0
+    allowedErr = 0
+
+    def __init__(
+        self,
+        canID,
+        inverted=False,
+        gear_ratio=1,
+        wheel_diameter=1,
+        absolute_encoder=False,
+    ):
+        self.canID = canID
+        self.gear_ratio = gear_ratio
+        self.inverted = inverted
+        self.absolute = absolute_encoder
+        self.gear_ratio = gear_ratio
+        self.wheel_diameter = wheel_diameter
+
+        # Encoder parameters 
+        # https://docs.reduxrobotics.com/canandcoder/spark-max
+        # https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
+
+        self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
+        self.motor.restoreFactoryDefaults()
+         
+        self.encoder = self.motor.getEncoder()
+        self.controller = self.motor.getPIDController()
+        self.controller.setFeedbackDevice(self.encoder)
+        
+        self.encoder.setPositionConversionFactor(1.0)
+        self.encoder.setVelocityConversionFactor(1.0)
+        
+        # PID parameters
+        self.controller.setP(self.kP)
+        self.controller.setI(self.kI)
+        self.controller.setD(self.kD)
+        self.controller.setFF(self.kFF)
+        self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
+        
+        self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
+        self.motor.setSmartCurrentLimit(40)
+        
+        #self.controller.burnFlash()    
+
+        self.clearFaults()
+    
+    def clearFaults(self):
+        self.motor.clearFaults()
+    
+    def getSpeed(self):
+        vel = -self.encoder.getVelocity()  # rpm
+        return vel
+
+    def setSpeed(self, speed):
+        self.motor.set(speed)
+        return None
+        
+        
+        
 class SwerveModule:
-    angleMotor: SparkMax
-    speedMotor: SparkMax
+    angleMotor: SparkMaxTurning
+    speedMotor: SparkMaxDriving
 
 
     def __init__(self):
@@ -179,12 +187,6 @@ class SwerveModule:
         self.tolerance = 0.001
 
         self.auto_lockout = 0
-
-    def getEncoder(self):
-        return 0.0
-
-    def resetEncoder(self):
-        return 0.0
     
     def clearFaults(self):
         self.angleMotor.clearFaults()
@@ -192,8 +194,8 @@ class SwerveModule:
         return False
 
     def getSpeedAngle(self):
-        angle = self.angleMotor.getRotation()
-        speed = self.speedMotor.getAbsPosition()
+        angle = self.angleMotor.getAbsPosition()
+        speed = self.speedMotor.getSpeed()
         return speed, angle
 
     def move(self, speed, angle):
@@ -202,9 +204,12 @@ class SwerveModule:
         return False
     
     def execute(self):
-        print(f'speed:{self.target_speed}    angle:{self.target_angle}')
+        #print(f'speed:{self.target_speed}    angle:{self.target_angle}')
         self.angleMotor.setAbsPosition(self.target_angle)
-        self.speedMotor.setPercent(self.target_speed)        
+        self.speedMotor.setSpeed(self.target_speed) 
+        speed, angle = self.getSpeedAngle()
+        print(speed, angle)
+               
 
 
 class SwerveDrive:
@@ -247,7 +252,7 @@ class SwerveDrive:
         self.FrontRight_SwerveModule.clearFaults()
         return False
 
-    def move(self, Lx, Ly, Rx, Ry):
+    def move(self, Lx, Ly, Rx, Ry, rateLimit = False): 
         """
         :param front_rear:
         :param right_left:
@@ -257,25 +262,36 @@ class SwerveDrive:
         fwd = Ly
         rcw = Rx
 
-        # TODO: optimize this normalization routine
-        # movement_arr = [fwd, strafe, rcw]
-        # max_mag = max([abs(move_val) for move_val in movement_arr])
-        # if max_mag > 1:
-        #     for i, _ in range(3):
-        #         movement_arr[i] = movement_arr[i] / max_mag
-        # fwd, strafe, rcw = movement_arr
+        # translationDir = math.atan2(Ly, Lx)
+        # translationMag = math.sqrt(math.pow(Lx, 2) + math.pow(Ly, 2))
+        # directionSlewRate:
+        # if (translationMag != 0.0): directionSlewRate = math.abs(driveConstants.kDirectionSlewRate / translationMag):
+        # else:
+        #     directionSlewRate = 500.0
+        
+        # currentTime = WPIUtilJNI.now() * 1e-6
+        # elapsedTime = currentTime - prevTime
+        
+        
+        
+            
+        
+        
+        
+        # FIXME: check the logic, how to unit test(potentualy) 
 
         frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
         rearX = strafe + rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
         leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
         rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
 
-        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
-        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
-        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
-        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
+        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, leftY)
+        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, rightY)
+        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, leftY)
+        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, rightY)
         self.move_changed = True
         return False
+
 
     def execute(self):
         if self.isMoveChanged():
