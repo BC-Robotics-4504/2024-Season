@@ -1,6 +1,5 @@
 import math
 from dataclasses import dataclass  # * Why do we need this import statement?
-
 import rev
 
 # Drivetrain configuration parameters
