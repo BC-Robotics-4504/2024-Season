@@ -10,7 +10,7 @@ class MyRobot(MagicRobot):
     '''
     
     # Swerve Drive Component Code
-    DriveConfig = DriveConfig(1.0, 1.0)
+    DriveConfig = DriveConfig(34.0, 34.0)
     SwerveDrive: SwerveDrive
     FrontLeft_SwerveModule: SwerveModule
     FrontRight_SwerveModule: SwerveModule
@@ -56,12 +56,13 @@ class MyRobot(MagicRobot):
     def teleopInit(self):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
-        self.SwerveDrive.clearFaults()
+        self.SwerveDriveFaults()
         pass
 
     def teleopPeriodic(self):
         # 1.) Poll position of Left X/Y and Right X/Y from controller
         Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
+        print(self.HMI.getAnalogSticks)
         
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx, Ry)

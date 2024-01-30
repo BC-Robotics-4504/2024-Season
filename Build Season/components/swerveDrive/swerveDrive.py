@@ -2,6 +2,7 @@ import math
 from dataclasses import dataclass  # * Why do we need this import statement?
 import rev
 
+
 # Drivetrain configuration parameters
 @dataclass
 class DriveConfig:
@@ -159,7 +160,7 @@ class SparkMaxDriving:
         #self.controller.burnFlash()    
 
         self.clearFaults()
-    
+
     def clearFaults(self):
         self.motor.clearFaults()
     
@@ -207,7 +208,7 @@ class SwerveModule:
         self.angleMotor.setAbsPosition(self.target_angle)
         self.speedMotor.setSpeed(self.target_speed) 
         speed, angle = self.getSpeedAngle()
-        print(speed, angle)
+        # print(speed, angle)
                
 
 
@@ -226,6 +227,7 @@ class SwerveDrive:
     rear_left_angle: float = 0
     rear_right_speed: float = 0
     rear_right_angle: float = 0
+   
 
     movement_changed: bool = False
 
@@ -270,12 +272,7 @@ class SwerveDrive:
         
         # currentTime = WPIUtilJNI.now() * 1e-6
         # elapsedTime = currentTime - prevTime
-        
-        
-        
-            
-        
-        
+
         
         # FIXME: check the logic, how to unit test(potentualy) 
 
@@ -291,19 +288,27 @@ class SwerveDrive:
         self.move_changed = True
         return False
 
-
     def execute(self):
         if self.isMoveChanged():
             self.FrontLeft_SwerveModule.move(
-                self.DriveConfig.speed_clamp*self.front_left_speed, self.front_left_angle
+                self.DriveConfig.speed_clamp * self.front_left_speed, self.front_left_angle
             )
             self.FrontRight_SwerveModule.move(
-                self.DriveConfig.speed_clamp*self.front_right_speed, self.front_right_angle
+                self.DriveConfig.speed_clamp * self.front_right_speed, self.front_right_angle
             )
             self.RearLeft_SwerveModule.move(
-                self.DriveConfig.speed_clamp*self.rear_left_speed, self.rear_left_angle
+                self.DriveConfig.speed_clamp * self.rear_left_speed, self.rear_left_angle
             )
             self.RearRight_SwerveModule.move(
-                self.DriveConfig.speed_clamp*self.rear_right_speed, self.rear_right_angle
+                self.DriveConfig.speed_clamp * self.rear_right_speed, self.rear_right_angle
             )
             self.move_changed = False
+
+       
+            print(f"Front Left Module - Angle: {self.front_left_angle}, Speed: {self.front_left_speed}")
+            print(f"Front Right Module - Angle: {self.front_right_angle}, Speed: {self.front_right_speed}")
+            print(f"Rear Left Module - Angle: {self.rear_left_angle}, Speed: {self.rear_left_speed}")
+            print(f"Rear Right Module - Angle: {self.rear_right_angle}, Speed: {self.rear_right_speed}")
+            
+    
+
