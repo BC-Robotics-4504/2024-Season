@@ -1,5 +1,6 @@
 import wpilib
 from magicbot import MagicRobot
+import math
 
 from components.swerveDrive.swerveDrive import SwerveModule, SwerveDrive, SparkMaxTurning, SparkMaxDriving, DriveConfig
 from components.hmi.hmi import HMI
@@ -26,11 +27,11 @@ class MyRobot(MagicRobot):
 
     def createObjects(self):
         # Swerve Drive Hardware Config
-        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.FrontLeft_SwerveModule_speedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
 
-        self.FrontRight_SwerveModule_angleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.FrontRight_SwerveModule_angleMotor = SparkMaxTurning(4, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.FrontRight_SwerveModule_speedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
@@ -38,7 +39,7 @@ class MyRobot(MagicRobot):
                                                           absolute_encoder=True)
         self.RearLeft_SwerveModule_speedMotor = SparkMaxDriving(7, inverted=False, gear_ratio=1, wheel_diameter=1)
 
-        self.RearRight_SwerveModule_angleMotor = SparkMaxTurning(2, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.RearRight_SwerveModule_angleMotor = SparkMaxTurning(2, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.RearRight_SwerveModule_speedMotor = SparkMaxDriving(1, inverted=False, gear_ratio=1, wheel_diameter=1)
 
@@ -56,14 +57,13 @@ class MyRobot(MagicRobot):
     def teleopInit(self):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
-        self.SwerveDriveFaults()
+        self.SwerveDrive.clearFaults()
         pass
 
     def teleopPeriodic(self):
         # 1.) Poll position of Left X/Y and Right X/Y from controller
         Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
-        print(self.HMI.getAnalogSticks)
-        
+
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx, Ry)
 

@@ -1,3 +1,6 @@
+from wpimath.geometry import Translation2d
+from wpimath.kinematics import SwerveDrive4Kinematics
+
 import math
 from dataclasses import dataclass  # * Why do we need this import statement?
 import rev
@@ -25,13 +28,13 @@ class SparkMaxTurning:
     """
     
     # PID coefficients
-    kP = 5e-5
-    kI = 1e-6
+    kP = 1
+    kI = 0
     kD = 0
     kIz = 0
-    kFF = 0.000156
-    kMaxOutput = 1
-    kMinOutput = -1
+    kFF = 1
+    kMaxOutput = 2*math.pi
+    kMinOutput = 0
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -66,12 +69,12 @@ class SparkMaxTurning:
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(1.0)
-        self.encoder.setVelocityConversionFactor(1.0)
+        self.encoder.setPositionConversionFactor(6.283185307179586)
+        self.encoder.setVelocityConversionFactor(0.10471975511965977)
         self.encoder.setInverted(inverted)
         self.controller.setPositionPIDWrappingEnabled(True)
         self.controller.setPositionPIDWrappingMinInput(0.0)
-        self.controller.setPositionPIDWrappingMaxInput(2*math.pi)
+        self.controller.setPositionPIDWrappingMaxInput(6.2831854820251465)
         # PID parameters
         self.controller.setP(self.kP)
         self.controller.setI(self.kI)
@@ -79,8 +82,8 @@ class SparkMaxTurning:
         self.controller.setFF(self.kFF)
         self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
         
-        self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
-        self.motor.setSmartCurrentLimit(40)
+        self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
+        self.motor.setSmartCurrentLimit(25)
         
         #self.controller.burnFlash()    
 
@@ -103,11 +106,11 @@ class SparkMaxDriving:
     """
     
     # PID coefficients
-    kP = 5e-5
-    kI = 1e-6
+    kP = 0.04
+    kI = 0
     kD = 0
     kIz = 0
-    kFF = 0.000156
+    kFF = 1
     kMaxOutput = 1
     kMinOutput = -1
     maxRPM = 5700
@@ -144,8 +147,8 @@ class SparkMaxDriving:
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(1.0)
-        self.encoder.setVelocityConversionFactor(1.0)
+        self.encoder.setPositionConversionFactor(0.05077956125529683)
+        self.encoder.setVelocityConversionFactor(0.0008463260209216138)
         
         # PID parameters
         self.controller.setP(self.kP)
@@ -178,7 +181,6 @@ class SwerveModule:
     angleMotor: SparkMaxTurning
     speedMotor: SparkMaxDriving
 
-
     def __init__(self):
         self.target_angle = 0
         self.target_speed = 0
@@ -208,7 +210,8 @@ class SwerveModule:
         self.angleMotor.setAbsPosition(self.target_angle)
         self.speedMotor.setSpeed(self.target_speed) 
         speed, angle = self.getSpeedAngle()
-        # print(speed, angle)
+        print(f'setting {speed:0.3f}, {angle:0.3f}')
+        print(f'getting {speed:0.3f}, {angle:0.3f}')
                
 
 
@@ -229,7 +232,7 @@ class SwerveDrive:
     rear_right_angle: float = 0
    
 
-    movement_changed: bool = False
+    move_changed: bool = False
 
     # @staticmethod
     def __calcAngleSpeed__(self, front_rear, right_left):
@@ -281,34 +284,40 @@ class SwerveDrive:
         leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
         rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
 
-        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, leftY)
-        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, rightY)
-        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, leftY)
-        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, rightY)
+        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
+        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
+        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
+        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
         self.move_changed = True
+
+        print('=================================')
+        print(f'{self.front_right_angle:0.3f}', 
+        f'{self.front_left_angle:0.3f}', 
+        f'{self.rear_left_angle:0.3f}', 
+        f'{self.rear_right_angle:0.3f}')
         return False
 
     def execute(self):
         if self.isMoveChanged():
             self.FrontLeft_SwerveModule.move(
-                self.DriveConfig.speed_clamp * self.front_left_speed, self.front_left_angle
+                self.front_left_speed, self.front_left_angle
             )
             self.FrontRight_SwerveModule.move(
-                self.DriveConfig.speed_clamp * self.front_right_speed, self.front_right_angle
+                self.front_right_speed, self.front_right_angle
             )
             self.RearLeft_SwerveModule.move(
-                self.DriveConfig.speed_clamp * self.rear_left_speed, self.rear_left_angle
+                self.rear_left_speed, self.rear_left_angle
             )
             self.RearRight_SwerveModule.move(
-                self.DriveConfig.speed_clamp * self.rear_right_speed, self.rear_right_angle
+                self.rear_right_speed, self.rear_right_angle
             )
             self.move_changed = False
 
        
-            print(f"Front Left Module - Angle: {self.front_left_angle}, Speed: {self.front_left_speed}")
-            print(f"Front Right Module - Angle: {self.front_right_angle}, Speed: {self.front_right_speed}")
-            print(f"Rear Left Module - Angle: {self.rear_left_angle}, Speed: {self.rear_left_speed}")
-            print(f"Rear Right Module - Angle: {self.rear_right_angle}, Speed: {self.rear_right_speed}")
+            # print(f"Front Left Module - Angle: {self.front_left_angle}, Speed: {self.front_left_speed}")
+            # print(f"Front Right Module - Angle: {self.front_right_angle}, Speed: {self.front_right_speed}")
+            # print(f"Rear Left Module - Angle: {self.rear_left_angle}, Speed: {self.rear_left_speed}")
+            # print(f"Rear Right Module - Angle: {self.rear_right_angle}, Speed: {self.rear_right_speed}")
             
     
 
