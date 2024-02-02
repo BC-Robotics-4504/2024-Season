@@ -262,9 +262,26 @@ class SwerveDrive:
         :param right_left:
         :returns:
         """
-        strafe = Lx
-        fwd = Ly
-        rcw = Rx
+        # strafe = Lx
+        # fwd = Ly
+        # rcw = Rx
+        Vx0 = Lx
+        Vy0 = Ly
+        w0 = Rx
+
+        A = Vx0 - w0 * self.DriveConfig.chasis_width/2
+        B = Vx0 + w0 * self.DriveConfig.chasis_width/2
+        C = Vy0 - w0 * self.DriveConfig.chasis_width/2
+        D = Vy0 + w0 * self.DriveConfig.chasis_width/2
+
+        V1_speed = math.hypot(B, C)
+        V1_angle = math.atan2(C, B)
+        V2_speed = math.hypot(A, D)
+        V2_angle = math.atan2(D, A)
+        #V3_s
+
+
+    
 
         # translationDir = math.atan2(Ly, Lx)
         # translationMag = math.sqrt(math.pow(Lx, 2) + math.pow(Ly, 2))
@@ -279,15 +296,16 @@ class SwerveDrive:
         
         # FIXME: check the logic, how to unit test(potentualy) 
 
-        frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
-        rearX = strafe + rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
-        leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
-        rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
+        # frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
+        # rearX = strafe + rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
+        # leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
+        # rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
 
-        self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
-        self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
-        self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
-        self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
+        # self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
+        # self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
+        # self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
+        # self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
+
         self.move_changed = True
 
         print('=================================')
