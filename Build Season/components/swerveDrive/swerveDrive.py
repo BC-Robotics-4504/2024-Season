@@ -274,11 +274,21 @@ class SwerveDrive:
         C = Vy0 - w0 * self.DriveConfig.chasis_width/2
         D = Vy0 + w0 * self.DriveConfig.chasis_width/2
 
-        V1_speed = math.hypot(B, C)
-        V1_angle = math.atan2(C, B)
-        V2_speed = math.hypot(A, D)
-        V2_angle = math.atan2(D, A)
-        #V3_s
+        # Wheel one
+        self.V1_speed = math.hypot(B, C)
+        self.V1_angle = math.atan2(C, B)
+
+        # Wheel two
+        self.V2_speed = math.hypot(B, D)
+        self.V2_angle = math.atan2(D, B)
+
+        # Wheel three
+        self.V3_speed = math.hypot(A, D)
+        self.V3_angle = math.atan2(D, A)
+
+        # Wheel four
+        self.V4_speed = math.hypot(A, C)
+        self.V4_angle = math.atan2(C, A)
 
 
     
@@ -293,7 +303,6 @@ class SwerveDrive:
         # currentTime = WPIUtilJNI.now() * 1e-6
         # elapsedTime = currentTime - prevTime
 
-        
         # FIXME: check the logic, how to unit test(potentualy) 
 
         # frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
@@ -317,20 +326,28 @@ class SwerveDrive:
 
     def execute(self):
         if self.isMoveChanged():
+
             self.FrontLeft_SwerveModule.move(
-                self.front_left_speed, self.front_left_angle
+                self.front_left_speed,  self.front_left_angle
             )
             self.FrontRight_SwerveModule.move(
                 self.front_right_speed, self.front_right_angle
             )
             self.RearLeft_SwerveModule.move(
-                self.rear_left_speed, self.rear_left_angle
+                self.rear_left_speed,  self.rear_left_angle
             )
             self.RearRight_SwerveModule.move(
-                self.rear_right_speed, self.rear_right_angle
+                self.rear_right_speed, self.rear_right_angle  
             )
-            self.move_changed = False
+            
+            self.FrontLeft_SwerveModule.move(self.V1_speed,  self.V1_angle)
+            self.FrontRight_SwerveModule.move(self.V2_speed,  self.V2_angle)
+            self.RearLeft_SwerveModule.move(self.V3_speed,  self.V3_angle)
+            self.RearRight_SwerveModule.move(self.V4_speed,  self.V4_angle)
+            
 
+            self.move_changed = False
+            
        
             # print(f"Front Left Module - Angle: {self.front_left_angle}, Speed: {self.front_left_speed}")
             # print(f"Front Right Module - Angle: {self.front_right_angle}, Speed: {self.front_right_speed}")
