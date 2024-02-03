@@ -31,10 +31,9 @@ class SparkMaxTurning:
     kP = 1
     kI = 0
     kD = 0
-    kIz = 0
     kFF = 1
-    kMaxOutput = 2*math.pi
-    kMinOutput = 0
+    kMaxOutput = 1
+    kMinOutput = -1
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -64,17 +63,18 @@ class SparkMaxTurning:
 
         self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
-         
+                 
         self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
+        print(self.encoder, self.controller)
         
-        self.encoder.setPositionConversionFactor(6.283185307179586)
-        self.encoder.setVelocityConversionFactor(0.10471975511965977)
-        self.encoder.setInverted(inverted)
-        self.controller.setPositionPIDWrappingEnabled(True)
-        self.controller.setPositionPIDWrappingMinInput(0.0)
-        self.controller.setPositionPIDWrappingMaxInput(6.2831854820251465)
+        self.encoder.setPositionConversionFactor(1)
+        self.encoder.setVelocityConversionFactor(1)
+        # self.encoder.setInverted(inverted)
+        # self.controller.setPositionPIDWrappingEnabled(True)
+        # self.controller.setPositionPIDWrappingMinInput(0)
+        # self.controller.setPositionPIDWrappingMaxInput(1)
         # PID parameters
         self.controller.setP(self.kP)
         self.controller.setI(self.kI)
@@ -86,14 +86,14 @@ class SparkMaxTurning:
         self.motor.setSmartCurrentLimit(25)
         
         #self.controller.burnFlash()    
-
         self.clearFaults()
     
     def clearFaults(self):
         self.motor.clearFaults()
     
     def setAbsPosition(self, position):
-        self.controller.setReference(position, rev.CANSparkMax.ControlType.kDutyCycle)
+        # self.controller.setReference(position, rev.CANSparkMax.ControlType.kDutyCycle)
+        self.controller.setReference(position, rev.CANSparkMax.ControlType.kPosition)
         return False
     
     def getAbsPosition(self):
@@ -147,8 +147,8 @@ class SparkMaxDriving:
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(0.05077956125529683)
-        self.encoder.setVelocityConversionFactor(0.0008463260209216138)
+        self.encoder.setPositionConversionFactor(1)
+        self.encoder.setVelocityConversionFactor(1)
         
         # PID parameters
         self.controller.setP(self.kP)
@@ -206,12 +206,9 @@ class SwerveModule:
         return False
     
     def execute(self):
-        #print(f'speed:{self.target_speed}    angle:{self.target_angle}')
-        self.angleMotor.setAbsPosition(self.target_angle)
-        self.speedMotor.setSpeed(self.target_speed) 
+        # self.angleMotor.setAbsPosition(self.target_angle)
+        # self.speedMotor.setSpeed(self.target_speed) 
         speed, angle = self.getSpeedAngle()
-        print(f'setting {speed:0.3f}, {angle:0.3f}')
-        print(f'getting {speed:0.3f}, {angle:0.3f}')
                
 
 
@@ -222,28 +219,16 @@ class SwerveDrive:
     RearLeft_SwerveModule: SwerveModule
     RearRight_SwerveModule: SwerveModule
 
-    front_left_speed: float = 0
-    front_left_angle: float = 0
-    front_right_speed: float = 0
-    front_right_angle: float = 0
-    rear_left_speed: float = 0
-    rear_left_angle: float = 0
-    rear_right_speed: float = 0
-    rear_right_angle: float = 0
-   
+    V1_speed: float = 0
+    V1_angle: float = 0
+    V2_speed: float = 0
+    V2_angle: float = 0
+    V3_speed: float = 0
+    V3_angle: float = 0
+    V4_speed: float = 0
+    V4_angle: float = 0
 
     move_changed: bool = False
-
-    # @staticmethod
-    def __calcAngleSpeed__(self, front_rear, right_left):
-        """
-        :param front_rear:
-        :param right_left:
-        :returns:
-        """
-        speed = math.hypot(front_rear, right_left)
-        angle = math.atan2(front_rear, right_left)
-        return speed, angle
 
     # @property
     def isMoveChanged(self):
@@ -269,8 +254,8 @@ class SwerveDrive:
         Vy0 = Ly
         w0 = Rx
 
-        A = Vx0 - w0 * self.DriveConfig.chasis_width/2
-        B = Vx0 + w0 * self.DriveConfig.chasis_width/2
+        A = Vx0 - w0 * self.DriveConfig.chasis_length/2
+        B = Vx0 + w0 * self.DriveConfig.chasis_length/2
         C = Vy0 - w0 * self.DriveConfig.chasis_width/2
         D = Vy0 + w0 * self.DriveConfig.chasis_width/2
 
@@ -290,61 +275,27 @@ class SwerveDrive:
         self.V4_speed = math.hypot(A, C)
         self.V4_angle = math.atan2(C, A)
 
-
-    
-
-        # translationDir = math.atan2(Ly, Lx)
-        # translationMag = math.sqrt(math.pow(Lx, 2) + math.pow(Ly, 2))
-        # directionSlewRate:
-        # if (translationMag != 0.0): directionSlewRate = math.abs(driveConstants.kDirectionSlewRate / translationMag):
-        # else:
-        #     directionSlewRate = 500.0
-        
-        # currentTime = WPIUtilJNI.now() * 1e-6
-        # elapsedTime = currentTime - prevTime
-
-        # FIXME: check the logic, how to unit test(potentualy) 
-
-        # frontX = strafe - rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
-        # rearX = strafe + rcw * self.DriveConfig.chasis_length / self.DriveConfig.ratio
-        # leftY = fwd - rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
-        # rightY = fwd + rcw * self.DriveConfig.chasis_width / self.DriveConfig.ratio
-
-        # self.front_left_speed, self.front_left_angle = self.__calcAngleSpeed__(frontX, rightY)
-        # self.front_right_speed, self.front_right_angle = self.__calcAngleSpeed__(frontX, leftY)
-        # self.rear_left_speed, self.rear_left_angle = self.__calcAngleSpeed__(rearX, rightY)
-        # self.rear_right_speed, self.rear_right_angle = self.__calcAngleSpeed__(rearX, leftY)
-
         self.move_changed = True
 
-        print('=================================')
-        print(f'{self.front_right_angle:0.3f}', 
-        f'{self.front_left_angle:0.3f}', 
-        f'{self.rear_left_angle:0.3f}', 
-        f'{self.rear_right_angle:0.3f}')
+        # print('=================================')
+        # print(f'{self.front_right_angle:0.3f}', 
+        # f'{self.front_left_angle:0.3f}', 
+        # f'{self.rear_left_angle:0.3f}', 
+        # f'{self.rear_right_angle:0.3f}')
         return False
 
     def execute(self):
         if self.isMoveChanged():
 
-            self.FrontLeft_SwerveModule.move(
-                self.front_left_speed,  self.front_left_angle
-            )
-            self.FrontRight_SwerveModule.move(
-                self.front_right_speed, self.front_right_angle
-            )
-            self.RearLeft_SwerveModule.move(
-                self.rear_left_speed,  self.rear_left_angle
-            )
-            self.RearRight_SwerveModule.move(
-                self.rear_right_speed, self.rear_right_angle  
-            )
-            
-            self.FrontLeft_SwerveModule.move(self.V1_speed,  self.V1_angle)
-            self.FrontRight_SwerveModule.move(self.V2_speed,  self.V2_angle)
-            self.RearLeft_SwerveModule.move(self.V3_speed,  self.V3_angle)
-            self.RearRight_SwerveModule.move(self.V4_speed,  self.V4_angle)
-            
+
+            # self.FrontLeft_SwerveModule.move(self.V1_speed,  self.V1_angle)
+            self.FrontLeft_SwerveModule.angleMotor.setAbsPosition(1.0)
+            # self.FrontRight_SwerveModule.move(self.V2_speed,  self.V2_angle)
+            # self.RearLeft_SwerveModule.move(self.V3_speed,  self.V3_angle)
+            # self.RearRight_SwerveModule.move(self.V4_speed,  self.V4_angle)         
+            #
+            speed, angle = self.FrontLeft_SwerveModule.getSpeedAngle()
+            print(f'{speed:0.3f}, {angle:0.3f}')   
 
             self.move_changed = False
             

@@ -1,15 +1,13 @@
 import wpilib
 from magicbot import MagicRobot
-from motor import Motor
+from motor import SparkMax
 
 
 class MyRobot(MagicRobot):
-    motor1: Motor
-    motor2: Motor
 
     def createObjects(self):
-        self.motor1 = Motor(canID=0)
-        self.motor2 = Motor(canID=1)
+        self.motor1 = SparkMax(canID = 0, mtype= "brushless")
+        self.motor2 = SparkMax(canID = 1, mtype= "brushless")
 
         # Launcher Hardware Config
 

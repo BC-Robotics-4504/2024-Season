@@ -2,19 +2,16 @@ import rev
 import wpilib
 
 
-class Motor:
+class SparkMax():
     def __init__(self, canID, mtype):
-        self.canID = canID
         self.mtype = mtype
-        self.motor = rev.CANSparkMax(mtype="brushless")
+        self.canID = canID
+        self.motor = rev.CANSparkMax(self.canID, self.mtype)
         self.isSpinning = False
+    
 
     def spin(self):
-        self.isSpinning = True
         if self.isSpinning == True:
-            rev.CANSparkMax.set(speed=0.25)
+            self.motor.set(speed=.50)
         else:
-            rev.CANSparkMax.set(speed=0)
-
-    def stop(self):
-        rev.CANSparkMax.set(speed=0)
+            self.isSpinning == False
