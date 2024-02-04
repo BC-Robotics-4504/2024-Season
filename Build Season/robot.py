@@ -27,19 +27,19 @@ class MyRobot(MagicRobot):
 
     def createObjects(self):
         # Swerve Drive Hardware Config
-        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.FrontLeft_SwerveModule_speedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
 
-        self.FrontRight_SwerveModule_angleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.FrontRight_SwerveModule_angleMotor = SparkMaxTurning(4, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.FrontRight_SwerveModule_speedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
-        self.RearLeft_SwerveModule_angleMotor = SparkMaxTurning(8, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.RearLeft_SwerveModule_angleMotor = SparkMaxTurning(8, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.RearLeft_SwerveModule_speedMotor = SparkMaxDriving(7, inverted=False, gear_ratio=1, wheel_diameter=1)
 
-        self.RearRight_SwerveModule_angleMotor = SparkMaxTurning(2, inverted=False, gear_ratio=1, wheel_diameter=1,
+        self.RearRight_SwerveModule_angleMotor = SparkMaxTurning(2, inverted=True, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.RearRight_SwerveModule_speedMotor = SparkMaxDriving(1, inverted=False, gear_ratio=1, wheel_diameter=1)
 

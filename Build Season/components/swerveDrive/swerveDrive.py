@@ -63,6 +63,7 @@ class SparkMaxTurning:
 
         self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
+        self.motor.setInverted(inverted) #TODO: does this need to be removed?
                  
         self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.controller = self.motor.getPIDController()
@@ -71,10 +72,9 @@ class SparkMaxTurning:
         
         self.encoder.setPositionConversionFactor(1)
         self.encoder.setVelocityConversionFactor(1)
-        # self.encoder.setInverted(inverted)
-        # self.controller.setPositionPIDWrappingEnabled(True)
-        # self.controller.setPositionPIDWrappingMinInput(0)
-        # self.controller.setPositionPIDWrappingMaxInput(1)
+        self.controller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
+        self.controller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
+        self.controller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
         # PID parameters
         self.controller.setP(self.kP)
         self.controller.setI(self.kI)
