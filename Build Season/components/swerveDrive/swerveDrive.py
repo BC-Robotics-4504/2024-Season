@@ -68,13 +68,13 @@ class SparkMaxTurning:
         self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
-        print(self.encoder, self.controller)
         
         self.encoder.setPositionConversionFactor(1)
         self.encoder.setVelocityConversionFactor(1)
         self.controller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
         self.controller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
         self.controller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
+        
         # PID parameters
         self.controller.setP(self.kP)
         self.controller.setI(self.kI)
