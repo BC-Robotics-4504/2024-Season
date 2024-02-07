@@ -65,7 +65,7 @@ class MyRobot(MagicRobot):
         Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
 
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
-        self.SwerveDrive.move(Lx, Ly, Rx, Ry)
+        self.SwerveDrive.move(Lx, Ly, Rx)
 
 
 if __name__ == "__main__":
