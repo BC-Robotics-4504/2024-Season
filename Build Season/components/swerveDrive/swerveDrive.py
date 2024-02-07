@@ -28,12 +28,14 @@ class SparkMaxTurning:
     """
     
     # PID coefficients
-    kP = 1
-    kI = 0
+    kP = 1e-5
+    kI = 1e-8
     kD = 0
-    kFF = 1
+    kIz = 0
+    # kFF = 0.000156
+    kFF = 0.0005
     kMaxOutput = 1
-    kMinOutput = -1
+    kMinOutput = 0
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -41,6 +43,8 @@ class SparkMaxTurning:
     maxAcc = 1000
     minVel = 0
     allowedErr = 0
+
+    smartMotionSlot=0
 
     def __init__(
         self,
@@ -63,24 +67,34 @@ class SparkMaxTurning:
 
         self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
-        self.motor.setInverted(inverted) #TODO: does this need to be removed?
-                 
-        self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+        self.motor.setInverted(inverted) #TODO: does this need to be removed?                 
+        
         self.controller = self.motor.getPIDController()
+        self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+        self.encoder.setAverageDepth(1)
+        self.encoder.setZeroOffset(0)
+        self.encoder.setInverted(False)
+        self.encoder.setPositionConversionFactor(1.0)
+        self.encoder.setVelocityConversionFactor(1.0)
         self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(1)
-        self.encoder.setVelocityConversionFactor(1)
-        self.controller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
-        self.controller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
-        self.controller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
+        # self.encoder.setPositionConversionFactor(1.0)
+        # self.encoder.setVelocityConversionFactor(1.0)
+        # self.controller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
+        # self.controller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
+        # self.controller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
         
         # PID parameters
         self.controller.setP(self.kP)
         self.controller.setI(self.kI)
         self.controller.setD(self.kD)
+        self.controller.setIZone(self.kIz)
         self.controller.setFF(self.kFF)
         self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
+        self.controller.setSmartMotionMaxVelocity(self.maxVel, self.smartMotionSlot)
+        self.controller.setSmartMotionMinOutputVelocity(self.minVel, self.smartMotionSlot)
+        self.controller.setSmartMotionMaxAccel(self.maxAcc, self.smartMotionSlot)
+        self.controller.setSmartMotionAllowedClosedLoopError(self.allowedErr, self.smartMotionSlot)
         
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self.motor.setSmartCurrentLimit(25)
@@ -92,8 +106,8 @@ class SparkMaxTurning:
         self.motor.clearFaults()
     
     def setAbsPosition(self, position):
-        # self.controller.setReference(position, rev.CANSparkMax.ControlType.kDutyCycle)
-        self.controller.setReference(position, rev.CANSparkMax.ControlType.kPosition)
+        self.controller.setReference(position, rev.CANSparkMax.ControlType.kDutyCycle)
+        # self.controller.setReference(position, rev.CANSparkMax.ControlType.kPosition)
         return False
     
     def getAbsPosition(self):
@@ -250,30 +264,27 @@ class SwerveDrive:
         # strafe = Lx
         # fwd = Ly
         # rcw = Rx
-        Vx0 = Lx
-        Vy0 = Ly
-        w0 = Rx
 
-        A = Vx0 - w0 * self.DriveConfig.chasis_length/2
-        B = Vx0 + w0 * self.DriveConfig.chasis_length/2
-        C = Vy0 - w0 * self.DriveConfig.chasis_width/2
-        D = Vy0 + w0 * self.DriveConfig.chasis_width/2
+        A = Lx - Rx * math.pi*self.DriveConfig.chasis_length
+        B = Lx + Rx * math.pi*self.DriveConfig.chasis_length
+        C = -Ly - Rx * math.pi*self.DriveConfig.chasis_width
+        D = -Ly + Rx * math.pi*self.DriveConfig.chasis_width
 
         # Wheel one
-        self.V1_speed = math.hypot(B, C)
-        self.V1_angle = math.atan2(C, B)
+        self.V1_speed = math.hypot(B, D)
+        self.V1_angle = math.atan2(B, D)/math.pi
 
         # Wheel two
-        self.V2_speed = math.hypot(B, D)
-        self.V2_angle = math.atan2(D, B)
+        self.V2_speed = math.hypot(A, D)
+        self.V2_angle = math.atan2(A, D)/math.pi
 
         # Wheel three
-        self.V3_speed = math.hypot(A, D)
-        self.V3_angle = math.atan2(D, A)
+        self.V3_speed = math.hypot(A, C)
+        self.V3_angle = math.atan2(A, C)/math.pi
 
         # Wheel four
-        self.V4_speed = math.hypot(A, C)
-        self.V4_angle = math.atan2(C, A)
+        self.V4_speed = math.hypot(B, C)
+        self.V4_angle = math.atan2(B, C)/math.pi
 
         self.move_changed = True
 
@@ -289,7 +300,7 @@ class SwerveDrive:
 
 
             # self.FrontLeft_SwerveModule.move(self.V1_speed,  self.V1_angle)
-            self.FrontLeft_SwerveModule.angleMotor.setAbsPosition(1.0)
+            self.FrontLeft_SwerveModule.angleMotor.setAbsPosition(self.V2_angle)
             # self.FrontRight_SwerveModule.move(self.V2_speed,  self.V2_angle)
             # self.RearLeft_SwerveModule.move(self.V3_speed,  self.V3_angle)
             # self.RearRight_SwerveModule.move(self.V4_speed,  self.V4_angle)         

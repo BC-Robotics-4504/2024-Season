@@ -11,7 +11,7 @@ class MyRobot(MagicRobot):
     '''
     
     # Swerve Drive Component Code
-    DriveConfig = DriveConfig(34.0, 34.0)
+    DriveConfig = DriveConfig(1.0, 1.0)
     SwerveDrive: SwerveDrive
     FrontLeft_SwerveModule: SwerveModule
     FrontRight_SwerveModule: SwerveModule
@@ -27,7 +27,7 @@ class MyRobot(MagicRobot):
 
     def createObjects(self):
         # Swerve Drive Hardware Config
-        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=True, gear_ratio=1, wheel_diameter=1,
+        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True)
         self.FrontLeft_SwerveModule_speedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
 
