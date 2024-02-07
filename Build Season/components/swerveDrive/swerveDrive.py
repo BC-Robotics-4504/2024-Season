@@ -212,7 +212,9 @@ class SwerveModule:
 
     def __init__(self):
         self.target_angle = 0
+        self.meas_angle = 0
         self.target_speed = 0
+        self.meas_speed = 0
 
         self.target_distance = 0
         self.tolerance = 0.001
@@ -225,12 +227,10 @@ class SwerveModule:
         return False
 
     def getAngle(self):
-        angle = self.angleMotor.getAbsPosition()
-        return angle
+        return self.meas_angle
     
     def getSpeed(self):
-        speed = self.speedMotor.getSpeed()
-        return speed
+        return self.meas_speed
 
     def move(self, speed, angle):
         self.target_speed = speed
@@ -238,11 +238,10 @@ class SwerveModule:
         return False
     
     def execute(self):
+        self.meas_speed = self.speedMotor.getSpeed()
+        self.meas_angle = self.angleMotor.getAbsPosition()
         self.angleMotor.setAbsPosition(self.target_angle)
         self.speedMotor.setSpeed(self.target_speed) 
-        speed, angle = self.getSpeedAngle()
-               
-
 
 class SwerveDrive:
     DriveConfig: DriveConfig
@@ -300,28 +299,6 @@ class SwerveDrive:
             self.backLeft = SwerveModuleState.optimize(self.backLeft, Rotation2d(self.RearLeft_SwerveModule.getAngle()))
             self.backRight = SwerveModuleState.optimize(self.backRight, Rotation2d(self.RearRight_SwerveModule.getAngle()))
 
-
-        # A = Lx - Rx * math.pi*self.DriveConfig.chasis_length
-        # B = Lx + Rx * math.pi*self.DriveConfig.chasis_length
-        # C = -Ly - Rx * math.pi*self.DriveConfig.chasis_width
-        # D = -Ly + Rx * math.pi*self.DriveConfig.chasis_width
-
-        # # Wheel one
-        # self.V1_speed = math.hypot(B, D)
-        # self.V1_angle = math.atan2(B, D)/math.pi
-
-        # # Wheel two
-        # self.V2_speed = math.hypot(A, D)
-        # self.V2_angle = math.atan2(A, D)/math.pi
-
-        # # Wheel three
-        # self.V3_speed = math.hypot(A, C)
-        # self.V3_angle = math.atan2(A, C)/math.pi
-
-        # # Wheel four
-        # self.V4_speed = math.hypot(B, C)
-        # self.V4_angle = math.atan2(B, C)/math.pi
-
         self.move_changed = True
         
         return False
@@ -333,14 +310,6 @@ class SwerveDrive:
             self.FrontRight_SwerveModule.move(self.frontRight.speed,  self.frontRight.angle)
             self.RearLeft_SwerveModule.move(self.backLeft.speed,  self.backLeft.angle)
             self.RearRight_SwerveModule.move(self.backRight.speed,  self.backRight.angle)
-
-            # self.FrontLeft_SwerveModule.move(self.V1_speed,  self.V1_angle)
-            # self.FrontRight_SwerveModule.move(self.V2_speed,  self.V2_angle)
-            # self.RearLeft_SwerveModule.move(self.V3_speed,  self.V3_angle)
-            # self.RearRight_SwerveModule.move(self.V4_speed,  self.V4_angle)         
-            #
-            # speed, angle = self.FrontLeft_SwerveModule.getSpeedAngle()
-            # print(f'{speed:0.3f}, {angle:0.3f}')   
 
             self.move_changed = False
             
