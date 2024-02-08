@@ -1,6 +1,8 @@
 import wpilib
 from magicbot import MagicRobot
 import math
+import rev
+import math
 
 from components.swerveDrive.swerveDrive import SwerveModule, SwerveDrive, SparkMaxTurning, SparkMaxDriving, DriveConfig
 from components.hmi.hmi import HMI
@@ -10,8 +12,8 @@ class MyRobot(MagicRobot):
     REFERENCE: https://robotpy.readthedocs.io/en/stable/frameworks/magicbot.html
     '''
     
-    # Swerve Drive Component Code
-    DriveConfig = DriveConfig(1.0, 1.0)
+    # # Swerve Drive Component Code
+    DriveConfig: DriveConfig = DriveConfig(1.0, 1.0)
     SwerveDrive: SwerveDrive
     FrontLeft_SwerveModule: SwerveModule
     FrontRight_SwerveModule: SwerveModule
@@ -27,28 +29,42 @@ class MyRobot(MagicRobot):
 
     def createObjects(self):
         # Swerve Drive Hardware Config
-        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1,
-                                                          absolute_encoder=True)
+        self.FrontLeft_SwerveModule_angleMotor = SparkMaxTurning(6, inverted=True, gear_ratio=1, wheel_diameter=1,
+                                                          absolute_encoder=True, z_offset=2.1494839)
         self.FrontLeft_SwerveModule_speedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         self.FrontRight_SwerveModule_angleMotor = SparkMaxTurning(4, inverted=True, gear_ratio=1, wheel_diameter=1,
-                                                          absolute_encoder=True)
+                                                          absolute_encoder=True, z_offset=3.0847984)
         self.FrontRight_SwerveModule_speedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         self.RearLeft_SwerveModule_angleMotor = SparkMaxTurning(8, inverted=True, gear_ratio=1, wheel_diameter=1,
-                                                          absolute_encoder=True)
+                                                          absolute_encoder=True, z_offset=0.6529800)
         self.RearLeft_SwerveModule_speedMotor = SparkMaxDriving(7, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         self.RearRight_SwerveModule_angleMotor = SparkMaxTurning(2, inverted=True, gear_ratio=1, wheel_diameter=1,
-                                                          absolute_encoder=True)
+                                                          absolute_encoder=True, z_offset=5.2467979)
         self.RearRight_SwerveModule_speedMotor = SparkMaxDriving(1, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         # Launcher Hardware Config
 
         # Climber Hardware Config
 
+        # Encoder parameters 
+        # https://docs.reduxrobotics.com/canandcoder/spark-max
+        # https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
+
+       
+        # # Smart Motion Parameters
+        # self.SMcontroller.setSmartMotionMaxVelocity(5600, 0)
+        # self.SMcontroller.setSmartMotionMinOutputVelocity(0, 0)
+        # self.SMcontroller.setSmartMotionMaxAccel(2700, 0)
+        # self.SMcontroller.setSmartMotionAllowedClosedLoopError(0.005, 0)
+        
+        #self.controller.burnFlash()    
+        # self.clearFaults()
+
         # HMI Hardware Config
-        self.HMI_controller = wpilib.XboxController(0)
+        self.HMI_xbox = wpilib.XboxController(0)
         pass
 
     def disabledPeriodic(self):
@@ -57,13 +73,15 @@ class MyRobot(MagicRobot):
     def teleopInit(self):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
-        self.SwerveDrive.clearFaults()
+        # self.SwerveDrive.clearFaults()
         pass
 
     def teleopPeriodic(self):
         # 1.) Poll position of Left X/Y and Right X/Y from controller
         Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
 
+        # if Rx < 0:
+        #     Rx += 1
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx)
 
