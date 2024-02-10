@@ -271,10 +271,10 @@ class SwerveDrive:
 
     def move(self, Lx, Ly, Rx): 
 
-        A = -Lx - math.pi*Rx*self.DriveConfig.chasis_length
-        B = -Lx + math.pi*Rx*self.DriveConfig.chasis_length
-        C = Ly - math.pi*Rx*self.DriveConfig.chasis_width
-        D = Ly + math.pi*Rx*self.DriveConfig.chasis_width
+        A = -Lx + math.pi*Rx*self.DriveConfig.chasis_length
+        B = -Lx - math.pi*Rx*self.DriveConfig.chasis_length
+        C = Ly + math.pi*Rx*self.DriveConfig.chasis_width
+        D = Ly - math.pi*Rx*self.DriveConfig.chasis_width
 
         self.frontLeft_angle = math.atan2(D, B)
         self.frontLeft_speed = math.hypot(D, B)
