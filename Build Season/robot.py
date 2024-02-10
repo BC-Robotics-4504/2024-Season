@@ -80,13 +80,6 @@ class MyRobot(MagicRobot):
         # 1.) Poll position of Left X/Y and Right X/Y from controller
         Lx, Ly, Rx, Ry = self.HMI.getAnalogSticks()
 
-        print('=======================================')
-        rl = self.SwerveDrive.RearLeft_SwerveModule.angleMotor.getAbsPosition()
-        rr = self.SwerveDrive.RearRight_SwerveModule.angleMotor.getAbsPosition()
-        fl = self.SwerveDrive.FrontLeft_SwerveModule.angleMotor.getAbsPosition()
-        fr = self.SwerveDrive.FrontRight_SwerveModule.angleMotor.getAbsPosition()
-        print(f'{fl:0.3f}, {fr:0.3f}, {rl:0.3f}, {rr:0.3f}')
-
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx)
 
