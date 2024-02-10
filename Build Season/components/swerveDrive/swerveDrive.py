@@ -16,7 +16,7 @@ class DriveConfig:
 
     chasis_length: float
     chasis_width: float
-    speed_clamp: float = 0.1
+    speed_clamp: float = 0.25
 
 class SparkMaxTurning:
     """Swerve Drive SparkMax Class
@@ -271,10 +271,10 @@ class SwerveDrive:
 
     def move(self, Lx, Ly, Rx): 
 
-        A = Lx - math.pi*Rx*self.DriveConfig.chasis_length
-        B = Lx + math.pi*Rx*self.DriveConfig.chasis_length
-        C = -Ly - math.pi*Rx*self.DriveConfig.chasis_width
-        D = -Ly + math.pi*Rx*self.DriveConfig.chasis_width
+        A = -Lx - math.pi*Rx*self.DriveConfig.chasis_length
+        B = -Lx + math.pi*Rx*self.DriveConfig.chasis_length
+        C = Ly - math.pi*Rx*self.DriveConfig.chasis_width
+        D = Ly + math.pi*Rx*self.DriveConfig.chasis_width
 
         self.frontLeft_angle = math.atan2(D, B)
         self.frontLeft_speed = math.hypot(D, B)
@@ -288,17 +288,6 @@ class SwerveDrive:
         self.frontRight_angle = math.atan2(C, B)
         self.frontRight_speed = math.hypot(C, B)
 
-        # speeds = ChassisSpeeds(Ly, Lx, Rx)
-
-        # self.frontLeft, self.frontRight, self.backLeft, self.backRight = self._kinematics.toSwerveModuleStates(speeds)
-
-        # if optimize:
-        #     self.frontLeft = SwerveModuleState.optimize(self.frontLeft, Rotation2d(self.FrontLeft_SwerveModule.getAngle()))
-        #     self.frontRight = SwerveModuleState.optimize(self.frontRight, Rotation2d(self.FrontRight_SwerveModule.getAngle()))
-        #     self.backLeft = SwerveModuleState.optimize(self.backLeft, Rotation2d(self.RearLeft_SwerveModule.getAngle()))
-        #     self.backRight = SwerveModuleState.optimize(self.backRight, Rotation2d(self.RearRight_SwerveModule.getAngle()))
-        # self.frontLeft_speed = Lx
-        # self.frontLeft_angle = Rx
         self.move_changed = True
         
         return False
@@ -309,7 +298,7 @@ class SwerveDrive:
             max_val = max([self.frontLeft_speed, self.frontRight_speed, self.rearLeft_speed, self.rearRight_speed])/self.DriveConfig.speed_clamp
             if abs(max_val) == 0:
                 max_val = 1
-                
+
             self.FrontLeft_SwerveModule.move(self.frontLeft_speed/max_val, self.frontLeft_angle)
             self.FrontRight_SwerveModule.move(self.frontRight_speed/max_val, self.frontRight_angle)
             self.RearLeft_SwerveModule.move(self.rearLeft_speed/max_val, self.rearLeft_angle)
