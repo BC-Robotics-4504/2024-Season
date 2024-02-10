@@ -44,14 +44,13 @@ class SparkMaxTurning:
     """
     
     # PID coefficients
-    kP = 1
-    kI = 0
-    kD = 0
-    kIz = 0
-    # kFF = 0.000156
+    kP = 0.32
+    kI = 1e-4
+    kD = 1
+    kIz = 0.30
     kFF = 0
     kMaxOutput = 1
-    kMinOutput = 0
+    kMinOutput = -1
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -99,8 +98,8 @@ class SparkMaxTurning:
         # self.encoder.setVelocityConversionFactor(1.0)
         self.SMcontroller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(1)
-        self.encoder.setVelocityConversionFactor(1)
+        self.encoder.setPositionConversionFactor(6.283185307179586)
+        self.encoder.setVelocityConversionFactor(.104719755119659771)
         self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
@@ -139,9 +138,9 @@ class SparkMaxDriving:
     """
     
     # PID coefficients
-    kP = 0.04
-    kI = 0
-    kD = 0
+    kP = 1e-4
+    kI = 1e-4
+    kD = 1e-4
     kIz = 0
     kFF = 1
     kMaxOutput = 1
@@ -180,8 +179,8 @@ class SparkMaxDriving:
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(1)
-        self.encoder.setVelocityConversionFactor(1)
+        self.encoder.setPositionConversionFactor(0.05077956125529683)
+        self.encoder.setVelocityConversionFactor(0.0008463260209216138)
         
         # PID parameters
         self.controller.setP(self.kP)
@@ -332,10 +331,18 @@ class SwerveDrive:
     def execute(self):
         if self.isMoveChanged():
 
-            self.FrontLeft_SwerveModule.move(self.frontLeft_speed,  self.frontLeft_angle)
-            self.FrontRight_SwerveModule.move(self.frontRight_speed,  self.frontRight_angle)
-            self.RearLeft_SwerveModule.move(self.rearLeft_speed,  self.rearLeft_angle)
-            self.RearRight_SwerveModule.move(self.rearRight_speed,  self.rearRight_angle)
+            self.FrontLeft_SwerveModule.move(self.frontLeft_speed, self.frontLeft_angle)
+            print(f"Front Left: ({self.frontLeft_speed:03f}, {self.frontLeft_angle})")
+
+            self.FrontRight_SwerveModule.move(self.frontRight_speed, self.frontRight_angle)
+            print(f"Front Right: ({self.frontRight_speed}, {self.frontRight_angle})")
+
+            self.RearLeft_SwerveModule.move(self.rearLeft_speed, self.rearLeft_angle)
+            print(f"Rear Left: ({self.rearLeft_speed}, {self.rearLeft_angle})")
+
+            self.RearRight_SwerveModule.move(self.rearRight_speed, self.rearRight_angle)
+            print(f"Rear Right: ({self.rearRight_speed}, {self.rearRight_angle})")
+
 
             self.move_changed = False
             

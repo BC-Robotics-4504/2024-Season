@@ -1,5 +1,6 @@
 
 import rev
+import wpilib
 
 
 
@@ -9,6 +10,7 @@ class Motor:
         self.motorType = motorType
         self.motor = rev.CANSparkMax(self.canID, self.motorType)
         self.isSpinning = False
+        
         pass
     
     

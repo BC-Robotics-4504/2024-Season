@@ -6,7 +6,7 @@ from components.hmi import HMI
 class MyRobot(MagicRobot):
     motor1 : Motor
     motor2 : Motor
-    HMI_controller : HMI
+
 
     def createObjects(self):
         
@@ -21,9 +21,11 @@ class MyRobot(MagicRobot):
        pass
 
     def teleopPeriodic(self):
+        if self.HMI_controller.getLeftTriggerAxis() != 0:
+            self.motor1.spin(speed=self.HMI_controller.getLeftTriggerAxis())
         
-        self.motor1.spin(self.HMI_controller.getAnalog()[0])
-        self.motor2.spin(self.HMI_controller.getAnalog()[1])
+        if self.HMI_controller.getRightTriggerAxis() != 0:
+            self.motor2.spin(speed=self.HMI_controller.getRightTriggerAxis())
         
         
         pass

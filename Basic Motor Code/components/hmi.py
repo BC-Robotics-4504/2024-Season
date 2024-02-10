@@ -9,4 +9,4 @@ class HMI:
         pass
     
     def getAnalog(self):
-        return (self.controller.getX(), self.controller.getY())
+        return (self.controller.getLeftY(), self.controller.getRightY())
