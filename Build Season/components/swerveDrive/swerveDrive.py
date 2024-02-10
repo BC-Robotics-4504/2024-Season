@@ -98,11 +98,11 @@ class SparkMaxTurning:
         # self.encoder.setVelocityConversionFactor(1.0)
         self.SMcontroller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(6.283185307179586)
+        self.encoder.setPositionConversionFactor(2*math.pi)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
         self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
-        self.SMcontroller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
+        self.SMcontroller.setPositionPIDWrappingMaxInput(2*math.pi) #TODO: does this need to be removed?
         
         # PID parameters
         self.SMcontroller.setP(self.kP)
