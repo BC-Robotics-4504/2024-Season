@@ -76,6 +76,7 @@ class SparkMaxTurning:
         self.absolute = absolute_encoder
         self.gear_ratio = gear_ratio
         self.wheel_diameter = wheel_diameter
+        self.zOffset = z_offset
 
         # Encoder parameters 
         # https://docs.reduxrobotics.com/canandcoder/spark-max
@@ -90,16 +91,10 @@ class SparkMaxTurning:
         self.SMcontroller = self.motor.getPIDController()
         self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.encoder.setInverted(inverted)
-        self.encoder.setZeroOffset(z_offset/(2*math.pi))
-        # self.encoder.setAverageDepth(1)
-        # self.encoder.setZeroOffset(0)
-        # self.encoder.setInverted(False)
-        # self.encoder.setPositionConversionFactor(1.0)
-        # self.encoder.setVelocityConversionFactor(1.0)
-        self.SMcontroller.setFeedbackDevice(self.encoder)
-        
         self.encoder.setPositionConversionFactor(2*math.pi)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
+        
+        self.SMcontroller.setFeedbackDevice(self.encoder)
         self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMaxInput(2*math.pi) #TODO: does this need to be removed?
@@ -125,7 +120,7 @@ class SparkMaxTurning:
         self.motor.clearFaults()
     
     def setAbsPosition(self, position):
-        self.SMcontroller.setReference(position, rev.CANSparkMax.ControlType.kPosition)
+        self.SMcontroller.setReference(position-self.zOffset, rev.CANSparkMax.ControlType.kPosition)
         return False
     
     def getAbsPosition(self):
@@ -298,11 +293,8 @@ class SwerveDrive:
 
         A = Lx - math.pi*Rx*self.DriveConfig.chasis_length
         B = Lx + math.pi*Rx*self.DriveConfig.chasis_length
-        C = Ly - math.pi*Rx*self.DriveConfig.chasis_width
-        D = Ly + math.pi*Rx*self.DriveConfig.chasis_width
-
-        self.frontRight_angle = math.atan2(C, B)
-        self.frontRight_speed = math.hypot(C, B)
+        C = -Ly - math.pi*Rx*self.DriveConfig.chasis_width
+        D = -Ly + math.pi*Rx*self.DriveConfig.chasis_width
 
         self.frontLeft_angle = math.atan2(D, B)
         self.frontLeft_speed = math.hypot(D, B)
@@ -312,6 +304,9 @@ class SwerveDrive:
 
         self.rearRight_angle = math.atan2(C, A)
         self.rearRight_speed = math.hypot(C, A)
+
+        self.frontRight_angle = math.atan2(C, B)
+        self.frontRight_speed = math.hypot(C, B)
 
         # speeds = ChassisSpeeds(Ly, Lx, Rx)
 
@@ -332,16 +327,9 @@ class SwerveDrive:
         if self.isMoveChanged():
 
             self.FrontLeft_SwerveModule.move(self.frontLeft_speed, self.frontLeft_angle)
-            print(f"Front Left: ({self.frontLeft_speed:03f}, {self.frontLeft_angle})")
-
             self.FrontRight_SwerveModule.move(self.frontRight_speed, self.frontRight_angle)
-            print(f"Front Right: ({self.frontRight_speed}, {self.frontRight_angle})")
-
             self.RearLeft_SwerveModule.move(self.rearLeft_speed, self.rearLeft_angle)
-            print(f"Rear Left: ({self.rearLeft_speed}, {self.rearLeft_angle})")
-
             self.RearRight_SwerveModule.move(self.rearRight_speed, self.rearRight_angle)
-            print(f"Rear Right: ({self.rearRight_speed}, {self.rearRight_angle})")
 
 
             self.move_changed = False
