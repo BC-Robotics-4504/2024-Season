@@ -10,3 +10,11 @@ class HMI:
     
     def getAnalog(self):
         return (self.controller.getLeftY(), self.controller.getRightY())
+
+    def getLeftTrigger(self):
+        return float(self.controller.getLeftTriggerAxis())
+
+    def getRightTrigger(self):
+        return float(self.controller.getRightTriggerAxis())
+
+    

@@ -6,13 +6,14 @@ from components.hmi import HMI
 class MyRobot(MagicRobot):
     motor1 : Motor
     motor2 : Motor
+    HMI_controller : HMI
 
 
     def createObjects(self):
-        
-        self.HMI_controller = wpilib.XboxController(0)
+
         self.motor1 = Motor(0)
         self.motor2 = Motor(1)
+        self.HMI_controller = HMI(0)
 
     def disabledPeriodic(self):
         pass
@@ -21,11 +22,9 @@ class MyRobot(MagicRobot):
        pass
 
     def teleopPeriodic(self):
-        if self.HMI_controller.getLeftTriggerAxis() != 0:
-            self.motor1.spin(speed=self.HMI_controller.getLeftTriggerAxis())
         
-        if self.HMI_controller.getRightTriggerAxis() != 0:
-            self.motor2.spin(speed=self.HMI_controller.getRightTriggerAxis())
+        self.motor1.spin(self.HMI_controller.getLeftTrigger())
+        self.motor2.spin(self.HMI_controller.getRightTrigger())
         
         
         pass
