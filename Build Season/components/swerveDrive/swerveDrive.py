@@ -1,22 +1,5 @@
-from wpimath.geometry import Translation2d, Rotation2d
-from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds, SwerveModuleState
-from wpimath.estimator import SwerveDrive4PoseEstimator
-
 import math
-from dataclasses import dataclass  # * Why do we need this import statement?
 import rev
-
-# Drivetrain configuration parameters
-@dataclass
-class DriveConfig:
-    """Drivetrain Configuration
-    Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
-    REFERENCE: https://docs.python.org/3/library/dataclasses.html
-    """
-
-    chasis_length: float
-    chasis_width: float
-    speed_clamp: float = 0.25
 
 class SparkMaxTurning:
     """Swerve Drive SparkMax Class
@@ -181,92 +164,48 @@ class SparkMaxDriving:
     def setSpeed(self, speed):
         self.motor.set(speed)
         return None
-        
-class SwerveModule:
-    angleMotor: SparkMaxTurning
-    speedMotor: SparkMaxDriving
-
-    def __init__(self):
-        self.target_angle = 0
-        self.meas_angle = 0
-        self.target_speed = 0
-        self.meas_speed = 0
-
-        self.target_distance = 0
-        self.tolerance = 0.001
-
-        self.auto_lockout = 0
-    
-    def clearFaults(self):
-        self.angleMotor.clearFaults()
-        self.speedMotor.clearFaults()
-        return False
-
-    def getAngle(self):
-        return self.meas_angle
-    
-    def getSpeed(self):
-        return self.meas_speed
-
-    def move(self, speed, angle):
-        self.target_speed = speed
-        self.target_angle = angle
-        return False
-    
-    def execute(self):
-        self.meas_speed = self.speedMotor.getSpeed()
-        self.meas_angle = self.angleMotor.getAbsPosition()
-        self.angleMotor.setAbsPosition(self.target_angle)
-        self.speedMotor.setSpeed(self.target_speed) 
 
 class SwerveDrive:
     DriveConfig: DriveConfig
 
-    FrontLeft_SwerveModule: SwerveModule
-    FrontRight_SwerveModule: SwerveModule
-    RearLeft_SwerveModule: SwerveModule
-    RearRight_SwerveModule: SwerveModule
+    FrontLeftAngleMotor: SparkMaxTurning
+    __frontLeftAngle__: float = 0
 
-    frontLeft_angle = 0
-    frontLeft_speed = 0
-    frontRight_angle = 0
-    frontRight_speed = 0
-    rearLeft_angle = 0
-    rearLeft_speed = 0
-    rearRight_angle = 0
-    rearRight_speed = 0
+    FrontLeftSpeedMotor: SparkMaxDriving 
+    __frontLeftSpeed__: float = 0
+
+    RearLeftAngleMotor: SparkMaxTurning
+    __rearLeftAngle__: float = 0
+
+    RearLeftSpeedMotor: SparkMaxDriving
+    __rearleftSpeed__: float = 0
+
+    RearRightAngleMotor: SparkMaxTurning
+    __rearRightAngle__: float = 0
+
+    RearRightSpeedMotor: SparkMaxDriving
+    __rearRightSpeed__: float = 0
+
+    FrontRightAngleMotor: SparkMaxTurning
+    __frontRightAngle__: float = 0
+
+    FrontRightSpeedMotor: SparkMaxDriving
+    __frontRightSpeed__: float = 0
 
     move_changed: bool = False
-
-    # _kinematics: SwerveDrive4Kinematics
-    # _odemetry: SwerveDrive4PoseEstimator
-
     
-    @property
-    def odemetry(self) -> SwerveDrive4PoseEstimator:
-        return self._odemetry
-    
-    def __init__(self):
-        pass
-    #     self._kinematics = SwerveDrive4Kinematics(self.DriveConfig.frontLeftLocation,
-    #                                              self.DriveConfig.frontRightLocation,
-    #                                              self.DriveConfig.backLeftLocation,
-    #                                              self.DriveConfig.backRightLocation)
-
-        # self._odemetry = SwerveDrive4PoseEstimator(self._kinematics,
-        #                                            Rotation2d(math.radians(self._navx.getAngle())),
-        #                                            module_positions, # type: ignore
-        #                                            Pose2d(0,0,geom.Rotation2d(0)))
-    
-    # @property
     def isMoveChanged(self):
         return self.move_changed
     
     def clearFaults(self):
-        self.RearLeft_SwerveModule.clearFaults()
-        self.RearRight_SwerveModule.clearFaults()
-        self.FrontLeft_SwerveModule.clearFaults()
-        self.FrontRight_SwerveModule.clearFaults()
+        self.FrontLeftAngleMotor.clearFaults()
+        self.FrontLeftSpeedMotor.clearFaults()
+        self.RearLeftAngleMotor.clearFaults()
+        self.RearLeftSpeedMotor.clearFaults()
+        self.RearRightAngleMotor.clearFaults()
+        self.RearRightSpeedMotor.clearFaults()
+        self.FrontRightAngleMotor.clearFaults()
+        self.FrontRightSpeedMotor.clearFaults()
         return False
 
     def move(self, Lx, Ly, Rx): 
@@ -276,36 +215,46 @@ class SwerveDrive:
         C = Ly + math.pi*Rx*self.DriveConfig.chasis_width
         D = Ly - math.pi*Rx*self.DriveConfig.chasis_width
 
-        self.frontLeft_angle = math.atan2(D, B)
-        self.frontLeft_speed = math.hypot(D, B)
+        self.__frontLeftAngle__ = math.atan2(D, B)
+        self.__frontLeftSpeed__ = math.hypot(D, B)
 
-        self.rearLeft_angle = math.atan2(D, A)
-        self.rearLeft_speed = math.hypot(D, A)
+        self.__rearLeftAngle__ = math.atan2(D, A)
+        self.__rearLeftSpeed__ = math.hypot(D, A)
 
-        self.rearRight_angle = math.atan2(C, A)
-        self.rearRight_speed = math.hypot(C, A)
+        self.__rearRightAngle__ = math.atan2(C, A)
+        self.__rearRightSpeed__ = math.hypot(C, A)
 
-        self.frontRight_angle = math.atan2(C, B)
-        self.frontRight_speed = math.hypot(C, B)
+        self.__frontRightAngle__ = math.atan2(C, B)
+        self.__frontRightSpeed__ = math.hypot(C, B)
 
         self.move_changed = True
         
         return False
+    
+    def clampSpeed(self):
+        max_val = max([self.__frontLeftSpeed__, 
+                        self.__frontRightSpeed__, 
+                        self.__rearLeftSpeed__, 
+                        self.__rearRightSpeed__])/self.DriveConfig.speed_clamp
+        if abs(max_val) == 0:
+            max_val = 1
+        return max_val
 
     def execute(self):
         if self.isMoveChanged():
 
-            max_val = max([self.frontLeft_speed, self.frontRight_speed, self.rearLeft_speed, self.rearRight_speed])/self.DriveConfig.speed_clamp
-            if abs(max_val) == 0:
-                max_val = 1
+            max_val = self.clampSpeed()
 
-            self.FrontLeft_SwerveModule.move(self.frontLeft_speed/max_val, self.frontLeft_angle)
-            self.FrontRight_SwerveModule.move(self.frontRight_speed/max_val, self.frontRight_angle)
-            self.RearLeft_SwerveModule.move(self.rearLeft_speed/max_val, self.rearLeft_angle)
-            self.RearRight_SwerveModule.move(self.rearRight_speed/max_val, self.rearRight_angle)
+            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
+            self.RearLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.RearLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+
+            self.RearRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.RearRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+
+            self.FrontRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.FrontRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
             self.move_changed = False
-            
-    
-
