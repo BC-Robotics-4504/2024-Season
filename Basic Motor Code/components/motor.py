@@ -9,9 +9,8 @@ class Motor:
         self.canID = canID
         self.motorType = motorType
         self.motor = rev.CANSparkMax(self.canID, self.motorType)
-        
-        
-        pass
+        self.isSpinning = False
+    
     
     
     def spin(self, speed):

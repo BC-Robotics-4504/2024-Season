@@ -6,7 +6,7 @@ import math
 
 from components.swerveDrive.swerveDrive import SwerveDrive, SparkMaxTurning, SparkMaxDriving
 from components.config import RobotConfig
-from components.hmi.hmi import HMI
+from components.hmi.hmi import HMIModule, XboxHMI 
 from components.launcher.launcher import Launcher, LauncherController
 
 class MyRobot(MagicRobot):
@@ -19,7 +19,8 @@ class MyRobot(MagicRobot):
     SwerveDrive: SwerveDrive
     
     # Controller Component Code
-    HMI: HMI
+    hmi:HMIModule
+
 
     # Launcher Component Code
     Launcher: Launcher
@@ -43,13 +44,14 @@ class MyRobot(MagicRobot):
         self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True, z_offset=0)
         self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
+        
 
         # Launcher Hardware Config
 
         # Climber Hardware Config
 
         # HMI Hardware Config
-        self.HMI_xbox = wpilib.XboxController(0)
+        self.hmi_interface = XboxHMI(0)
         pass
 
     def disabledPeriodic(self):
@@ -63,7 +65,7 @@ class MyRobot(MagicRobot):
 
     def teleopPeriodic(self):
         # 1.) Poll position of Left X/Y and Right X/Y from controller
-        Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
+        Lx, Ly, Rx, _ = self.hmi.getAnalogs()
 
         # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx)

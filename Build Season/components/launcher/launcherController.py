@@ -29,7 +29,7 @@ class LauncherController(StateMachine):
     @state(must_finish=True)
     def spinup_launcher(self):
         if self.launcher.ShootingFlywheelPosition != ShootingFlywheelPositions.READY:
-            self.launcher.
+            self.launcher.spinForward()
         else:
             self.next_state_now('shoot_note')
 
