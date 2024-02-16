@@ -212,8 +212,8 @@ class SwerveDrive:
     def move(self, Lx, Ly, Rx): 
 
         # Check negatives and positives here for Lx, Ly, and Rx
-        A = Lx - math.pi*Rx*self.RobotConfig.chasis_length
-        B = Lx + math.pi*Rx*self.RobotConfig.chasis_length
+        A = -Lx + math.pi*Rx*self.RobotConfig.chasis_length
+        B = -Lx -math.pi*Rx*self.RobotConfig.chasis_length
         C = -Ly - math.pi*Rx*self.RobotConfig.chasis_width
         D = -Ly + math.pi*Rx*self.RobotConfig.chasis_width 
 
