@@ -148,7 +148,7 @@ class SparkMaxDualSpinner:
 
         self.SMcontroller = self.motor.getPIDController()
         self.encoder = self.motor.getEncoder()
-        self.encoder.setInverted(inverted)
+        # self.encoder.setInverted(inverted)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
         
         #self.controller.burnFlash()    

@@ -17,6 +17,10 @@ class HMI:
 
         self.rightX = 0.
         self.rightY = 0.
+        self.A = False
+        self.B = False
+        self.X = False
+        
 
     def updateAnalogSticks(self):
         # Get input from analog sticks 
@@ -25,9 +29,32 @@ class HMI:
         self.rightX = self.xbox.getRightX()
         self.rightY = self.xbox.getRightY()
         return False
+    
+    def updateButtons(self):
+        self.A = self.xbox.getAButton()
+        self.B = self.xbox.getBButton()
+        self.X = self.xbox.getXButton()
+        return None
+    
+    def getA(self):
+        A = self.A
+        self.A = False
+        return A
+    
+    def getB(self):
+        B = self.B
+        self.B = False
+        return B
+
+    def getX(self):
+        X = self.X
+        self.X = False
+        return X
 
     def getAnalogSticks(self):
         return self.leftX, self.leftY, self.rightX, self.rightY
 
     def execute(self):
         self.updateAnalogSticks()
+        self.updateButtons()
+    

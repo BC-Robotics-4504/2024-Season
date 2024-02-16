@@ -1,5 +1,6 @@
 import math
 import rev
+from components.config import RobotConfig
 
 class SparkMaxTurning:
     """Swerve Drive SparkMax Class
@@ -166,30 +167,30 @@ class SparkMaxDriving:
         return None
 
 class SwerveDrive:
-    DriveConfig: DriveConfig
+    RobotConfig: RobotConfig
 
-    FrontLeftAngleMotor: SparkMaxTurning
+    SwerveDrive_FrontLeftAngleMotor: SparkMaxTurning
     __frontLeftAngle__: float = 0
 
-    FrontLeftSpeedMotor: SparkMaxDriving 
+    SwerveDrive_FrontLeftSpeedMotor: SparkMaxDriving 
     __frontLeftSpeed__: float = 0
 
-    RearLeftAngleMotor: SparkMaxTurning
+    SwerveDrive_RearLeftAngleMotor: SparkMaxTurning
     __rearLeftAngle__: float = 0
 
-    RearLeftSpeedMotor: SparkMaxDriving
+    SwerveDrive_RearLeftSpeedMotor: SparkMaxDriving
     __rearleftSpeed__: float = 0
 
-    RearRightAngleMotor: SparkMaxTurning
+    SwerveDrive_RearRightAngleMotor: SparkMaxTurning
     __rearRightAngle__: float = 0
 
-    RearRightSpeedMotor: SparkMaxDriving
+    SwerveDrive_RearRightSpeedMotor: SparkMaxDriving
     __rearRightSpeed__: float = 0
 
-    FrontRightAngleMotor: SparkMaxTurning
+    SwerveDrive_FrontRightAngleMotor: SparkMaxTurning
     __frontRightAngle__: float = 0
 
-    FrontRightSpeedMotor: SparkMaxDriving
+    SwerveDrive_FrontRightSpeedMotor: SparkMaxDriving
     __frontRightSpeed__: float = 0
 
     move_changed: bool = False
@@ -198,22 +199,22 @@ class SwerveDrive:
         return self.move_changed
     
     def clearFaults(self):
-        self.FrontLeftAngleMotor.clearFaults()
-        self.FrontLeftSpeedMotor.clearFaults()
-        self.RearLeftAngleMotor.clearFaults()
-        self.RearLeftSpeedMotor.clearFaults()
-        self.RearRightAngleMotor.clearFaults()
-        self.RearRightSpeedMotor.clearFaults()
-        self.FrontRightAngleMotor.clearFaults()
-        self.FrontRightSpeedMotor.clearFaults()
+        self.SwerveDrive_FrontLeftAngleMotor.clearFaults()
+        self.SwerveDrive_FrontLeftSpeedMotor.clearFaults()
+        self.SwerveDrive_RearLeftAngleMotor.clearFaults()
+        self.SwerveDrive_RearLeftSpeedMotor.clearFaults()
+        self.SwerveDrive_RearRightAngleMotor.clearFaults()
+        self.SwerveDrive_RearRightSpeedMotor.clearFaults()
+        self.SwerveDrive_FrontRightAngleMotor.clearFaults()
+        self.SwerveDrive_FrontRightSpeedMotor.clearFaults()
         return False
 
     def move(self, Lx, Ly, Rx): 
 
-        A = -Lx + math.pi*Rx*self.DriveConfig.chasis_length
-        B = -Lx - math.pi*Rx*self.DriveConfig.chasis_length
-        C = Ly + math.pi*Rx*self.DriveConfig.chasis_width
-        D = Ly - math.pi*Rx*self.DriveConfig.chasis_width
+        A = -Lx + math.pi*Rx*self.RobotConfig.chasis_length
+        B = -Lx - math.pi*Rx*self.RobotConfig.chasis_length
+        C = Ly + math.pi*Rx*self.RobotConfig.chasis_width
+        D = Ly - math.pi*Rx*self.RobotConfig.chasis_width
 
         self.__frontLeftAngle__ = math.atan2(D, B)
         self.__frontLeftSpeed__ = math.hypot(D, B)
@@ -235,7 +236,7 @@ class SwerveDrive:
         max_val = max([self.__frontLeftSpeed__, 
                         self.__frontRightSpeed__, 
                         self.__rearLeftSpeed__, 
-                        self.__rearRightSpeed__])/self.DriveConfig.speed_clamp
+                        self.__rearRightSpeed__])/self.RobotConfig.speed_clamp
         if abs(max_val) == 0:
             max_val = 1
         return max_val
@@ -245,16 +246,16 @@ class SwerveDrive:
 
             max_val = self.clampSpeed()
 
-            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.SwerveDrive_FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.SwerveDrive_FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
-            self.RearLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.RearLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.SwerveDrive_RearLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.SwerveDrive_RearLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
-            self.RearRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.RearRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.SwerveDrive_RearRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.SwerveDrive_RearRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
-            self.FrontRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.FrontRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.SwerveDrive_FrontRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.SwerveDrive_FrontRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
             self.move_changed = False

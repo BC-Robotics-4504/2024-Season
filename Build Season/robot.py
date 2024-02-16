@@ -7,27 +7,41 @@ import math
 from components.swerveDrive.swerveDrive import SwerveDrive, SparkMaxTurning, SparkMaxDriving
 from components.config import RobotConfig
 from components.hmi.hmi import HMI
-from components.launcher.launcher import Launcher, LauncherController
+from components.launcher.launcher import Launcher, SparkMaxDualSpinner, SparkMaxPivot
+
 
 class MyRobot(MagicRobot):
     ''' MagicRobot Framework
     REFERENCE: https://robotpy.readthedocs.io/en/stable/frameworks/magicbot.html
     '''
     
-    # # Swerve Drive Component Code
-    DriveConfig: DriveConfig = RobotConfig(1.0, 1.0, speed_clamp=0.25)
+    RobotConfig = RobotConfig()
+    
+    # Swerve Drive Component Code
     SwerveDrive: SwerveDrive
+    # SwerveDrive_FrontLeftAngleMotor: SparkMaxTurning
+    # SwerveDrive_FrontLeftSpeedMotor: SparkMaxDriving
+    
+    # SwerveDrive_FrontRightAngleMotor: SparkMaxTurning
+    # SwerveDrive_FrontRightSpeedMotor: SparkMaxDriving
+    
+    # SwerveDrive_RearLeftAngleMotor: SparkMaxTurning
+    # SwerveDrive_RearLeftSpeedMotor: SparkMaxDriving
+    
+    # SwerveDrive_RearRightAngleMotor: SparkMaxTurning
+    # SwerveDrive_RearRightSpeedMotor: SparkMaxDriving
     
     # Controller Component Code
     HMI: HMI
 
     # Launcher Component Code
-    Launcher: Launcher
+    # Launcher: Launcher
 
     # Climber Component Code    
 
     def createObjects(self):
         # Swerve Drive Hardware Config
+        
         self.SwerveDrive_FrontLeftAngleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True, z_offset=0)
         self.SwerveDrive_FrontLeftSpeedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
@@ -46,7 +60,12 @@ class MyRobot(MagicRobot):
         
 
         # Launcher Hardware Config
-
+        self.leftFly = SparkMaxDualSpinner(9, inverted=True)
+        self.rightFly = SparkMaxDualSpinner(10)
+        
+        self.leftIntake = SparkMaxDualSpinner(11, inverted= True)
+        self.rightIntake= SparkMaxDualSpinner(12, inverted=True)
+        
         # Climber Hardware Config
 
         # HMI Hardware Config
@@ -63,6 +82,32 @@ class MyRobot(MagicRobot):
         pass
 
     def teleopPeriodic(self):
+        
+        
+        if self.HMI.getA():
+            self.leftFly.setSpeed(.88)
+            self.rightFly.setSpeed(.88)
+        else:
+            self.leftFly.setSpeed(0)
+            self.rightFly.setSpeed(0)  
+                        
+        # if self.HMI.getB():
+        #     self.leftIntake.setSpeed(.25)
+        #     self.rightIntake.setSpeed(.25)
+        # else:
+        #     self.leftIntake.setSpeed(0)
+        #     self.rightIntake.setSpeed(0)       
+        
+        if self.HMI.getX():
+            self.leftIntake.setSpeed(-.35)     
+            self.rightIntake.setSpeed(-.35)
+        elif self.HMI.getB():
+            self.leftIntake.setSpeed(.25)
+            self.rightIntake.setSpeed(.25)
+        else:
+            self.leftIntake.setSpeed(0)
+            self.rightIntake.setSpeed(0)
+
         # 1.) Poll position of Left X/Y and Right X/Y from controller
         Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
 
