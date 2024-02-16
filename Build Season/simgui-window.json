@@ -5,20 +5,20 @@
   "MainWindow": {
     "GLOBAL": {
       "fps": "120",
-      "height": "1001",
+      "height": "960",
       "maximized": "0",
       "style": "0",
       "userScale": "2",
       "width": "1920",
-      "xpos": "-185",
-      "ypos": "73"
+      "xpos": "9",
+      "ypos": "111"
     }
   },
   "Window": {
     "###FMS": {
       "Collapsed": "0",
       "Pos": "5,540",
-      "Size": "336,158"
+      "Size": "202,214"
     },
     "###Joysticks": {
       "Collapsed": "0",
