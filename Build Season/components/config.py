@@ -9,8 +9,8 @@ class RobotConfig:
     """
 
     # Robot Geometry Parameters
-    chasis_length: float = 1.0
-    chasis_width: float = 1.0
+    chasis_length: float = 0.7366 # 29 in to m
+    chasis_width: float = 0.7366 # 29 in to m
 
     # Swerve Drive Parameters
     speed_clamp: float = 0.25
