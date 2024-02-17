@@ -18,10 +18,6 @@ class DriveForward(AutonomousStateMachine):
     @state(first=True, must_finish= True)
     def drive(self):
         self.SwerveDrive.goDistance(3.0, 0, 0)
-        self.next_state('driving')
-
-    @state(must_finish=True)
-    def driving(self):
         print(f"[{time.time()}] ================================= I am moving =======================================")
         if self.SwerveDrive.atDistance():
             self.next_state('stop')
