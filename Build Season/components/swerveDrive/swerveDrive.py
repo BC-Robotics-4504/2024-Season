@@ -212,22 +212,26 @@ class SwerveDrive:
     def move(self, Lx, Ly, Rx): 
 
         # Check negatives and positives here for Lx, Ly, and Rx
-        A = -Lx +  math.pi*Rx*self.RobotConfig.chasis_length
-        B =  Lx  - math.pi*Rx*self.RobotConfig.chasis_length
-        C =  Ly - math.pi*Rx*self.RobotConfig.chasis_width
-        D = -Ly + math.pi*Rx*self.RobotConfig.chasis_width 
+        Vx0 = -Lx
+        Vy0 = Ly
+        w0 = -Rx
+        
+        Vxp = Vx0 + w0*math.pi*self.RobotConfig.chasis_length
+        Vxn = Vx0 - w0*math.pi*self.RobotConfig.chasis_length
+        Vyp = Vy0 + w0*math.pi*self.RobotConfig.chasis_width
+        Vyn = Vy0 - w0*math.pi*self.RobotConfig.chasis_width
 
-        self.__frontLeftAngle__ = math.atan2(C, B)
-        self.__frontLeftSpeed__ = math.hypot(C, B)
+        self.__frontLeftAngle__ = math.atan2(Vyp, Vxp)
+        self.__frontLeftSpeed__ = math.hypot(Vyp, Vxp)
 
-        self.__rearLeftAngle__ = math.atan2(D, B)
-        self.__rearLeftSpeed__ = math.hypot(D, B)
+        self.__rearLeftAngle__ = math.atan2(Vyp, Vxn)
+        self.__rearLeftSpeed__ = math.hypot(Vyp, Vxn)
 
-        self.__rearRightAngle__ = math.atan2(D, A)
-        self.__rearRightSpeed__ = math.hypot(D, A)
+        self.__rearRightAngle__ = math.atan2(Vyn, Vxn)
+        self.__rearRightSpeed__ = math.hypot(Vyn, Vxn)
 
-        self.__frontRightAngle__ = math.atan2(C, A)
-        self.__frontRightSpeed__ = math.hypot(C, A)
+        self.__frontRightAngle__ = math.atan2(Vyn, Vxp)
+        self.__frontRightSpeed__ = math.hypot(Vyn, Vxp)
 
         self.move_changed = True
         
@@ -250,13 +254,13 @@ class SwerveDrive:
             self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
             self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
-            self.RearLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.RearLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__/max_val) 
+            self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
 
-            self.RearRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.RearRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__/max_val) 
+            self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
 
-            self.FrontRightSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
-            self.FrontRightAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__/max_val) 
+            self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
 
             self.move_changed = False
