@@ -16,7 +16,7 @@ class DriveForward(AutonomousStateMachine):
     # Injected from the definition in robot.py
 
     @state(first=True, must_finish= True)
-    def drive_backward(self):
+    def drive(self):
         self.SwerveDrive.goDistance(3.0, 0, 0)
         self.next_state('driving')
 
