@@ -212,22 +212,22 @@ class SwerveDrive:
     def move(self, Lx, Ly, Rx): 
 
         # Check negatives and positives here for Lx, Ly, and Rx
-        A = -Lx + math.pi*Rx*self.RobotConfig.chasis_length
-        B = -Lx -math.pi*Rx*self.RobotConfig.chasis_length
-        C = -Ly - math.pi*Rx*self.RobotConfig.chasis_width
+        A = -Lx +  math.pi*Rx*self.RobotConfig.chasis_length
+        B =  Lx  - math.pi*Rx*self.RobotConfig.chasis_length
+        C =  Ly - math.pi*Rx*self.RobotConfig.chasis_width
         D = -Ly + math.pi*Rx*self.RobotConfig.chasis_width 
 
-        self.__frontLeftAngle__ = math.atan2(D, B)
-        self.__frontLeftSpeed__ = math.hypot(D, B)
+        self.__frontLeftAngle__ = math.atan2(C, B)
+        self.__frontLeftSpeed__ = math.hypot(C, B)
 
-        self.__rearLeftAngle__ = math.atan2(D, A)
-        self.__rearLeftSpeed__ = math.hypot(D, A)
+        self.__rearLeftAngle__ = math.atan2(D, B)
+        self.__rearLeftSpeed__ = math.hypot(D, B)
 
-        self.__rearRightAngle__ = math.atan2(C, A)
-        self.__rearRightSpeed__ = math.hypot(C, A)
+        self.__rearRightAngle__ = math.atan2(D, A)
+        self.__rearRightSpeed__ = math.hypot(D, A)
 
-        self.__frontRightAngle__ = math.atan2(C, B)
-        self.__frontRightSpeed__ = math.hypot(C, B)
+        self.__frontRightAngle__ = math.atan2(C, A)
+        self.__frontRightSpeed__ = math.hypot(C, A)
 
         self.move_changed = True
         
