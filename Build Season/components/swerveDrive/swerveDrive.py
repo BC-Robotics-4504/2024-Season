@@ -111,6 +111,9 @@ class SparkMaxDriving:
     maxAcc = 1000
     minVel = 0
     allowedErr = 0
+    
+    targetDistance = 0
+    tolerance = 0.01
 
     def __init__(
         self,
@@ -138,7 +141,7 @@ class SparkMaxDriving:
         self.controller = self.motor.getPIDController()
         self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(0.05077956125529683)
+        self.encoder.setPositionConversionFactor(0.1016)
         self.encoder.setVelocityConversionFactor(0.0008463260209216138)
         
         # PID parameters
@@ -147,7 +150,7 @@ class SparkMaxDriving:
         self.controller.setD(self.kD)
         self.controller.setFF(self.kFF)
         self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
-        
+        self.distance_to_rotations = gear_ratio / (math.pi * self.wheel_diameter)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
         self.motor.setSmartCurrentLimit(40)
         
@@ -165,38 +168,51 @@ class SparkMaxDriving:
     def setSpeed(self, speed):
         self.motor.set(speed)
         return None
+    
+    def atDistance(self):
+        currentDistance = self.encoder.getPosition()
+        if abs(currentDistance-self.targetDistance) <= self.tolerance:
+            return True
+        return False
+    
+    def setDistance(self, targetDistance):
+        self.targetDistance = targetDistance
+        self.encoder.setPosition(0)
+        self.controller.setReference(targetDistance, rev.CANSparkMax.ControlType.kPosition)
+        return False
 
 class SwerveDrive:
     RobotConfig: RobotConfig
 
     FrontLeftAngleMotor: SparkMaxTurning
     __frontLeftAngle__: float = 0
-
+    
     FrontLeftSpeedMotor: SparkMaxDriving 
     __frontLeftSpeed__: float = 0
-
+    __frontLeftDistance__: float = 0
+    
     RearLeftAngleMotor: SparkMaxTurning
     __rearLeftAngle__: float = 0
-
+    
     RearLeftSpeedMotor: SparkMaxDriving
     __rearleftSpeed__: float = 0
-
+    __rearLeftDistance__: float = 0
+    
     RearRightAngleMotor: SparkMaxTurning
     __rearRightAngle__: float = 0
 
     RearRightSpeedMotor: SparkMaxDriving
     __rearRightSpeed__: float = 0
-
+    __rearRightDistance__: float = 0 
+    
     FrontRightAngleMotor: SparkMaxTurning
     __frontRightAngle__: float = 0
 
     FrontRightSpeedMotor: SparkMaxDriving
     __frontRightSpeed__: float = 0
-
+    __frontRightDistance__: float = 0
     move_changed: bool = False
-    
-    def isMoveChanged(self):
-        return self.move_changed
+    distance_changed: bool = False
     
     def clearFaults(self):
         self.FrontLeftAngleMotor.clearFaults()
@@ -237,6 +253,27 @@ class SwerveDrive:
         
         return False
     
+    def goDistance(self, target_distance, target_angle, target_rotations):
+        
+        Xp = target_distance * math.cos(target_angle) + math.pi * self.RobotConfig.chasis_length * target_rotations
+        Xn = target_distance * math.cos(target_angle) - math.pi * self.RobotConfig.chasis_length * target_rotations
+        Yp = target_distance * math.sin(target_angle) + math.pi * self.RobotConfig.chasis_width * target_rotations
+        Yn = target_distance * math.sin(target_angle) - math.pi * self.RobotConfig.chasis_width * target_rotations
+
+        self.__frontLeftAngle__ = math.atan2(Yp, Xp)
+        self.__frontLeftDistance__ = math.hypot(Yp, Xp)
+
+        self.__rearLeftAngle__ = math.atan2(Yp, Xn)
+        self.__rearLeftDistance__ = math.hypot(Yp, Xn)
+
+        self.__rearRightAngle__ = math.atan2(Yn, Xn)
+        self.__rearRightDistance__ = math.hypot(Yn, Xn)
+
+        self.__frontRightAngle__ = math.atan2(Yn, Xp)
+        self.__frontRightDistance__ = math.hypot(Yn, Xp)
+        
+        self.distance_changed = True
+        
     def clampSpeed(self):
         max_val = max([self.__frontLeftSpeed__, 
                         self.__frontRightSpeed__, 
@@ -246,8 +283,19 @@ class SwerveDrive:
             max_val = 1
         return max_val
 
+    def atDistance(self):
+        FL = self.FrontLeftSpeedMotor.atDistance()
+        FR = self.FrontRightSpeedMotor.atDistance()
+        RL = self.RearLeftSpeedMotor.atDistance()
+        RR = self.RearRightSpeedMotor.atDistance()
+        
+        if FL and FR and RL and RR:
+            return True
+        
+        return False
+        
     def execute(self):
-        if self.isMoveChanged():
+        if self.move_changed:
 
             max_val = self.clampSpeed()
 
@@ -264,3 +312,19 @@ class SwerveDrive:
             self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
 
             self.move_changed = False
+            
+        if self.distance_changed:
+
+            self.FrontLeftSpeedMotor.setDistance(self.__frontLeftDistance__) 
+            self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+
+            self.RearLeftSpeedMotor.setDistance(self.__rearLeftDistance__) 
+            self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
+
+            self.RearRightSpeedMotor.setDistance(self.__rearRightDistance__) 
+            self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
+
+            self.FrontRightSpeedMotor.setDistance(self.__frontRightDistance__) 
+            self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
+
+            self.distance_changed = False

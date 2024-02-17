@@ -1,6 +1,7 @@
 from magicbot import AutonomousStateMachine, timed_state, state
 import wpilib
-from components.swerveDrive import swerveDrive
+from components.swerveDrive.swerveDrive import SwerveDrive, SparkMaxDriving
+import time
 
 # this is one of your components
 
@@ -8,14 +9,26 @@ from components.swerveDrive import swerveDrive
 
 class DriveForward(AutonomousStateMachine):
     
-    swerve : swerveDrive.SwerveDrive
+    SwerveDrive : SwerveDrive
     MODE_NAME = "Drive Backwards"
     DEFAULT = True
 
     # Injected from the definition in robot.py
-   
 
-    @timed_state(duration=3, first=True)
+    @state(first=True, must_finish= True)
     def drive_backward(self):
-        self.swerve.move(0, 0.25, 0)
+        self.SwerveDrive.goDistance(3.0, 0, 0)
+        self.next_state('driving')
+
+    @state(must_finish=True)
+    def driving(self):
+        print(f"[{time.time()}] ================================= I am moving =======================================")
+        if self.SwerveDrive.atDistance():
+            self.next_state('stop')
+        
+    @state(must_finish=True)
+    def stop(self):
+        print(f"[{time.time()}] ================================= Finished. =======================================")
+
+        
         
