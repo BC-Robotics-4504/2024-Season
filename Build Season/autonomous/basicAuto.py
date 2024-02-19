@@ -10,12 +10,12 @@ import time
 class DriveForward(AutonomousStateMachine):
     
     SwerveDrive : SwerveDrive
-    MODE_NAME = "Drive Backwards"
+    MODE_NAME = "Basic Autonomous"
     DEFAULT = True
 
     # Injected from the definition in robot.py
 
-    @state(first=True, must_finish= True)
+    @state(first=True, must_finish=True)
     def drive(self):
         self.SwerveDrive.goDistance(3.0, 0, 0)
         print(f"[{time.time()}] ================================= I am moving =======================================")

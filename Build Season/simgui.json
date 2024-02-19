@@ -5,7 +5,33 @@
       "/SmartDashboard/Autonomous Mode": "String Chooser"
     }
   },
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
+    "Retained Values": {
+      "open": false
+    }
+  },
   "NetworkTables Info": {
     "visible": true
+  },
+  "Plot": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.05999999865889549,
+            0.05999999865889549,
+            0.05999999865889549,
+            0.9399999976158142
+          ],
+          "height": 338
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
   }
 }

@@ -19,7 +19,7 @@ class ClimberController(StateMachine):
     def lowerClimber(self):
         self.__actionaLower__ = True
 
-    def run(self):
+    def runClimber(self):
         self.engage()
 
     @state(first=True)

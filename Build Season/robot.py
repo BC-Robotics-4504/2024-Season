@@ -29,11 +29,11 @@ class MyRobot(MagicRobot):
 
     # Launcher Component Code
     Launcher: Launcher
-    # LauncherController: LauncherController
+    LauncherController: LauncherController
 
     # Climber Component Code    
     Climber: Climber
-    # ClimberController: ClimberController
+    ClimberController: ClimberController
 
     # Vision Componenet Code
     Vision: Vision
@@ -85,26 +85,26 @@ class MyRobot(MagicRobot):
 
         self.SwerveDrive.move(Lx, Ly, Rx)
 
-        # # 2.) Actuate Launcher
-        # if self.HMI.getA():
-        #     self.LauncherController.lowerIntake()
+        # 2.) Actuate Launcher
+        if self.HMI.getA():
+            self.LauncherController.lowerIntake()
 
-        # elif self.HMI.getB():
-        #     self.LauncherController.raiseIntake()
+        elif self.HMI.getB():
+            self.LauncherController.raiseIntake()
 
-        # elif self.HMI.getLT() > 0.35:
-        #     self.LauncherController.shootLauncher()
+        elif self.HMI.getLT() > 0.35:
+            self.LauncherController.shootLauncher()
 
-        # self.LauncherController.run()
+        self.LauncherController.runLauncher()
 
-        # #3.) Actuate Climber
-        # if self.HMI.getRB():
-        #     self.ClimberController.raiseClimber()
+        #3.) Actuate Climber
+        if self.HMI.getRB():
+            self.ClimberController.raiseClimber()
 
-        # elif self.HMI.getLB():
-        #     self.ClimberController.lowerClimber()
+        elif self.HMI.getLB():
+            self.ClimberController.lowerClimber()
 
-        # self.ClimberController.run()
+        self.ClimberController.runClimber()
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)

@@ -10,7 +10,7 @@ class LauncherController(StateMachine):
 
     move_changed: bool = False
 
-    __actionlowerIntake__ = False
+    __actionLowerIntake__ = False
     __actionRaiseIntake__ = False
     __actionShootLauncher__ = False
 
@@ -26,7 +26,7 @@ class LauncherController(StateMachine):
     def shootLauncher(self):
         self.__actionShootLauncher__ = True
 
-    def run(self):
+    def runLauncher(self):
         self.engage()
 
     '''
@@ -44,8 +44,6 @@ class LauncherController(StateMachine):
         elif self.__actionShootLauncher__:
             self.next_state('__spinupLauncher__')
             
-        pass
-
     @state(must_finish=True)
     def __raiseIntake__(self):
         if self.Launcher.IntakeLevelPosition != IntakeLevelPositions.RAISED:
@@ -67,8 +65,8 @@ class LauncherController(StateMachine):
         else:
             self.next_state('__shootLauncher__')
 
-    # @state(timed_state=1.0, must_finish=True)
-    @timed_state(duration=1.0, must_finish=True)
+    # @timed_state(duration=1, must_finish=True) #FIXME: Why doesn't @timed_state() work here?
+    @state(must_finish=True)
     def __feedLauncher__(self):
         if self.Launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.FORWARD:
             self.Launcher.spinIntakeForward()

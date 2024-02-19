@@ -14,12 +14,14 @@ class HMI:
         
         self.leftX = 0.
         self.leftY = 0.
-
         self.rightX = 0.
         self.rightY = 0.
+        
         self.A = False
         self.B = False
-        self.X = False
+        self.RB = False
+        self.LB = False
+        self.LT = 0.
         
 
     def updateAnalogSticks(self):
