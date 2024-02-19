@@ -6,7 +6,7 @@ class ClimberController(StateMachine):
     MODE_NAME = "Climber Controller"
     DEFAULT = False
 
-    climber: Climber
+    Climber: Climber
 
     move_changed: bool = False
 
@@ -32,14 +32,14 @@ class ClimberController(StateMachine):
 
     @state(must_finish=True)
     def __raiseIntake__(self):
-        if self.climber.ClimberPosition != ClimberPositions.RAISED:
-            self.climber.raiseClimber()
+        if self.Climber.ClimberPosition != ClimberPositions.RAISED:
+            self.Climber.raiseClimber()
         else:
             self.next_state('__wait__')
 
     @state(must_finish=True)
     def __lowerIntake__(self):
-        if self.climber.ClimberPosition != ClimberPositions.LOWERED:
-            self.climber.lowerClimber()
+        if self.Climber.ClimberPosition != ClimberPositions.LOWERED:
+            self.Climber.lowerClimber()
         else:
             self.next_state('__wait__')

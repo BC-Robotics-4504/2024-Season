@@ -47,6 +47,10 @@ class SparkMaxPivot:
         self.wheel_diameter = wheel_diameter
         self.zOffset = z_offset
 
+        # Encoder parameters 
+        # https://docs.reduxrobotics.com/canandcoder/spark-max
+        # https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
+
         self.motor = rev.CANSparkMax(self.canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
         self.motor.setInverted(not inverted)
@@ -54,13 +58,13 @@ class SparkMaxPivot:
         self.motor.setSmartCurrentLimit(25)
 
         self.SMcontroller = self.motor.getPIDController()
-        self.encoder = self.motor.getEncoder()
+        self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.encoder.setInverted(inverted)
         self.encoder.setPositionConversionFactor(2*math.pi)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
         
         self.SMcontroller.setFeedbackDevice(self.encoder)
-        self.SMcontroller.setPositionPIDWrappingEnabled(False) #TODO: does this need to be removed?
+        self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMaxInput(2*math.pi) #TODO: does this need to be removed?
         
@@ -71,15 +75,6 @@ class SparkMaxPivot:
         self.SMcontroller.setIZone(self.kIz)
         self.SMcontroller.setFF(self.kFF)
         self.SMcontroller.setOutputRange(self.kMinOutput, self.kMaxOutput)
-
-        # Smart Motion Parameters
-        self.SMcontroller.setSmartMotionMaxVelocity(self.maxVel, self.smartMotionSlot)
-        self.SMcontroller.setSmartMotionMinOutputVelocity(self.minVel, self.smartMotionSlot)
-        self.SMcontroller.setSmartMotionMaxAccel(self.maxAcc, self.smartMotionSlot)
-        self.SMcontroller.setSmartMotionAllowedClosedLoopError(self.allowedErr, self.smartMotionSlot)
-        
-        #self.controller.burnFlash()    
-        self.clearFaults()
     
     def clearFaults(self):
         self.motor.clearFaults()

@@ -22,5 +22,11 @@ class RobotConfig:
     intake_lowered_position: float = 0.15
     intake_raised_position: float = 0.0
 
-    # Climber Parameter
+    # Climber Parameters
     climbing_max_distance: float = 0.5
+
+    # Vision Parameters
+    camera_angle: float = 0.0
+    camera_mount_height: float = 0.0
+    apriltag_target_height: float = 0.0
+    
