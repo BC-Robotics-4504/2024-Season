@@ -232,10 +232,10 @@ class SwerveDrive:
         Vy0 = Ly
         w0 = -Rx
         
-        Vxp = Vx0 + w0*math.pi*self.RobotConfig.chasis_length
-        Vxn = Vx0 - w0*math.pi*self.RobotConfig.chasis_length
-        Vyp = Vy0 + w0*math.pi*self.RobotConfig.chasis_width
-        Vyn = Vy0 - w0*math.pi*self.RobotConfig.chasis_width
+        Vxp = Vx0 + w0*math.pi*self.RobotConfig.chassis_length
+        Vxn = Vx0 - w0*math.pi*self.RobotConfig.chassis_length
+        Vyp = Vy0 + w0*math.pi*self.RobotConfig.chassis_width
+        Vyn = Vy0 - w0*math.pi*self.RobotConfig.chassis_width
 
         self.__frontLeftAngle__ = math.atan2(Vyp, Vxp)
         self.__frontLeftSpeed__ = math.hypot(Vyp, Vxp)
@@ -255,10 +255,10 @@ class SwerveDrive:
     
     def goDistance(self, target_distance, target_angle, target_rotations):
         
-        Xp = target_distance * math.cos(target_angle) + math.pi * self.RobotConfig.chasis_length * target_rotations
-        Xn = target_distance * math.cos(target_angle) - math.pi * self.RobotConfig.chasis_length * target_rotations
-        Yp = target_distance * math.sin(target_angle) + math.pi * self.RobotConfig.chasis_width * target_rotations
-        Yn = target_distance * math.sin(target_angle) - math.pi * self.RobotConfig.chasis_width * target_rotations
+        Xp = target_distance * math.cos(target_angle) + math.pi * self.RobotConfig.chassis_length * target_rotations
+        Xn = target_distance * math.cos(target_angle) - math.pi * self.RobotConfig.chassis_length * target_rotations
+        Yp = target_distance * math.sin(target_angle) + math.pi * self.RobotConfig.chassis_width * target_rotations
+        Yn = target_distance * math.sin(target_angle) - math.pi * self.RobotConfig.chassis_width * target_rotations
 
         self.__frontLeftAngle__ = math.atan2(Yp, Xp)
         self.__frontLeftDistance__ = math.hypot(Yp, Xp)

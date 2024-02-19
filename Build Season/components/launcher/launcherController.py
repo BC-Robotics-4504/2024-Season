@@ -10,34 +10,88 @@ class LauncherController(StateMachine):
 
     move_changed: bool = False
 
+    __actionlowerIntake__ = False
+    __actionRaiseIntake__ = False
+    __actionShootLauncher__ = False
+
     position = 0
     isEngaged = False
 
-    '''
-    STATE MACHINE DEFINITIONS
-    '''
-    def actuate(self):
+    def lowerIntake(self):
+        self.__actionLowerIntake__ = True
+
+    def raiseIntake(self):
+        self.__actionRaiseIntake__ = True
+
+    def shootLauncher(self):
+        self.__actionShootLauncher__ = True
+
+    def run(self):
         self.engage()
 
-    @state(first= True, must_finish= True)
-    def raise_intake(self):
+    '''
+    STATE MACHINE DEFINITIONS ===================================
+    '''
+
+    @state(first=True)
+    def __wait__(self):
+        if self.__actionLowerIntake__:
+            self.next_state('__lowerIntake__')
+
+        elif self.__actionRaiseIntake__:
+            self.next_state('__raiseIntake__')
+
+        elif self.__actionShootLauncher__:
+            self.next_state('__spinupLauncher__')
+            
+        pass
+
+    @state(must_finish=True)
+    def __raiseIntake__(self):
         if self.launcher.IntakeLevelPosition != IntakeLevelPositions.RAISED:
             self.launcher.retractIntake()
-        self.isEngaged = True
-        self.next_state_now('spinup_launcher')
+        else:
+            self.next_state('__spindownIntake__')
+
+    @state(must_finish=True)
+    def __spindownIntake__(self):
+        if self.launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.STOPPED:
+            self.launcher.spindownIntake()
+        else:
+            self.next_state('__wait__')
             
     @state(must_finish=True)
-    def spinup_launcher(self):
+    def __spinupLauncher__(self):
         if self.launcher.ShootingFlywheelPosition != ShootingFlywheelPositions.READY:
-            self.launcher.spinForward()
+            self.launcher.spinIntakeForward()
         else:
-            self.next_state_now('shoot_note')
+            self.next_state('__shootLauncher__')
 
-    @state()
-    def shoot_note(self):
-        self.next_state_now('dormant')
-        self.isEngaged = False
+    @state(timed_state=1.0, must_finish=True)
+    def __feedLauncher__(self):
+        if self.launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.FORWARD:
+            self.launcher.spinIntakeForward()
+        else:
+            self.next_state('__spindownLauncher__')
 
-    @state()    #Waits For Activation
-    def dormant(self):
-        pass
+    @state(must_finish=True)
+    def __spindownLauncher__(self):
+        if self.launcher.ShootingFlywheelPosition != ShootingFlywheelPositions.STOPPED:
+            self.launcher.spindownShooter()
+        else:
+            self.next_state('__wait__')
+
+    @state(must_finish=True)
+    def __lowerIntake__(self):
+        if self.launcher.IntakeLevelPosition != IntakeLevelPositions.LOWERED:
+            self.launcher.lowerIntake()
+        # self.isEngaged = True
+        else:
+            self.next_state('__spinupIntake__')
+
+    @state(must_finish=True)
+    def __spinupIntake__(self):
+        if self.launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.REVERSE:
+            self.launcher.spinIntakeReverse()
+        else:
+            self.next_state('__wait__')

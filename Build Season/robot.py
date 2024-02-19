@@ -8,6 +8,10 @@ from components.swerveDrive.swerveDrive import SwerveDrive, SparkMaxTurning, Spa
 from components.config import RobotConfig
 from components.hmi.hmi import HMI
 from components.launcher.launcher import Launcher, SparkMaxDualSpinner, SparkMaxPivot
+from components.climber.climber import Climber, SparkMaxClimb
+
+from components.launcher.launcherController import LauncherController
+from components.climber.climberController import ClimberController
 
 
 class MyRobot(MagicRobot):
@@ -19,25 +23,17 @@ class MyRobot(MagicRobot):
     
     # Swerve Drive Component Code
     SwerveDrive: SwerveDrive
-    # SwerveDrive_FrontLeftAngleMotor: SparkMaxTurning
-    # SwerveDrive_FrontLeftSpeedMotor: SparkMaxDriving
-    
-    # SwerveDrive_FrontRightAngleMotor: SparkMaxTurning
-    # SwerveDrive_FrontRightSpeedMotor: SparkMaxDriving
-    
-    # SwerveDrive_RearLeftAngleMotor: SparkMaxTurning
-    # SwerveDrive_RearLeftSpeedMotor: SparkMaxDriving
-    
-    # SwerveDrive_RearRightAngleMotor: SparkMaxTurning
-    # SwerveDrive_RearRightSpeedMotor: SparkMaxDriving
     
     # Controller Component Code
     HMI: HMI
 
     # Launcher Component Code
-    # Launcher: Launcher
+    Launcher: Launcher
+    LauncherController: LauncherController
 
     # Climber Component Code    
+    Climber: Climber
+    ClimberController: ClimberController
 
     def createObjects(self):
         # Swerve Drive Hardware Config
@@ -57,16 +53,19 @@ class MyRobot(MagicRobot):
         self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1,
                                                           absolute_encoder=True, z_offset=0)
         self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
-        
 
         # Launcher Hardware Config
-        self.leftFly = SparkMaxDualSpinner(9, inverted=True)
-        self.rightFly = SparkMaxDualSpinner(10)
-        
-        self.leftIntake = SparkMaxDualSpinner(11, inverted= True)
-        self.rightIntake= SparkMaxDualSpinner(12, inverted=True)
+        self.Launcher_LauncherSpinnerL = SparkMaxDualSpinner(9, inverted=True)
+        self.Launcher_LauncherSpinnerR = SparkMaxDualSpinner(10)
+
+        self.Launcher_IntakeSpinnerL = SparkMaxDualSpinner(11, inverted=True)
+        self.Launcher_IntakeSpinnerR = SparkMaxDualSpinner(12, inverted=True)
+
+        # self.Launcher_IntakePivot = SparkMaxPivot(?) #FIXME!!!
         
         # Climber Hardware Config
+        # self.Climber_ClimberMotorL = SparkMaxClimb(?) #FIXME!!!
+        # self.Climber_ClimberMotorR = SparkMaxClimb(?, inverted=True) #FIXME!!!
 
         # HMI Hardware Config
         self.HMI_xbox = wpilib.XboxController(0)
@@ -82,38 +81,32 @@ class MyRobot(MagicRobot):
         pass
 
     def teleopPeriodic(self):
-        
-        
-        if self.HMI.getA():
-            self.leftFly.setSpeed(.88)
-            self.rightFly.setSpeed(.88)
-        else:
-            self.leftFly.setSpeed(0)
-            self.rightFly.setSpeed(0)  
-                        
-        # if self.HMI.getB():
-        #     self.leftIntake.setSpeed(.25)
-        #     self.rightIntake.setSpeed(.25)
-        # else:
-        #     self.leftIntake.setSpeed(0)
-        #     self.rightIntake.setSpeed(0)       
-        
-        if self.HMI.getX():
-            self.leftIntake.setSpeed(-.35)     
-            self.rightIntake.setSpeed(-.35)
-        elif self.HMI.getB():
-            self.leftIntake.setSpeed(.25)
-            self.rightIntake.setSpeed(.25)
-        else:
-            self.leftIntake.setSpeed(0)
-            self.rightIntake.setSpeed(0)
 
-        # 1.) Poll position of Left X/Y and Right X/Y from controller
+        # 1.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
 
-        # 2.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
         self.SwerveDrive.move(Lx, Ly, Rx)
 
+        # 2.) Actuate Launcher
+        if self.HMI.getA():
+            self.LauncherController.lowerIntake()
+
+        elif self.HMI.getB():
+            self.LauncherController.raiseIntake()
+
+        elif self.HMI.getLT() > 0.35:
+            self.LauncherController.shootLauncher()
+
+        self.LauncherController.run()
+
+        #3.) Actuate Climber
+        if self.HMI.getRB():
+            self.ClimberController.raiseClimber()
+
+        elif self.HMI.getLB():
+            self.ClimberController.lowerClimber()
+
+        self.ClimberController.run()
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)

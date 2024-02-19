@@ -9,8 +9,8 @@ class RobotConfig:
     """
 
     # Robot Geometry Parameters
-    chasis_length: float = 0.7366 # 29 in to m
-    chasis_width: float = 0.7366 # 29 in to m
+    chassis_length: float = 0.7366 # 29 in to m
+    chassis_width: float = 0.7366 # 29 in to m
 
     # Swerve Drive Parameters
     speed_clamp: float = 0.25
@@ -21,3 +21,6 @@ class RobotConfig:
     intake_reverse_rolling_speed: float = -0.1
     intake_lowered_position: float = 0.15
     intake_raised_position: float = 0.0
+
+    # Climber Parameter
+    climbing_max_distance: float = 0.5
