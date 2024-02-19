@@ -1,18 +1,17 @@
 import wpilib
 from magicbot import MagicRobot
-import math
-import rev
-import math
+
+from components.config import RobotConfig
+
+from components.hmi.hmi import HMI
 
 from components.swerveDrive.swerveDrive import SwerveDrive, SparkMaxTurning, SparkMaxDriving
-from components.config import RobotConfig
-from components.hmi.hmi import HMI
+
 from components.launcher.launcher import Launcher, SparkMaxDualSpinner, SparkMaxPivot
-from components.climber.climber import Climber, SparkMaxClimb
-
 from components.launcher.launcherController import LauncherController
-from components.climber.climberController import ClimberController
 
+from components.climber.climber import Climber, SparkMaxClimb
+from components.climber.climberController import ClimberController
 
 class MyRobot(MagicRobot):
     ''' MagicRobot Framework
