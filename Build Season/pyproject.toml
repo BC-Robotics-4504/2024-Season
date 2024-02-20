@@ -23,6 +23,7 @@ robotpy_extras = [
       "rev"
     # "romi"
     # "sim"
+      "pynetworktables"
 ]
 
 # Other pip packages to install
