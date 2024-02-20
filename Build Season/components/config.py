@@ -17,6 +17,7 @@ class RobotConfig:
 
     # Launcher Parameters
     shooting_flywheel_speed: float = 0.25
+    shooting_max_distance: float = 10.0
     intake_forward_rolling_speed: float = 0.1
     intake_reverse_rolling_speed: float = -0.1
     intake_lowered_position: float = 0.15
@@ -29,4 +30,5 @@ class RobotConfig:
     camera_angle: float = 0.0
     camera_mount_height: float = 0.0
     apriltag_target_height: float = 0.0
+    
     

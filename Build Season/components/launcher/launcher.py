@@ -202,6 +202,7 @@ class Launcher:
 
     ShootingFlywheelPosition: ShootingFlywheelPositions
     __shootingFLywheelChanged__: bool = False
+    __shootingFLywheelSpeed__: float = 0.0
 
     def __init__(self):
         self.IntakeLevelPosition = IntakeLevelPositions.RAISED
@@ -240,9 +241,10 @@ class Launcher:
             self.__intakeRollerChanged__ = True
         return None
     
-    def spinupShooter(self):
+    def spinupShooter(self, speed):
         if self.ShootingFlywheelPosition != ShootingFlywheelPositions.RAMPING:
             self.ShootingFlywheelPosition = ShootingFlywheelPositions.RAMPING
+            self.__shootingFLywheelSpeed__ = speed
             self.__shootingFLywheelChanged__ = True
 
     def spindownShooter(self):
@@ -279,24 +281,24 @@ class Launcher:
     def __updateIntakeLevel__(self):
         # Do intake level adjust work
         if self.__intakeLevelChanged__:
-            if self.IntakePosition == IntakeLevelPositions.LOWERING:
+            if self.IntakeLevelPosition == IntakeLevelPositions.LOWERING:
                 self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
                 atPosition = self.IntakePivot.atPosition()
                 if atPosition:
-                    self.IntakePosition = IntakeLevelPositions.LOWERED
+                    self.IntakeLevelPosition = IntakeLevelPositions.LOWERED
 
-            if self.IntakePosition == IntakeLevelPositions.RAISING:
+            if self.IntakeLevelPosition == IntakeLevelPositions.RAISING:
                 self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)
                 atPosition = self.IntakePivot.atPosition()
                 if atPosition:
-                    self.IntakePosition = IntakeLevelPositions.RAISED   
+                    self.IntakeLevelPosition = IntakeLevelPositions.RAISED   
         return None
     
     def __updateFlywheels__(self):
         if self.__shootingFLywheelChanged__:
             if self.ShootingFlywheelPosition == ShootingFlywheelPositions.RAMPING:
-                self.LauncherSpinnerL.setSpeed(self.RobotConfig.shooting_flywheel_speed)
-                self.LauncherSpinnerR.setSpeed(self.RobotConfig.shooting_flywheel_speed)
+                self.LauncherSpinnerL.setSpeed(self.__shootingFLywheelSpeed__)
+                self.LauncherSpinnerR.setSpeed(self.__shootingFLywheelSpeed__)
                 atSpeedL = self.LauncherSpinnerL.atSpeed()
                 atSpeedR = self.LauncherSpinnerR.atSpeed()
                 if atSpeedL and atSpeedR:

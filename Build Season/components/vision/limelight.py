@@ -82,7 +82,7 @@ class Limelight:
 
             light: Default state of the light to set when camera is connected to the code
         """
-        if nt:
+        if nt is not None:
             self.__nt = nt
         else:
             self.__nt = NetworkTables.getTable("limelight")

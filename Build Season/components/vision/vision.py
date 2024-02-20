@@ -5,24 +5,37 @@ from components.config import RobotConfig
 class Vision:
     RobotConfig: RobotConfig
 
-    limelight: Limelight
+    LimeLight: Limelight
 
     target_distance = 0.0
     horizontal_offset = 0.0
     vertical_offset = 0.0
-
-    def getPoise(self):
-        return self.target_distance, self.horizontal_offset, self.vertical_offset
+    valid_target = False
+    
+    def getTargetDistance(self):
+        if self.valid_target:
+            return self.target_distance
+        else:
+            return None
+        
+    def getTargetHeight(self):
+        if self.valid_target:
+            return self.vertical_offset
+        
+    def getTargetAngle(self):
+        if self.valid_target:
+            return self.horizontal_offset
+        else:
+            return None
 
     def execute(self):
-
-        # Check if targets exist in frame
-        if self.limelight.valid_targets:
+        self.valid_target = self.LimeLight.valid_targets
+        if self.valid_target:
             self.target_distance = calc_distance(self.RobotConfig.camera_angle,
                                                  self.RobotConfig.camera_mount_height,
                                                  self.RobotConfig.apriltag_target_height,
-                                                 self.limelight)
+                                                 self.LimeLight)
             
-            self.horizontal_offset = self.limelight.horizontal_offset()
-            self.vertical_offset = self.limelight.vertical_offset()
+            self.horizontal_offset = self.LimeLight.horizontal_offset
+            self.vertical_offset = self.LimeLight.vertical_offset
 

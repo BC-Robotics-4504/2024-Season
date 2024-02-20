@@ -66,7 +66,7 @@ class MyRobot(MagicRobot):
         self.HMI_xbox = wpilib.XboxController(0)
 
         # Vision Hardware Config
-        self.Vision_limelight = Limelight()        
+        self.Vision_LimeLight = Limelight()        
         pass
 
     def disabledPeriodic(self):
