@@ -18,10 +18,10 @@ class RobotConfig:
     # Launcher Parameters
     shooting_flywheel_speed: float = 0.25
     shooting_max_distance: float = 10.0
-    intake_forward_rolling_speed: float = 0.1
-    intake_reverse_rolling_speed: float = -0.1
-    intake_lowered_position: float = 0.15
-    intake_raised_position: float = 0.0
+    intake_forward_rolling_speed: float = 0.2
+    intake_reverse_rolling_speed: float = -0.2
+    intake_lowered_position: float = 0.055
+    intake_raised_position: float = 0.805
 
     # Climber Parameters
     climbing_max_distance: float = 0.5

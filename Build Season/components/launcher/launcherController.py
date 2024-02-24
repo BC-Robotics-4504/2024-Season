@@ -1,7 +1,7 @@
 from magicbot import StateMachine, timed_state, state
 
 from components.swerveDrive.swerveDrive import SwerveDrive
-from components.launcher.launcher import Launcher, IntakeLevelPositions, IntakeRollerPosiitons, ShootingFlywheelPositions
+from components.launcher.launcher import Launcher, IntakeLevelPositions, IntakeRollerPositions, ShootingFlywheelPositions
 from components.vision.vision import Vision
 from components.config import RobotConfig
 
@@ -54,27 +54,27 @@ class LauncherController(StateMachine):
         elif self.__actionShootLauncher__:
             self.next_state('__alignLauncher__')
             
-    @state(must_finish=True)
+    @state()
     def __raiseIntake__(self):
-        if self.Launcher.IntakeLevelPosition != IntakeLevelPositions.RAISED:
-            self.Launcher.retractIntake()
-        else:
-            self.next_state('__wait__')
-
-    @state(must_finish=True)
-    def __lowerIntake__(self):
-        if self.Launcher.IntakeLevelPosition != IntakeLevelPositions.LOWERED:
-            self.Launcher.lowerIntake()
-        # self.isEngaged = True
-        else:
-            self.next_state('__wait__')
-
-    @state(must_finish=True)
+        self.Launcher.retractIntake()
+        self.__actionRaiseIntake__ = False
+        self.next_state('__spindownIntake__')
+        
+    @state()
     def __spindownIntake__(self):
-        if self.Launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.STOPPED:
-            self.Launcher.spindownIntake()
-        else:
-            self.next_state('__wait__')
+        self.Launcher.spindownIntake()
+        self.next_state('__wait__')
+
+    @state()
+    def __lowerIntake__(self):
+        self.Launcher.lowerIntake()
+        self.__actionLowerIntake__ = False
+        self.next_state('__spinupIntake__')
+        
+    @state()
+    def __spinupIntake__(self):
+        self.Launcher.spinIntakeReverse()
+        self.next_state('__wait__')
 
     @state(must_finish=True)
     def __alignLauncher__(self):
@@ -98,21 +98,12 @@ class LauncherController(StateMachine):
     # @timed_state(duration=1, must_finish=True) #FIXME: Why doesn't @timed_state() work here?
     @state(must_finish=True)
     def __feedLauncher__(self):
-        if self.Launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.FORWARD:
+        if self.Launcher.IntakeRollerPosition != IntakeRollerPositions.FORWARD:
             self.Launcher.spinIntakeForward()
         else:
             self.next_state('__spindownLauncher__')
 
     @state(must_finish=True)
     def __spindownLauncher__(self):
-        if self.Launcher.ShootingFlywheelPosition != ShootingFlywheelPositions.STOPPED:
-            self.Launcher.spindownShooter()
-        else:
-            self.next_state('__wait__')
-
-    @state(must_finish=True)
-    def __spinupIntake__(self):
-        if self.Launcher.IntakeRollerPosiiton != IntakeRollerPosiitons.REVERSE:
-            self.Launcher.spinIntakeReverse()
-        else:
-            self.next_state('__wait__')
+        self.Launcher.spindownShooter()
+        self.next_state('__wait__')

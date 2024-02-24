@@ -31,9 +31,9 @@ class MyRobot(MagicRobot):
     Launcher: Launcher
     LauncherController: LauncherController
 
-    # Climber Component Code    
-    Climber: Climber
-    ClimberController: ClimberController
+    # # Climber Component Code    
+    # Climber: Climber
+    # ClimberController: ClimberController
 
     # Vision Componenet Code
     Vision: Vision
@@ -50,17 +50,17 @@ class MyRobot(MagicRobot):
         self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         # Launcher Hardware Config
-        self.Launcher_LauncherSpinnerL = SparkMaxDualSpinner(9, inverted=True)
-        self.Launcher_LauncherSpinnerR = SparkMaxDualSpinner(10)
+        self.Launcher_LauncherSpinnerL = SparkMaxDualSpinner(10, inverted=True)
+        self.Launcher_LauncherSpinnerR = SparkMaxDualSpinner(12)
 
-        self.Launcher_IntakeSpinnerL = SparkMaxDualSpinner(11, inverted=True)
-        self.Launcher_IntakeSpinnerR = SparkMaxDualSpinner(12, inverted=True)
+        self.Launcher_IntakeSpinnerL = SparkMaxDualSpinner(14, inverted=False)
+        self.Launcher_IntakeSpinnerR = SparkMaxDualSpinner(13, inverted=False)
 
-        self.Launcher_IntakePivot = SparkMaxPivot(13) #FIXME!!!
+        self.Launcher_IntakePivot = SparkMaxPivot(9, inverted=False, gear_ratio=4) #FIXME!!!
         
         # Climber Hardware Config
-        self.Climber_ClimberMotorL = SparkMaxClimb(14) #FIXME!!!
-        self.Climber_ClimberMotorR = SparkMaxClimb(15, inverted=True) #FIXME!!!
+        # self.Climber_ClimberMotorL = SparkMaxClimb(14) #FIXME!!!
+        # self.Climber_ClimberMotorR = SparkMaxClimb(15, inverted=True) #FIXME!!!
 
         # HMI Hardware Config
         self.HMI_xbox = wpilib.XboxController(0)
@@ -76,14 +76,15 @@ class MyRobot(MagicRobot):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
         # self.SwerveDrive.clearFaults()
+        self.LauncherController.raiseIntake()
         pass
 
     def teleopPeriodic(self):
 
-        # 1.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
-        Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
+        # # 1.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
+        # Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
 
-        self.SwerveDrive.move(Lx, Ly, Rx)
+        # self.SwerveDrive.move(Lx, Ly, Rx)
 
         # 2.) Actuate Launcher
         if self.HMI.getA():
@@ -96,15 +97,16 @@ class MyRobot(MagicRobot):
             self.LauncherController.shootLauncher()
 
         self.LauncherController.runLauncher()
+        # print(self.LauncherController.Launcher.IntakePivot.getPosition())
 
-        #3.) Actuate Climber
-        if self.HMI.getRB():
-            self.ClimberController.raiseClimber()
+        # #3.) Actuate Climber
+        # if self.HMI.getRB():
+        #     self.ClimberController.raiseClimber()
 
-        elif self.HMI.getLB():
-            self.ClimberController.lowerClimber()
+        # elif self.HMI.getLB():
+        #     self.ClimberController.lowerClimber()
 
-        self.ClimberController.runClimber()
+        # self.ClimberController.runClimber()
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)

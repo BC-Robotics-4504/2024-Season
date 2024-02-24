@@ -11,7 +11,7 @@ class SparkMaxPivot:
     """
     
     # PID coefficients
-    kP = 0.32
+    kP = 3
     kI = 1e-4
     kD = 1
     kIz = 0.30
@@ -21,11 +21,10 @@ class SparkMaxPivot:
     maxRPM = 5700
 
     # Smart Motion Coefficients
-    maxVel = 2000  # rpm
-    maxAcc = 1000
+    maxVel = 2000 # rpm
+    maxAcc = 1500
     minVel = 0
     allowedErr = 0
-
     smartMotionSlot = 0
 
     target_position = 0
@@ -53,20 +52,25 @@ class SparkMaxPivot:
 
         self.motor = rev.CANSparkMax(self.canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
-        self.motor.setInverted(not inverted)
+        self.motor.setInverted(inverted)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
-        self.motor.setSmartCurrentLimit(25)
+        self.motor.setSmartCurrentLimit(40)
 
         self.SMcontroller = self.motor.getPIDController()
         self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.encoder.setInverted(inverted)
-        self.encoder.setPositionConversionFactor(2*math.pi)
+        self.encoder.setPositionConversionFactor(2*math.pi/self.gear_ratio)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
         
         self.SMcontroller.setFeedbackDevice(self.encoder)
-        self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
+        self.SMcontroller.setPositionPIDWrappingEnabled(False) #TODO: does this need to be removed?
         self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
-        self.SMcontroller.setPositionPIDWrappingMaxInput(2*math.pi) #TODO: does this need to be removed?
+        self.SMcontroller.setPositionPIDWrappingMaxInput(2*math.pi/self.gear_ratio) #TODO: does this need to be removed?
+        
+        self.SMcontroller.setSmartMotionMaxVelocity(self.maxVel, self.smartMotionSlot)
+        self.SMcontroller.setSmartMotionMinOutputVelocity(self.minVel, self.smartMotionSlot)
+        self.SMcontroller.setSmartMotionMaxAccel(self.maxAcc, self.smartMotionSlot)
+        self.SMcontroller.setSmartMotionAllowedClosedLoopError(self.allowedErr, self.smartMotionSlot)
         
         # PID parameters
         self.SMcontroller.setP(self.kP)
@@ -88,8 +92,9 @@ class SparkMaxPivot:
         rotation = self.encoder.getPosition()
         return rotation
     
-    def atPosition(self, tolerance=0.05):
+    def atPosition(self, tolerance=0.02):
         err = self.target_position - self.getPosition()
+        print(err, self.target_position, self.getPosition())
         if abs(err) <= tolerance:
             return True
         return False
@@ -172,7 +177,7 @@ class IntakeLevelPositions(Enum):
     LOWERED = 3
     RAISING = 4
 
-class IntakeRollerPosiitons(Enum):
+class IntakeRollerPositions(Enum):
     STOPPED = 1
     FORWARD = 2
     REVERSE = 3
@@ -197,7 +202,7 @@ class Launcher:
     IntakeLevelPosition: IntakeLevelPositions
     __intakeLevelChanged__: bool = False
 
-    IntakeRollerPosiiton: IntakeRollerPosiitons 
+    IntakeRollerPosition: IntakeRollerPositions 
     __intakeRollerChanged__: bool = False
 
     ShootingFlywheelPosition: ShootingFlywheelPositions
@@ -206,7 +211,7 @@ class Launcher:
 
     def __init__(self):
         self.IntakeLevelPosition = IntakeLevelPositions.RAISED
-        self.IntakeRollerPosiiton = IntakeRollerPosiitons.STOPPED
+        self.IntakeRollerPosition = IntakeRollerPositions.STOPPED
         self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPED
         pass
 
@@ -224,20 +229,20 @@ class Launcher:
         return None
     
     def spinIntakeForward(self):
-        if self.IntakeRollerPosiiton != IntakeRollerPosiitons.FORWARD:
-            self.IntakeRollerPosiiton = IntakeRollerPosiitons.FORWARD
+        if self.IntakeRollerPosition != IntakeRollerPositions.FORWARD:
+            self.IntakeRollerPosition = IntakeRollerPositions.FORWARD
             self.__intakeRollerChanged__ = True
         return None
     
     def spinIntakeReverse(self):
-        if self.IntakeRollerPosiiton != IntakeRollerPosiitons.REVERSE:
-            self.IntakeRollerPosiiton = IntakeRollerPosiitons.REVERSE
+        if self.IntakeRollerPosition != IntakeRollerPositions.REVERSE:
+            self.IntakeRollerPosition = IntakeRollerPositions.REVERSE
             self.__intakeRollerChanged__ = True
         return None
     
     def spindownIntake(self):
-        if self.IntakeRollerPosiiton != IntakeRollerPosiitons.STOPPED:
-            self.IntakeRollerPosiiton = IntakeRollerPosiitons.STOPPED
+        if self.IntakeRollerPosition != IntakeRollerPositions.STOPPED:
+            self.IntakeRollerPosition = IntakeRollerPositions.STOPPED
             self.__intakeRollerChanged__ = True
         return None
     
@@ -254,25 +259,25 @@ class Launcher:
 
     def __updateIntakeRollers__(self):
         if self.__intakeRollerChanged__:
-            if self.IntakeRollerPosiiton == IntakeRollerPosiitons.STOPPED:
+            if self.IntakeRollerPosition == IntakeRollerPositions.STOPPED:
                 self.IntakeSpinnerL.setSpeed(0.0)
                 self.IntakeSpinnerR.setSpeed(0.0)
 
-            if self.IntakeRollerPosiiton == IntakeRollerPosiitons.FORWARD:
+            if self.IntakeRollerPosition == IntakeRollerPositions.FORWARD:
                 self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
                 self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
                 atSpeedL = self.IntakeSpinnerL.atSpeed()
                 atSpeedR = self.IntakeSpinnerR.atSpeed()
                 if atSpeedL and atSpeedR:
-                    self.IntakeRollerPosiiton = IntakeRollerPosiitons.FORWARD
+                    self.IntakeRollerPosition = IntakeRollerPositions.FORWARD
 
-            if self.IntakeRollerPosiiton == IntakeRollerPosiitons.REVERSE:
+            if self.IntakeRollerPosition == IntakeRollerPositions.REVERSE:
                 self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
                 self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
                 atSpeedL = self.IntakeSpinnerL.atSpeed()
                 atSpeedR = self.IntakeSpinnerR.atSpeed()
                 if atSpeedL and atSpeedR:
-                    self.IntakeRollerPosiiton = IntakeRollerPosiitons.REVERSE
+                    self.IntakeRollerPosition = IntakeRollerPositions.REVERSE
 
             self.__intakeRollerChanged__ = False
 
@@ -280,18 +285,18 @@ class Launcher:
     
     def __updateIntakeLevel__(self):
         # Do intake level adjust work
-        if self.__intakeLevelChanged__:
-            if self.IntakeLevelPosition == IntakeLevelPositions.LOWERING:
-                self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
-                atPosition = self.IntakePivot.atPosition()
-                if atPosition:
-                    self.IntakeLevelPosition = IntakeLevelPositions.LOWERED
+        # if self.__intakeLevelChanged__:
+        if self.IntakeLevelPosition == IntakeLevelPositions.LOWERING:
+            self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
+            atPosition = self.IntakePivot.atPosition()
+            if atPosition:
+                self.IntakeLevelPosition = IntakeLevelPositions.LOWERED
 
-            if self.IntakeLevelPosition == IntakeLevelPositions.RAISING:
-                self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)
-                atPosition = self.IntakePivot.atPosition()
-                if atPosition:
-                    self.IntakeLevelPosition = IntakeLevelPositions.RAISED   
+        if self.IntakeLevelPosition == IntakeLevelPositions.RAISING:
+            self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)
+            atPosition = self.IntakePivot.atPosition()
+            if atPosition:
+                self.IntakeLevelPosition = IntakeLevelPositions.RAISED   
         return None
     
     def __updateFlywheels__(self):
