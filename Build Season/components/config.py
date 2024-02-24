@@ -21,7 +21,7 @@ class RobotConfig:
     intake_forward_rolling_speed: float = 0.2
     intake_reverse_rolling_speed: float = -0.2
     intake_lowered_position: float = 0.055
-    intake_raised_position: float = 0.805
+    intake_raised_position: float = 0.81
 
     # Climber Parameters
     climbing_max_distance: float = 0.5

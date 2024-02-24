@@ -1,6 +1,7 @@
 import math
 from enum import Enum
 
+import wpilib
 import rev
 
 from components.config import RobotConfig
@@ -94,7 +95,6 @@ class SparkMaxPivot:
     
     def atPosition(self, tolerance=0.02):
         err = self.target_position - self.getPosition()
-        print(err, self.target_position, self.getPosition())
         if abs(err) <= tolerance:
             return True
         return False
@@ -208,6 +208,8 @@ class Launcher:
     ShootingFlywheelPosition: ShootingFlywheelPositions
     __shootingFLywheelChanged__: bool = False
     __shootingFLywheelSpeed__: float = 0.0
+    
+    LimitSwitch: wpilib.DigitalInput
 
     def __init__(self):
         self.IntakeLevelPosition = IntakeLevelPositions.RAISED
@@ -251,11 +253,14 @@ class Launcher:
             self.ShootingFlywheelPosition = ShootingFlywheelPositions.RAMPING
             self.__shootingFLywheelSpeed__ = speed
             self.__shootingFLywheelChanged__ = True
+        return None
 
     def spindownShooter(self):
-         if self.ShootingFlywheelPosition != ShootingFlywheelPositions.STOPPING:
+        if self.ShootingFlywheelPosition != ShootingFlywheelPositions.STOPPING:
             self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPING  
-            self.__shootingFLywheelChanged__ = True    
+            self.__shootingFLywheelSpeed__ = 0
+            self.__shootingFLywheelChanged__ = True  
+        return None  
 
     def __updateIntakeRollers__(self):
         if self.__intakeRollerChanged__:
@@ -280,6 +285,12 @@ class Launcher:
                     self.IntakeRollerPosition = IntakeRollerPositions.REVERSE
 
             self.__intakeRollerChanged__ = False
+            
+        if not self.LimitSwitch.get():
+            self.IntakeSpinnerL.setSpeed(0.0)
+            self.IntakeSpinnerR.setSpeed(0.0)     
+            self.IntakeRollerPosition = IntakeRollerPositions.STOPPED   
+               
 
         return None
     
@@ -300,22 +311,25 @@ class Launcher:
         return None
     
     def __updateFlywheels__(self):
+        
         if self.__shootingFLywheelChanged__:
+
             if self.ShootingFlywheelPosition == ShootingFlywheelPositions.RAMPING:
                 self.LauncherSpinnerL.setSpeed(self.__shootingFLywheelSpeed__)
                 self.LauncherSpinnerR.setSpeed(self.__shootingFLywheelSpeed__)
-                atSpeedL = self.LauncherSpinnerL.atSpeed()
-                atSpeedR = self.LauncherSpinnerR.atSpeed()
-                if atSpeedL and atSpeedR:
-                    self.ShootingFlywheelPosition = ShootingFlywheelPositions.READY
+                # atSpeedL = self.LauncherSpinnerL.atSpeed()
+                # atSpeedR = self.LauncherSpinnerR.atSpeed()
+                # if atSpeedL and atSpeedR:
+                self.ShootingFlywheelPosition = ShootingFlywheelPositions.READY
 
             if self.ShootingFlywheelPosition == ShootingFlywheelPositions.STOPPING:
                 self.LauncherSpinnerL.setSpeed(0.0)
                 self.LauncherSpinnerR.setSpeed(0.0)
-                atSpeedL = self.LauncherSpinnerL.atSpeed()
-                atSpeedR = self.LauncherSpinnerR.atSpeed()
-                if atSpeedL and atSpeedR:
-                    self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPED
+                # atSpeedL = self.LauncherSpinnerL.atSpeed()
+                # atSpeedR = self.LauncherSpinnerR.atSpeed()
+                # if atSpeedL and atSpeedR:
+                self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPED
+                
         return None
 
     def execute(self):

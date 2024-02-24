@@ -21,7 +21,9 @@ class LauncherController(StateMachine):
 
     __actionLowerIntake__ = False
     __actionRaiseIntake__ = False
-    __actionShootLauncher__ = False
+    __actionFeedLauncher__ = False
+    __actionSpinupLauncher__ = False
+    __actionSpindownLauncher__ = False
 
     position = 0
     isEngaged = False
@@ -32,8 +34,14 @@ class LauncherController(StateMachine):
     def raiseIntake(self):
         self.__actionRaiseIntake__ = True
 
-    def shootLauncher(self):
-        self.__actionShootLauncher__ = True
+    def feedLauncher(self):
+        self.__actionFeedLauncher__ = True
+        
+    def spinupLauncher(self):
+        self.__actionSpinupLauncher__ = True
+        
+    def spindownLauncher(self):
+        self.__actionSpindownLauncher__ = True
 
 
     def runLauncher(self):
@@ -51,8 +59,14 @@ class LauncherController(StateMachine):
         elif self.__actionRaiseIntake__:
             self.next_state('__raiseIntake__')
 
-        elif self.__actionShootLauncher__:
-            self.next_state('__alignLauncher__')
+        elif self.__actionFeedLauncher__:
+            self.next_state('__feedLauncher__')
+            
+        elif self.__actionSpinupLauncher__:
+            self.next_state('__spinupLauncher__')
+            
+        elif self.__actionSpindownLauncher__:
+            self.next_state('__spindownLauncher__')
             
     @state()
     def __raiseIntake__(self):
@@ -76,34 +90,31 @@ class LauncherController(StateMachine):
         self.Launcher.spinIntakeReverse()
         self.next_state('__wait__')
 
-    @state(must_finish=True)
-    def __alignLauncher__(self):
-        # FIXME: add PID loop here? (https://docs.limelightvision.io/docs/docs-limelight/tutorials/tutorial-aiming-with-visual-servoing)
-        target_angle = self.Vision.getTargetAngle()
-        if abs(target_angle) > 1.0:
-            self.SwerveDrive.goDistance(0, 0, target_angle/360)
-        else:
-            self.next_state('__spinupLauncher__')
+    # @state(must_finish=True)
+    # def __alignLauncher__(self):
+    #     # FIXME: add PID loop here? (https://docs.limelightvision.io/docs/docs-limelight/tutorials/tutorial-aiming-with-visual-servoing)
+    #     target_angle = self.Vision.getTargetAngle()
+    #     if abs(target_angle) > 1.0:
+    #         self.SwerveDrive.goDistance(0, 0, target_angle/360)
+    #     else:
+    #         self.next_state('__spinupLauncher__')
             
-    @state(must_finish=True)
+    @state()
     def __spinupLauncher__(self):
-        if self.Launcher.ShootingFlywheelPosition != ShootingFlywheelPositions.READY:
-            # TODO: calculate correlation between target distance and shooter flywheel speed
-            target_distance = self.Vision.getTargetDistance()
-            shooter_speed = target_distance
-            self.Launcher.spinIntakeForward(shooter_speed)
-        else:
-            self.next_state('__feedLauncher__')
+        self.Launcher.spinupShooter(1.0)
+        self.__actionSpinupLauncher__ = False
+        self.next_state('__wait__')
 
     # @timed_state(duration=1, must_finish=True) #FIXME: Why doesn't @timed_state() work here?
-    @state(must_finish=True)
+    @state()
     def __feedLauncher__(self):
-        if self.Launcher.IntakeRollerPosition != IntakeRollerPositions.FORWARD:
-            self.Launcher.spinIntakeForward()
-        else:
-            self.next_state('__spindownLauncher__')
+        self.Launcher.spinIntakeForward()
+        self.__actionFeedLauncher__ = False
+        self.next_state('__wait__')
 
-    @state(must_finish=True)
+    @state()
     def __spindownLauncher__(self):
         self.Launcher.spindownShooter()
+        self.Launcher.spindownIntake()
+        self.__actionSpindownLauncher__ = False
         self.next_state('__wait__')

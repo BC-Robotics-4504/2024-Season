@@ -16,6 +16,7 @@ from components.climber.climberController import ClimberController
 from components.vision.limelight import Limelight
 from components.vision.vision import Vision
 
+
 class MyRobot(MagicRobot):
 
     # Configuration Class
@@ -58,6 +59,8 @@ class MyRobot(MagicRobot):
 
         self.Launcher_IntakePivot = SparkMaxPivot(9, inverted=False, gear_ratio=4) #FIXME!!!
         
+        self.Launcher_LimitSwitch = wpilib.DigitalInput(0)
+        
         # Climber Hardware Config
         # self.Climber_ClimberMotorL = SparkMaxClimb(14) #FIXME!!!
         # self.Climber_ClimberMotorR = SparkMaxClimb(15, inverted=True) #FIXME!!!
@@ -66,7 +69,8 @@ class MyRobot(MagicRobot):
         self.HMI_xbox = wpilib.XboxController(0)
 
         # Vision Hardware Config
-        self.Vision_LimeLight = Limelight()        
+        self.Vision_LimeLight = Limelight() 
+               
         pass
 
     def disabledPeriodic(self):
@@ -81,20 +85,27 @@ class MyRobot(MagicRobot):
 
     def teleopPeriodic(self):
 
-        # # 1.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
-        # Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
+        # 1.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
+        Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
 
-        # self.SwerveDrive.move(Lx, Ly, Rx)
+        self.SwerveDrive.move(Lx, Ly, Rx)
 
         # 2.) Actuate Launcher
+    
         if self.HMI.getA():
             self.LauncherController.lowerIntake()
 
         elif self.HMI.getB():
             self.LauncherController.raiseIntake()
-
-        elif self.HMI.getLT() > 0.35:
-            self.LauncherController.shootLauncher()
+            
+        elif self.HMI.getRT() > 0.35:
+            self.LauncherController.feedLauncher()
+            
+        if self.HMI.getRB():
+            self.LauncherController.spinupLauncher()
+            
+        elif self.HMI.getLB():
+            self.LauncherController.spindownLauncher()
 
         self.LauncherController.runLauncher()
         # print(self.LauncherController.Launcher.IntakePivot.getPosition())

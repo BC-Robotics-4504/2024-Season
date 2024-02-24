@@ -151,7 +151,7 @@ class SparkMaxDriving:
         self.controller.setFF(self.kFF)
         self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
         self.distance_to_rotations = gear_ratio / (math.pi * self.wheel_diameter)
-        self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
+        self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self.motor.setSmartCurrentLimit(40)
         
         #self.controller.burnFlash()    
