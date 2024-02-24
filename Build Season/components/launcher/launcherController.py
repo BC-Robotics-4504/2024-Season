@@ -59,7 +59,15 @@ class LauncherController(StateMachine):
         if self.Launcher.IntakeLevelPosition != IntakeLevelPositions.RAISED:
             self.Launcher.retractIntake()
         else:
-            self.next_state('__spindownIntake__')
+            self.next_state('__wait__')
+
+    @state(must_finish=True)
+    def __lowerIntake__(self):
+        if self.Launcher.IntakeLevelPosition != IntakeLevelPositions.LOWERED:
+            self.Launcher.lowerIntake()
+        # self.isEngaged = True
+        else:
+            self.next_state('__wait__')
 
     @state(must_finish=True)
     def __spindownIntake__(self):
@@ -101,14 +109,6 @@ class LauncherController(StateMachine):
             self.Launcher.spindownShooter()
         else:
             self.next_state('__wait__')
-
-    @state(must_finish=True)
-    def __lowerIntake__(self):
-        if self.Launcher.IntakeLevelPosition != IntakeLevelPositions.LOWERED:
-            self.Launcher.lowerIntake()
-        # self.isEngaged = True
-        else:
-            self.next_state('__spinupIntake__')
 
     @state(must_finish=True)
     def __spinupIntake__(self):
