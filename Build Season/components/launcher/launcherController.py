@@ -24,7 +24,6 @@ class LauncherController(StateMachine):
     __actionFeedLauncher__ = False
     __actionSpinupLauncher__ = False
     __actionSpindownLauncher__ = False
-    __actionShootLauncher__ = False
 
     position = 0
     isEngaged = False
@@ -34,9 +33,6 @@ class LauncherController(StateMachine):
 
     def raiseIntake(self):
         self.__actionRaiseIntake__ = True
-    
-    def shoot(self):
-        self.__actionShootLauncher__ == True
 
     def feedLauncher(self):
         self.__actionFeedLauncher__ = True
@@ -46,6 +42,7 @@ class LauncherController(StateMachine):
         
     def spindownLauncher(self):
         self.__actionSpindownLauncher__ = True
+
 
     def runLauncher(self):
         self.engage()
@@ -64,9 +61,6 @@ class LauncherController(StateMachine):
 
         elif self.__actionFeedLauncher__:
             self.next_state('__feedLauncher__')
-        
-        elif self.__actionShootLauncher__:
-            self.next_state('__runFlywheels__')
             
         elif self.__actionSpinupLauncher__:
             self.next_state('__spinupLauncher__')
@@ -112,21 +106,10 @@ class LauncherController(StateMachine):
         self.next_state('__wait__')
 
     # @timed_state(duration=1, must_finish=True) #FIXME: Why doesn't @timed_state() work here?
-    @state(must_finish= True)
+    @state()
     def __feedLauncher__(self):
         self.Launcher.spinIntakeForward()
         self.__actionFeedLauncher__ = False
-        self.next_state('__wait__')
-        
-    @timed_state(must_finish= True, duration= 2) 
-    def __runFlywheels__(self):
-        self.Launcher.spinupShooter()
-        self.next_state("__shootLauncher__")
-        
-    @state(must_finish= True)
-    def __shootLauncher__(self):
-        self.Launcher.spinIntakeForward()
-        self.__actionShootLauncher__ == False
         self.next_state('__wait__')
 
     @state()

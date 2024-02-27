@@ -22,7 +22,6 @@ class HMI:
         self.RB = False
         self.LB = False
         self.RT = 0.
-        self.X = False
         
 
     def updateAnalogSticks(self):
@@ -45,11 +44,6 @@ class HMI:
         A = self.A
         self.A = False
         return A
-    
-    def getX(self):
-        X = self.X
-        self.X = False
-        return X
     
     def getB(self):
         B = self.B
