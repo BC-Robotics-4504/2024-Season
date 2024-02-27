@@ -100,12 +100,17 @@ class MyRobot(MagicRobot):
             
         elif self.HMI.getRT() > 0.35:
             self.LauncherController.feedLauncher()
+        
+        elif self.HMI.getX():
+            self.LauncherController.shoot()
             
         if self.HMI.getRB():
             self.LauncherController.spinupLauncher()
             
         elif self.HMI.getLB():
             self.LauncherController.spindownLauncher()
+        
+
 
         self.LauncherController.runLauncher()
         # print(self.LauncherController.Launcher.IntakePivot.getPosition())
