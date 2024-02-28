@@ -275,10 +275,10 @@ class SwerveDrive:
         self.distance_changed = True
         
     def clampSpeed(self):
-        max_val = max([self.__frontLeftSpeed__, 
+        max_val = min([max([self.__frontLeftSpeed__, 
                         self.__frontRightSpeed__, 
                         self.__rearLeftSpeed__, 
-                        self.__rearRightSpeed__])/self.RobotConfig.speed_clamp
+                        self.__rearRightSpeed__]),self.RobotConfig.speed_clamp])
         if abs(max_val) == 0:
             max_val = 1
         return max_val

@@ -20,8 +20,10 @@ class RobotConfig:
     shooting_max_distance: float = 10.0
     intake_forward_rolling_speed: float = 0.2
     intake_reverse_rolling_speed: float = -0.2
-    intake_lowered_position: float = 0.055
-    intake_raised_position: float = 0.81
+    intake_lowered_position: float = 0.58
+    intake_raised_position: float = 1.3
+    intake_amp_position: float = 1.23
+    intake_launch_rolling_speed: float = 1.0
 
     # Climber Parameters
     climbing_max_distance: float = 0.5

@@ -22,6 +22,8 @@ class HMI:
         self.RB = False
         self.LB = False
         self.RT = 0.
+        self.X = False
+        self.Y = False
         
 
     def updateAnalogSticks(self):
@@ -35,6 +37,8 @@ class HMI:
     def updateButtons(self):
         self.A = self.xbox.getAButton()
         self.B = self.xbox.getBButton()
+        self.X = self.xbox.getXButton()
+        self.Y = self.xbox.getYButton()
         self.RT = self.xbox.getRightTriggerAxis()
         self.RB = self.xbox.getRightBumper()
         self.LB = self.xbox.getLeftBumper()
@@ -44,6 +48,16 @@ class HMI:
         A = self.A
         self.A = False
         return A
+    
+    def getX(self):
+        X = self.X
+        self.X = False
+        return X
+    
+    def getY(self):
+        Y = self.Y
+        self.Y = False
+        return Y
     
     def getB(self):
         B = self.B

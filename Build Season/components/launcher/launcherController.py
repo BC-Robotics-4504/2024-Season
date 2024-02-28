@@ -21,7 +21,9 @@ class LauncherController(StateMachine):
 
     __actionLowerIntake__ = False
     __actionRaiseIntake__ = False
+    __actionRaiseIntakeAmp__ = False
     __actionFeedLauncher__ = False
+    __actionShootAmp__ = False
     __actionSpinupLauncher__ = False
     __actionSpindownLauncher__ = False
 
@@ -33,6 +35,12 @@ class LauncherController(StateMachine):
 
     def raiseIntake(self):
         self.__actionRaiseIntake__ = True
+        
+    def raiseIntakeAmp(self):
+        self.__actionRaiseIntakeAmp__ = True
+        
+    def launchAmp(self):
+        self.__actionShootAmp__ = True
 
     def feedLauncher(self):
         self.__actionFeedLauncher__ = True
@@ -58,6 +66,12 @@ class LauncherController(StateMachine):
 
         elif self.__actionRaiseIntake__:
             self.next_state('__raiseIntake__')
+            
+        elif self.__actionRaiseIntakeAmp__:
+            self.next_state('__raiseIntakeAmp__')
+            
+        elif self.__actionShootAmp__:
+            self.next_state('__shootAmp__')
 
         elif self.__actionFeedLauncher__:
             self.next_state('__feedLauncher__')
@@ -72,7 +86,19 @@ class LauncherController(StateMachine):
     def __raiseIntake__(self):
         self.Launcher.retractIntake()
         self.__actionRaiseIntake__ = False
-        self.next_state('__spindownIntake__')
+        self.next_state('__wait__')
+        
+    @state()
+    def __raiseIntakeAmp__(self):
+        self.Launcher.retractIntakeAmp()
+        self.__actionRaiseIntakeAmp__ = False
+        self.next_state('__wait__')
+        
+    @state()
+    def __shootAmp__(self):
+        self.Launcher.retractIntakeAmp()
+        self.__actionShootAmp__ = False
+        self.next_state('__wait__')
         
     @state()
     def __spindownIntake__(self):

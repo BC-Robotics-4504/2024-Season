@@ -54,10 +54,11 @@ class MyRobot(MagicRobot):
         self.Launcher_LauncherSpinnerL = SparkMaxDualSpinner(10, inverted=True)
         self.Launcher_LauncherSpinnerR = SparkMaxDualSpinner(12)
 
-        self.Launcher_IntakeSpinnerL = SparkMaxDualSpinner(14, inverted=False)
-        self.Launcher_IntakeSpinnerR = SparkMaxDualSpinner(13, inverted=False)
+        self.Launcher_IntakeSpinnerL = SparkMaxDualSpinner(14, inverted=True)
+        self.Launcher_IntakeSpinnerR = SparkMaxDualSpinner(13, inverted=True)
 
-        self.Launcher_IntakePivot = SparkMaxPivot(9, inverted=False, gear_ratio=4) #FIXME!!!
+        self.Launcher_IntakePivot = SparkMaxPivot(9, inverted=False, gear_ratio=4, 
+                                                  follower_canID=15)
         
         self.Launcher_LimitSwitch = wpilib.DigitalInput(0)
         
@@ -80,7 +81,7 @@ class MyRobot(MagicRobot):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
         # self.SwerveDrive.clearFaults()
-        self.LauncherController.raiseIntake()
+        self.LauncherController.Launcher.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)
         pass
 
     def teleopPeriodic(self):
@@ -98,6 +99,12 @@ class MyRobot(MagicRobot):
         elif self.HMI.getB():
             self.LauncherController.raiseIntake()
             
+        elif self.HMI.getX():
+            self.LauncherController.raiseIntakeAmp()
+            
+        elif self.HMI.getY():
+            self.LauncherController.launchAmp()
+            
         elif self.HMI.getRT() > 0.35:
             self.LauncherController.feedLauncher()
             
@@ -108,7 +115,9 @@ class MyRobot(MagicRobot):
             self.LauncherController.spindownLauncher()
 
         self.LauncherController.runLauncher()
+        
         # print(self.LauncherController.Launcher.IntakePivot.getPosition())
+        self.LauncherController.Launcher.IntakePivot.atPosition()
 
         # #3.) Actuate Climber
         # if self.HMI.getRB():
