@@ -185,27 +185,7 @@ class SparkMaxDualSpinner:
         if abs(err) <= tolerance:
             return True
         return False
-     
-class IntakeLevelPositions(Enum):
-    RAISED = 1
-    AMP = 2
-    AMPING = 3
-    LOWERING = 4
-    LOWERED = 5
-    RAISING = 6
-
-class IntakeRollerPositions(Enum):
-    STOPPED = 1
-    FORWARD = 2
-    REVERSE = 3
-    LAUNCH = 4
-
-class ShootingFlywheelPositions(Enum):
-    STOPPED = 1
-    RAMPING = 2
-    READY = 3
-    STOPPING = 4
-
+    
 class Launcher:
     RobotConfig: RobotConfig
 
@@ -217,173 +197,113 @@ class Launcher:
     LauncherSpinnerL: SparkMaxDualSpinner
     LauncherSpinnerR: SparkMaxDualSpinner
 
-    IntakeLevelPosition: IntakeLevelPositions
-    __intakeLevelChanged__: bool = False
-
-    IntakeRollerPosition: IntakeRollerPositions 
-    __intakeRollerChanged__: bool = False
-
-    ShootingFlywheelPosition: ShootingFlywheelPositions
-    __shootingFLywheelChanged__: bool = False
-    __shootingFLywheelSpeed__: float = 0.0
-    
     LimitSwitch: wpilib.DigitalInput
+    
+    target_intake_position = None
+    target_launcher_speed = 0
 
     def __init__(self):
-        self.IntakeLevelPosition = IntakeLevelPositions.RAISED
-        self.IntakeRollerPosition = IntakeRollerPositions.STOPPED
-        self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPED
         pass
+    
+    def isPositionedIntake(self):
+        if self.target_intake_position is None:
+            return False
+        
+        err = self.IntakePivot.getPosition() - self.target_intake_position
+        if abs(err) < self.RobotConfig.intake_tolerance:
+            return True
+        return False 
 
     def lowerIntake(self):  
-        if self.IntakeLevelPosition != IntakeLevelPositions.LOWERING:
-            self.IntakeLevelPosition = IntakeLevelPositions.LOWERING 
-            self.__intakeLevelChanged__ = True
+        self.target_intake_position = self.RobotConfig.intake_lowered_position
+        self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
+        return None      
+    
+    def raiseIntake(self):
+        self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)   
         return None
     
-    def retractIntake(self):
-        if self.IntakeLevelPosition != IntakeLevelPositions.RAISING:
-            self.IntakeLevelPosition = IntakeLevelPositions.RAISING  
-            self.__intakeLevelChanged__ = True   
-
+    def isNoteInIntake(self):
+        return not self.LimitSwitch.get()
+    
+    def isSpeedLauncher(self):
+        errL = self.LauncherSpinnerL.getSpeed() > self.RobotConfig.shooting_flywheel_threshold_speed
+        errR = self.LauncherSpinnerR.getSpeed() > self.RobotConfig.shooting_flywheel_threshold_speed
+        # avg_err = (abs(errL) + abs(errR))/2
+        # print(self.LauncherSpinnerL.getSpeed(), self.LauncherSpinnerR.getSpeed(), self.RobotConfig.shooting_flywheel_threshold_speed)
+        if errL and errR:
+            return True
+        return False
+    
+    def spinupShooter(self):
+        self.LauncherSpinnerL.setSpeed(self.RobotConfig.shooting_flywheel_speed)
+        self.LauncherSpinnerR.setSpeed(self.RobotConfig.shooting_flywheel_speed)
         return None
     
-    def retractIntakeAmp(self):
-        if self.IntakeLevelPosition != IntakeLevelPositions.AMPING:
-            self.IntakeLevelPosition = IntakeLevelPositions.AMPING 
-            self.__intakeLevelChanged__ = True   
-
-        return None
+    def spindownLauncher(self):
+        self.LauncherSpinnerL.setSpeed(0.0)
+        self.LauncherSpinnerR.setSpeed(0.0)  
+        return None  
     
-    def spinIntakeForward(self):
-        if self.IntakeRollerPosition != IntakeRollerPositions.FORWARD:
-            self.IntakeRollerPosition = IntakeRollerPositions.FORWARD
-            self.__intakeRollerChanged__ = True
-        return None
-    
-    def spinIntakeReverse(self):
-        if self.IntakeRollerPosition != IntakeRollerPositions.REVERSE:
-            self.IntakeRollerPosition = IntakeRollerPositions.REVERSE
-            self.__intakeRollerChanged__ = True
-        return None
-    
-    def launchIntake(self):
-        if self.IntakeRollerPosition != IntakeRollerPositions.LAUNCH:
-            self.IntakeRollerPosition = IntakeRollerPositions.LAUNCH
-            self.__intakeRollerChanged__ = True        
+    def feedShooterSpeaker(self):
+        self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_feed_speaker_speed)
+        self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_feed_speaker_speed) 
+        return None   
     
     def spindownIntake(self):
-        if self.IntakeRollerPosition != IntakeRollerPositions.STOPPED:
-            self.IntakeRollerPosition = IntakeRollerPositions.STOPPED
-            self.__intakeRollerChanged__ = True
+        self.IntakeSpinnerL.setSpeed(0.0)
+        self.IntakeSpinnerR.setSpeed(0.0)
+        return None    
+    
+    def spindownIntake(self):
+        self.IntakeSpinnerL.setSpeed(0.0)
+        self.IntakeSpinnerR.setSpeed(0.0)
         return None
     
-    def spinupShooter(self, speed):
-        if self.ShootingFlywheelPosition != ShootingFlywheelPositions.RAMPING:
-            self.ShootingFlywheelPosition = ShootingFlywheelPositions.RAMPING
-            self.__shootingFLywheelSpeed__ = speed
-            self.__shootingFLywheelChanged__ = True
-        return None
-
-    def spindownShooter(self):
-        if self.ShootingFlywheelPosition != ShootingFlywheelPositions.STOPPING:
-            self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPING  
-            self.__shootingFLywheelSpeed__ = 0
-            self.__shootingFLywheelChanged__ = True  
-        return None  
-
-    def __updateIntakeRollers__(self):
-        if self.__intakeRollerChanged__:
-            if self.IntakeRollerPosition == IntakeRollerPositions.STOPPED:
-                self.IntakeSpinnerL.setSpeed(0.0)
-                self.IntakeSpinnerR.setSpeed(0.0)
-
-            if self.IntakeRollerPosition == IntakeRollerPositions.FORWARD:
-                self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
-                self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
-                atSpeedL = self.IntakeSpinnerL.atSpeed()
-                atSpeedR = self.IntakeSpinnerR.atSpeed()
-                if atSpeedL and atSpeedR:
-                    self.IntakeRollerPosition = IntakeRollerPositions.FORWARD
-
-            if self.IntakeRollerPosition == IntakeRollerPositions.REVERSE:
-                self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
-                self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
-                atSpeedL = self.IntakeSpinnerL.atSpeed()
-                atSpeedR = self.IntakeSpinnerR.atSpeed()
-                if atSpeedL and atSpeedR:
-                    self.IntakeRollerPosition = IntakeRollerPositions.REVERSE
-                    
-            if self.IntakeRollerPosition == IntakeRollerPositions.LAUNCH:
-                self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_launch_rolling_speed)
-                self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_launch_rolling_speed)
-                atSpeedL = self.IntakeSpinnerL.atSpeed()
-                atSpeedR = self.IntakeSpinnerR.atSpeed()
-                if atSpeedL and atSpeedR:
-                    self.IntakeRollerPosition = IntakeRollerPositions.LAUNCH
-
-            self.__intakeRollerChanged__ = False
-            
-        if not self.LimitSwitch.get():
-            self.IntakeSpinnerL.setSpeed(0.0)
-            self.IntakeSpinnerR.setSpeed(0.0)     
-            self.IntakeRollerPosition = IntakeRollerPositions.STOPPED   
-               
-
+    def spinIntakeIn(self):
+        self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
+        self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
         return None
     
-    def __updateIntakeLevel__(self):
-        # Do intake level adjust work
-        if self.__intakeLevelChanged__:
-            if self.IntakeLevelPosition == IntakeLevelPositions.LOWERING:
-                self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
-                atPosition = self.IntakePivot.atPosition()
-                if atPosition:
-                    self.IntakeLevelPosition = IntakeLevelPositions.LOWERED  
-                    
-            if self.IntakeLevelPosition == IntakeLevelPositions.AMPING:
-                self.IntakePivot.setPosition(self.RobotConfig.intake_amp_position)
-                atPosition = self.IntakePivot.atPosition()
-                if atPosition:
-                    self.IntakeLevelPosition = IntakeLevelPositions.AMP       
-
-            if self.IntakeLevelPosition == IntakeLevelPositions.RAISING:
-                self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)
-                atPosition = self.IntakePivot.atPosition()
-                if atPosition:
-                    self.IntakeLevelPosition = IntakeLevelPositions.RAISED  
-                
+    def ampIntake(self):
+        self.target_intake_position = self.RobotConfig.intake_amp_position
+        self.IntakePivot.setPosition(self.RobotConfig.intake_amp_position)
         return None
     
-    def __updateFlywheels__(self):
-        
-        if self.__shootingFLywheelChanged__:
-
-            if self.ShootingFlywheelPosition == ShootingFlywheelPositions.RAMPING:
-                self.LauncherSpinnerL.setSpeed(self.__shootingFLywheelSpeed__)
-                self.LauncherSpinnerR.setSpeed(self.__shootingFLywheelSpeed__)
-                # atSpeedL = self.LauncherSpinnerL.atSpeed()
-                # atSpeedR = self.LauncherSpinnerR.atSpeed()
-                # if atSpeedL and atSpeedR:
-                self.ShootingFlywheelPosition = ShootingFlywheelPositions.READY
-
-            if self.ShootingFlywheelPosition == ShootingFlywheelPositions.STOPPING:
-                self.LauncherSpinnerL.setSpeed(0.0)
-                self.LauncherSpinnerR.setSpeed(0.0)
-                # atSpeedL = self.LauncherSpinnerL.atSpeed()
-                # atSpeedR = self.LauncherSpinnerR.atSpeed()
-                # if atSpeedL and atSpeedR:
-                self.ShootingFlywheelPosition = ShootingFlywheelPositions.STOPPED
-                
+    def feedShooterAmp(self):
+        self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_amp_shooting_speed)
+        self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_amp_shooting_speed) 
         return None
+    
+    # def raiseAmp(self):
+    #     self.IntakePivot.setPosition(self.RobotConfig.intake_amp_position)
+    #     return None
+    
+    # def spinIntakeForward(self):
+    #     self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
+    #     self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
+    #     return None
+    
 
+    
+    # def launchIntake(self):
+    #     self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_launch_rolling_speed)
+    #     self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_launch_rolling_speed)        
+    
+    # def spindownIntake(self):
+    #     self.IntakeSpinnerL.setSpeed(0.0)
+    #     self.IntakeSpinnerR.setSpeed(0.0)
+    #     return None
+    
+    # def spinupShooter(self):
+    #     self.LauncherSpinnerL.setSpeed(self.RobotConfig.shooting_flywheel_speed)
+    #     self.LauncherSpinnerR.setSpeed(self.RobotConfig.shooting_flywheel_speed)
+    #     return None
+
+    # def spindownShooter(self):
+    #     self.LauncherSpinnerL.setSpeed(0.0)
+    #     self.LauncherSpinnerR.setSpeed(0.0)  
+    #     return None  
+    
     def execute(self):
-        # Do intake level adjust work
-        self.__updateIntakeLevel__()
-
-        # Do intake roller adjust work
-        self.__updateIntakeRollers__()
-
-        # Do intake flywheel adjust work
-        self.__updateFlywheels__()
-
+        pass

@@ -74,14 +74,14 @@ class MyRobot(MagicRobot):
                
         pass
 
-    def disabledPeriodic(self):
-        pass
+    # def disabledPeriodic(self):
+    #     pass
 
     def teleopInit(self):
         # Define relationships between controller input events and what they're supposed to trigger
         # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
         # self.SwerveDrive.clearFaults()
-        self.LauncherController.Launcher.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)
+        self.LauncherController.raiseIntake()
         pass
 
     def teleopPeriodic(self):
@@ -99,25 +99,25 @@ class MyRobot(MagicRobot):
         elif self.HMI.getB():
             self.LauncherController.raiseIntake()
             
-        elif self.HMI.getX():
+        elif self.HMI.getY():
             self.LauncherController.raiseIntakeAmp()
             
-        elif self.HMI.getY():
-            self.LauncherController.launchAmp()
+        # elif self.HMI.getY():
+        #     self.LauncherController.launchAmp()
             
         elif self.HMI.getRT() > 0.35:
-            self.LauncherController.feedLauncher()
+            self.LauncherController.shootSpeaker() #FIXME! The intake rollers don't stop spinning 
             
-        if self.HMI.getRB():
-            self.LauncherController.spinupLauncher()
+        # if self.HMI.getRB():
+        #     self.LauncherController.spinupLauncher()
             
-        elif self.HMI.getLB():
-            self.LauncherController.spindownLauncher()
+        # elif self.HMI.getLB():
+        #     self.LauncherController.spindownLauncher()
 
         self.LauncherController.runLauncher()
         
         # print(self.LauncherController.Launcher.IntakePivot.getPosition())
-        self.LauncherController.Launcher.IntakePivot.atPosition()
+        # self.LauncherController.Launcher.IntakePivot.atPosition()
 
         # #3.) Actuate Climber
         # if self.HMI.getRB():

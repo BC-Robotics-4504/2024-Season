@@ -1,56 +1,48 @@
-from magicbot import StateMachine, timed_state, state
+from magicbot import StateMachine, state
+from enum import Enum
+from wpilib import Timer
 
 from components.swerveDrive.swerveDrive import SwerveDrive
-from components.launcher.launcher import Launcher, IntakeLevelPositions, IntakeRollerPositions, ShootingFlywheelPositions
+from components.launcher.launcher import Launcher
 from components.vision.vision import Vision
 from components.config import RobotConfig
+
+class LauncherActions(Enum):
+    RAISE_INTAKE = 1
+    LOWER_INTAKE = 2
+    SHOOT_SPEAKER = 3
+    SHOOT_AMP = 4
+    WAIT = 5
 
 class LauncherController(StateMachine):
     MODE_NAME = "Launcher Controller"
     DEFAULT = False
+    
+    target_action = LauncherActions.WAIT
 
     Kp = -0.1
-    min_command = 0.5
 
     RobotConfig: RobotConfig
     Launcher: Launcher
     Vision: Vision
     SwerveDrive: SwerveDrive
 
-    move_changed: bool = False
-
-    __actionLowerIntake__ = False
-    __actionRaiseIntake__ = False
-    __actionRaiseIntakeAmp__ = False
-    __actionFeedLauncher__ = False
-    __actionShootAmp__ = False
-    __actionSpinupLauncher__ = False
-    __actionSpindownLauncher__ = False
-
-    position = 0
     isEngaged = False
+    
+    timer = Timer()
+    timer.start()
 
     def lowerIntake(self):
-        self.__actionLowerIntake__ = True
+        self.target_action = LauncherActions.LOWER_INTAKE
 
     def raiseIntake(self):
-        self.__actionRaiseIntake__ = True
+        self.target_action = LauncherActions.RAISE_INTAKE
         
     def raiseIntakeAmp(self):
-        self.__actionRaiseIntakeAmp__ = True
-        
-    def launchAmp(self):
-        self.__actionShootAmp__ = True
+        self.target_action = LauncherActions.SHOOT_AMP
 
-    def feedLauncher(self):
-        self.__actionFeedLauncher__ = True
-        
-    def spinupLauncher(self):
-        self.__actionSpinupLauncher__ = True
-        
-    def spindownLauncher(self):
-        self.__actionSpindownLauncher__ = True
-
+    def shootSpeaker(self):
+        self.target_action = LauncherActions.SHOOT_SPEAKER
 
     def runLauncher(self):
         self.engage()
@@ -60,61 +52,77 @@ class LauncherController(StateMachine):
     '''
 
     @state(first=True)
-    def __wait__(self):
-        if self.__actionLowerIntake__:
+    def __wait__(self):           
+        if self.target_action == LauncherActions.LOWER_INTAKE:
             self.next_state('__lowerIntake__')
-
-        elif self.__actionRaiseIntake__:
-            self.next_state('__raiseIntake__')
+            self.target_action = LauncherActions.WAIT
             
-        elif self.__actionRaiseIntakeAmp__:
-            self.next_state('__raiseIntakeAmp__')
-            
-        elif self.__actionShootAmp__:
-            self.next_state('__shootAmp__')
-
-        elif self.__actionFeedLauncher__:
-            self.next_state('__feedLauncher__')
-            
-        elif self.__actionSpinupLauncher__:
+        if self.target_action == LauncherActions.SHOOT_SPEAKER:
             self.next_state('__spinupLauncher__')
+            self.target_action = LauncherActions.WAIT
             
-        elif self.__actionSpindownLauncher__:
-            self.next_state('__spindownLauncher__')
+        if self.target_action == LauncherActions.SHOOT_AMP:
+            self.next_state('__ampIntake__')
+            self.target_action = LauncherActions.WAIT
             
-    @state()
-    def __raiseIntake__(self):
-        self.Launcher.retractIntake()
-        self.__actionRaiseIntake__ = False
-        self.next_state('__wait__')
-        
-    @state()
-    def __raiseIntakeAmp__(self):
-        self.Launcher.retractIntakeAmp()
-        self.__actionRaiseIntakeAmp__ = False
-        self.next_state('__wait__')
-        
-    @state()
-    def __shootAmp__(self):
-        self.Launcher.retractIntakeAmp()
-        self.__actionShootAmp__ = False
-        self.next_state('__wait__')
-        
-    @state()
-    def __spindownIntake__(self):
-        self.Launcher.spindownIntake()
-        self.next_state('__wait__')
-
     @state()
     def __lowerIntake__(self):
         self.Launcher.lowerIntake()
-        self.__actionLowerIntake__ = False
-        self.next_state('__spinupIntake__')
+        self.Launcher.spinIntakeIn()
+        if self.Launcher.isPositionedIntake():
+            self.next_state('__intakeNote__')
+          
+    @state()  
+    def __intakeNote__(self):
+        if self.Launcher.isNoteInIntake():
+            self.next_state('__raiseIntake__')
+            
+        if self.target_action == LauncherActions.RAISE_INTAKE:
+            self.next_state('__raiseIntake__')
+            
+    @state()
+    def __spinupLauncher__(self):
+        self.Launcher.spinupShooter()
+        if self.Launcher.isSpeedLauncher():
+            self.timer.restart()
+            self.next_state_now('__launchNoteSpeaker__')
+            
+    
+    # @timed_state(duration=0, must_finish=True, next_state='__spindownLauncher__')
+    @state()
+    def __launchNoteSpeaker__(self):
+        self.Launcher.feedShooterSpeaker()
+        if self.timer.hasElapsed(self.RobotConfig.intake_feed_delay):
+            self.timer.stop()
+            self.next_state('__spindownLauncher__')
+            
+    @state()
+    def __spindownLauncher__(self):
+        self.Launcher.spindownLauncher()
+        self.Launcher.spindownIntake()
+        self.next_state('__wait__')
+            
+    @state()
+    def __raiseIntake__(self):
+        self.Launcher.raiseIntake()
+        self.Launcher.spindownIntake()
+        if self.Launcher.isPositionedIntake():
+            self.next_state('__wait__')
+    
+    @state()
+    def __ampIntake__(self):
+        self.Launcher.ampIntake()
+        if self.Launcher.isPositionedIntake():
+            self.timer.restart()
+            self.next_state('__launchNoteAmp__')
         
     @state()
-    def __spinupIntake__(self):
-        self.Launcher.spinIntakeReverse()
-        self.next_state('__wait__')
+    def __launchNoteAmp__(self):
+        self.Launcher.feedShooterAmp()
+        if self.timer.hasElapsed(self.RobotConfig.intake_feed_delay):
+            self.timer.stop()
+            self.next_state('__raiseIntake__')            
+        
 
     # @state(must_finish=True)
     # def __alignLauncher__(self):
@@ -124,23 +132,3 @@ class LauncherController(StateMachine):
     #         self.SwerveDrive.goDistance(0, 0, target_angle/360)
     #     else:
     #         self.next_state('__spinupLauncher__')
-            
-    @state()
-    def __spinupLauncher__(self):
-        self.Launcher.spinupShooter(1.0)
-        self.__actionSpinupLauncher__ = False
-        self.next_state('__wait__')
-
-    # @timed_state(duration=1, must_finish=True) #FIXME: Why doesn't @timed_state() work here?
-    @state()
-    def __feedLauncher__(self):
-        self.Launcher.spinIntakeForward()
-        self.__actionFeedLauncher__ = False
-        self.next_state('__wait__')
-
-    @state()
-    def __spindownLauncher__(self):
-        self.Launcher.spindownShooter()
-        self.Launcher.spindownIntake()
-        self.__actionSpindownLauncher__ = False
-        self.next_state('__wait__')
