@@ -16,7 +16,6 @@ from components.climber.climberController import ClimberController
 from components.vision.limelight import Limelight
 from components.vision.vision import Vision
 
-
 class MyRobot(MagicRobot):
 
     # Configuration Class
@@ -41,13 +40,17 @@ class MyRobot(MagicRobot):
 
     def createObjects(self):
         # Swerve Drive Hardware Config
-        self.SwerveDrive_FrontLeftAngleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1, absolute_encoder=True, z_offset=0)
+        self.SwerveDrive_FrontLeftAngleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1, 
+                                                               absolute_encoder=True, z_offset=0)
         self.SwerveDrive_FrontLeftSpeedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
-        self.SwerveDrive_RearLeftAngleMotor = SparkMaxTurning(8, inverted=False, gear_ratio=1, wheel_diameter=1, absolute_encoder=True, z_offset=0)
+        self.SwerveDrive_RearLeftAngleMotor = SparkMaxTurning(8, inverted=False, gear_ratio=1, wheel_diameter=1, 
+                                                              absolute_encoder=True, z_offset=0)
         self.SwerveDrive_RearLeftSpeedMotor = SparkMaxDriving(7, inverted=False, gear_ratio=1, wheel_diameter=1)
-        self.SwerveDrive_RearRightAngleMotor = SparkMaxTurning(2, inverted=False, gear_ratio=1, wheel_diameter=1, absolute_encoder=True, z_offset=0)
+        self.SwerveDrive_RearRightAngleMotor = SparkMaxTurning(2, inverted=False, gear_ratio=1, wheel_diameter=1, 
+                                                               absolute_encoder=True, z_offset=0)
         self.SwerveDrive_RearRightSpeedMotor = SparkMaxDriving(1, inverted=False, gear_ratio=1, wheel_diameter=1)
-        self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1, absolute_encoder=True, z_offset=0)
+        self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1, 
+                                                                absolute_encoder=True, z_offset=0)
         self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         # Launcher Hardware Config
@@ -78,20 +81,18 @@ class MyRobot(MagicRobot):
     #     pass
 
     def teleopInit(self):
-        # Define relationships between controller input events and what they're supposed to trigger
-        # DO NOT PUT LEFT X/Y or RIGHT X/Y here--those will have to be updated using polling
-        # self.SwerveDrive.clearFaults()
+        self.SwerveDrive.clearFaults()
         self.LauncherController.raiseIntake()
         pass
 
     def teleopPeriodic(self):
 
-        # 1.) Move drivetrain based on Left X/Y and Right X/Y controller inputs
+        # Move drivetrain based on Left X/Y and Right X/Y controller inputs
         Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
 
         self.SwerveDrive.move(Lx, Ly, Rx)
 
-        # 2.) Actuate Launcher
+        # Actuate Launcher
     
         if self.HMI.getA():
             self.LauncherController.lowerIntake()
@@ -116,9 +117,6 @@ class MyRobot(MagicRobot):
 
         self.LauncherController.runLauncher()
         
-        # print(self.LauncherController.Launcher.IntakePivot.getPosition())
-        # self.LauncherController.Launcher.IntakePivot.atPosition()
-
         # #3.) Actuate Climber
         # if self.HMI.getRB():
         #     self.ClimberController.raiseClimber()
