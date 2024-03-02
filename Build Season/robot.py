@@ -6,6 +6,7 @@ from components.config import RobotConfig
 from components.hmi.hmi import HMI
 
 from components.swerveDrive.swerveDrive import SwerveDrive, SparkMaxTurning, SparkMaxDriving
+from components.swerveDrive.autoAlignment import AutoAlignment
 
 from components.launcher.launcher import Launcher, SparkMaxDualSpinner, SparkMaxPivot
 from components.launcher.launcherController import LauncherController
@@ -37,6 +38,7 @@ class MyRobot(MagicRobot):
 
     # Vision Componenet Code
     Vision: Vision
+    Alignment: AutoAlignment
 
     def createObjects(self):
         # Swerve Drive Hardware Config
@@ -93,7 +95,6 @@ class MyRobot(MagicRobot):
         self.SwerveDrive.move(Lx, Ly, Rx)
 
         # Actuate Launcher
-    
         if self.HMI.getA():
             self.LauncherController.lowerIntake()
 
@@ -103,15 +104,12 @@ class MyRobot(MagicRobot):
         if self.HMI.getY():
             self.LauncherController.raiseIntakeAmp()
             
-        # elif self.HMI.getY():
-        #     self.LauncherController.launchAmp()
-            
         if self.HMI.getRT() > 0.35:
-            self.LauncherController.shootSpeaker() #FIXME! The intake rollers don't stop spinning 
+            self.LauncherController.shootSpeaker()
             
-        # if self.HMI.getRB():
-        #     self.LauncherController.spinupLauncher()
-            
+        if self.HMI.getLT() > 0.35:
+            self.Alignment.align()
+                        
         # elif self.HMI.getLB():
         #     self.LauncherController.spindownLauncher()
 

@@ -17,10 +17,16 @@ def calc_distance(
     Returns:
         Gives the distance (in the same units that were used for the input) away from the wall that has the target
     """
-    d = (target_height - mount_height) / math.tan(
-        math.radians(camera_angle + limelight.vertical_offset)
-    )
-    return d
+    
+    try:
+        d = (target_height - mount_height) / math.tan(
+            math.radians(camera_angle + limelight.vertical_offset)
+        )
+        return d
+    
+    except:
+        return None
+    
 
 
 def calc_camera_angle(

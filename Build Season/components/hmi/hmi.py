@@ -22,6 +22,7 @@ class HMI:
         self.RB = False
         self.LB = False
         self.RT = 0.
+        self.LT = 0.
         self.X = False
         self.Y = False
         
@@ -40,6 +41,7 @@ class HMI:
         self.X = self.xbox.getXButton()
         self.Y = self.xbox.getYButton()
         self.RT = self.xbox.getRightTriggerAxis()
+        self.LT = self.xbox.getLeftTriggerAxis()
         self.RB = self.xbox.getRightBumper()
         self.LB = self.xbox.getLeftBumper()
         return None
@@ -68,6 +70,11 @@ class HMI:
         RT = self.RT
         self.RT = 0
         return RT
+    
+    def getLT(self):
+        LT = self.LT
+        self.LT = 0
+        return LT
     
     def getRB(self):
         RB = self.RB

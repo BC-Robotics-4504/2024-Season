@@ -98,8 +98,8 @@ class SparkMaxDriving:
     
     # PID coefficients
     kP = 1e-4
-    kI = 1e-4
-    kD = 1e-4
+    kI = 0
+    kD = 0
     kIz = 0
     kFF = 0 #FIXME: try tuning this for better driving performance
     kMaxOutput = 1
@@ -275,13 +275,11 @@ class SwerveDrive:
         self.distance_changed = True
         
     def clampSpeed(self):
-        max_val = min([max([self.__frontLeftSpeed__, 
-                        self.__frontRightSpeed__, 
-                        self.__rearLeftSpeed__, 
-                        self.__rearRightSpeed__]),self.RobotConfig.speed_clamp])
-        if abs(max_val) == 0:
-            max_val = 1
-        return max_val
+        self.__frontLeftSpeed__ *= self.RobotConfig.speed_clamp
+        self.__frontRightSpeed__ *= self.RobotConfig.speed_clamp
+        self.__rearLeftSpeed__ *= self.RobotConfig.speed_clamp
+        self.__rearRightSpeed__ *= self.RobotConfig.speed_clamp
+        return None
 
     def atDistance(self):
         FL = self.FrontLeftSpeedMotor.atDistance()
@@ -297,18 +295,18 @@ class SwerveDrive:
     def execute(self):
         if self.move_changed:
 
-            max_val = self.clampSpeed()
+            self.clampSpeed()
 
-            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__/max_val) 
+            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__) 
             self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 
-            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__/max_val) 
+            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__) 
             self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
 
-            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__/max_val) 
+            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__) 
             self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
 
-            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__/max_val) 
+            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
             self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
 
             self.move_changed = False

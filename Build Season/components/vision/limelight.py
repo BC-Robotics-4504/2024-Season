@@ -2,7 +2,7 @@
 Repo: https://github.com/FRC703/Robotpy-Limelight/tree/master (https://pypi.org/project/robotpy-limelight)
 Author: Josh Bacon, FRC703
 '''
-from networktables import NetworkTables
+import ntcore
 from enum import Enum
 import typing
 from typing import Tuple
@@ -85,7 +85,9 @@ class Limelight:
         if nt is not None:
             self.__nt = nt
         else:
-            self.__nt = NetworkTables.getTable("limelight")
+            inst = ntcore.NetworkTableInstance.getDefault()
+            self.__nt = inst.getTable("limelight")
+            
         self._enabled = camera
         self._light = light
 

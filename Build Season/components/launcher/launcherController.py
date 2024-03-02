@@ -24,8 +24,6 @@ class LauncherController(StateMachine):
 
     RobotConfig: RobotConfig
     Launcher: Launcher
-    Vision: Vision
-    SwerveDrive: SwerveDrive
 
     isEngaged = False
     

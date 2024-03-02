@@ -27,10 +27,14 @@ class Vision:
             return self.horizontal_offset
         else:
             return None
+        
+    def getTargetID(self):
+        return self.valid_target
 
     def execute(self):
         self.valid_target = self.LimeLight.valid_targets
         if self.valid_target:
+            self.LimeLight.light(LEDState.ON)
             self.target_distance = calc_distance(self.RobotConfig.camera_angle,
                                                  self.RobotConfig.camera_mount_height,
                                                  self.RobotConfig.apriltag_target_height,
@@ -38,4 +42,7 @@ class Vision:
             
             self.horizontal_offset = self.LimeLight.horizontal_offset
             self.vertical_offset = self.LimeLight.vertical_offset
+            
+        else:
+            self.LimeLight.light(LEDState.OFF)
 
