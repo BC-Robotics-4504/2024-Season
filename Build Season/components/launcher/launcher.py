@@ -220,6 +220,7 @@ class Launcher:
         return None      
     
     def raiseIntake(self):
+        self.target_intake_position = self.RobotConfig.intake_raised_position
         self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)   
         return None
     
