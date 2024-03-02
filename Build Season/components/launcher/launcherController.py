@@ -52,43 +52,37 @@ class LauncherController(StateMachine):
     '''
 
     @state(first=True)
-    def __wait__(self):           
+    def __wait__(self):       
+        
+        if self.Launcher.isNoteInIntake():
+            self.next_state_now('__raiseIntake__')
+
         if self.target_action == LauncherActions.LOWER_INTAKE:
             self.next_state('__lowerIntake__')
-            self.target_action = LauncherActions.WAIT
             
         if self.target_action == LauncherActions.SHOOT_SPEAKER:
             self.next_state('__spinupLauncher__')
-            self.target_action = LauncherActions.WAIT
             
         if self.target_action == LauncherActions.SHOOT_AMP:
             self.next_state('__ampIntake__')
-            self.target_action = LauncherActions.WAIT
+        
+        self.target_action = LauncherActions.WAIT
             
     @state()
     def __lowerIntake__(self):
         self.Launcher.lowerIntake()
         self.Launcher.spinIntakeIn()
-        if self.Launcher.isPositionedIntake():
-            self.next_state('__intakeNote__')
-          
-    @state()  
-    def __intakeNote__(self):
-        if self.Launcher.isNoteInIntake():
-            self.next_state('__raiseIntake__')
-            
-        if self.target_action == LauncherActions.RAISE_INTAKE:
-            self.next_state('__raiseIntake__')
+        self.next_state('__wait__')
+
             
     @state()
     def __spinupLauncher__(self):
         self.Launcher.spinupShooter()
-        if self.Launcher.isSpeedLauncher():
+        if self.Launcher.isLauncherAtSpeed():
             self.timer.restart()
             self.next_state_now('__launchNoteSpeaker__')
             
     
-    # @timed_state(duration=0, must_finish=True, next_state='__spindownLauncher__')
     @state()
     def __launchNoteSpeaker__(self):
         self.Launcher.feedShooterSpeaker()

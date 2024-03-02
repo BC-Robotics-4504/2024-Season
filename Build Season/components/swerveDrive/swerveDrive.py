@@ -101,7 +101,7 @@ class SparkMaxDriving:
     kI = 1e-4
     kD = 1e-4
     kIz = 0
-    kFF = 1
+    kFF = 0 #FIXME: try tuning this for better driving performance
     kMaxOutput = 1
     kMinOutput = -1
     maxRPM = 5700

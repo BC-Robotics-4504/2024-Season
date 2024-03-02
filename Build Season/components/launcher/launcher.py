@@ -199,7 +199,11 @@ class Launcher:
 
     LimitSwitch: wpilib.DigitalInput
     
+    current_intake_position = None
     target_intake_position = None
+    
+    currentL_launcher_speed = 0
+    currentR_launcher_speed = 0
     target_launcher_speed = 0
 
     def __init__(self):
@@ -209,11 +213,18 @@ class Launcher:
         if self.target_intake_position is None:
             return False
         
-        err = self.IntakePivot.getPosition() - self.target_intake_position
+        err = self.current_intake_position - self.target_intake_position
         if abs(err) < self.RobotConfig.intake_tolerance:
             return True
         return False 
-
+    
+    def isNoteInIntake(self):
+        note_in_intake = not self.LimitSwitch.get()
+        is_lowered = self.target_intake_position == self.RobotConfig.intake_lowered_position
+        if is_lowered and note_in_intake:
+            return True
+        return False
+    
     def lowerIntake(self):  
         self.target_intake_position = self.RobotConfig.intake_lowered_position
         self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
@@ -224,14 +235,9 @@ class Launcher:
         self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)   
         return None
     
-    def isNoteInIntake(self):
-        return not self.LimitSwitch.get()
-    
-    def isSpeedLauncher(self):
-        errL = self.LauncherSpinnerL.getSpeed() > self.RobotConfig.shooting_flywheel_threshold_speed
-        errR = self.LauncherSpinnerR.getSpeed() > self.RobotConfig.shooting_flywheel_threshold_speed
-        # avg_err = (abs(errL) + abs(errR))/2
-        # print(self.LauncherSpinnerL.getSpeed(), self.LauncherSpinnerR.getSpeed(), self.RobotConfig.shooting_flywheel_threshold_speed)
+    def isLauncherAtSpeed(self):
+        errL = self.currentL_launcher_speed > self.RobotConfig.shooting_flywheel_threshold_speed
+        errR = self.currentR_launcher_speed > self.RobotConfig.shooting_flywheel_threshold_speed
         if errL and errR:
             return True
         return False
@@ -276,35 +282,8 @@ class Launcher:
         self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_amp_shooting_speed) 
         return None
     
-    # def raiseAmp(self):
-    #     self.IntakePivot.setPosition(self.RobotConfig.intake_amp_position)
-    #     return None
-    
-    # def spinIntakeForward(self):
-    #     self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
-    #     self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_forward_rolling_speed)
-    #     return None
-    
-
-    
-    # def launchIntake(self):
-    #     self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_launch_rolling_speed)
-    #     self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_launch_rolling_speed)        
-    
-    # def spindownIntake(self):
-    #     self.IntakeSpinnerL.setSpeed(0.0)
-    #     self.IntakeSpinnerR.setSpeed(0.0)
-    #     return None
-    
-    # def spinupShooter(self):
-    #     self.LauncherSpinnerL.setSpeed(self.RobotConfig.shooting_flywheel_speed)
-    #     self.LauncherSpinnerR.setSpeed(self.RobotConfig.shooting_flywheel_speed)
-    #     return None
-
-    # def spindownShooter(self):
-    #     self.LauncherSpinnerL.setSpeed(0.0)
-    #     self.LauncherSpinnerR.setSpeed(0.0)  
-    #     return None  
-    
     def execute(self):
+        self.current_intake_position = self.IntakePivot.getPosition()
+        self.currentL_launcher_speed = self.LauncherSpinnerL.getSpeed()
+        self.currentR_launcher_speed = self.LauncherSpinnerR.getSpeed()      
         pass
