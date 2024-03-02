@@ -97,16 +97,16 @@ class MyRobot(MagicRobot):
         if self.HMI.getA():
             self.LauncherController.lowerIntake()
 
-        elif self.HMI.getB():
+        if self.HMI.getB():
             self.LauncherController.raiseIntake()
             
-        elif self.HMI.getY():
+        if self.HMI.getY():
             self.LauncherController.raiseIntakeAmp()
             
         # elif self.HMI.getY():
         #     self.LauncherController.launchAmp()
             
-        elif self.HMI.getRT() > 0.35:
+        if self.HMI.getRT() > 0.35:
             self.LauncherController.shootSpeaker() #FIXME! The intake rollers don't stop spinning 
             
         # if self.HMI.getRB():

@@ -53,9 +53,11 @@ class LauncherController(StateMachine):
 
     @state(first=True)
     def __wait__(self):       
-        
         if self.Launcher.isNoteInIntake():
             self.next_state_now('__raiseIntake__')
+        
+        if self.target_action == LauncherActions.RAISE_INTAKE:
+            self.next_state('__raiseIntake__')
 
         if self.target_action == LauncherActions.LOWER_INTAKE:
             self.next_state('__lowerIntake__')
@@ -65,15 +67,14 @@ class LauncherController(StateMachine):
             
         if self.target_action == LauncherActions.SHOOT_AMP:
             self.next_state('__ampIntake__')
-        
-        self.target_action = LauncherActions.WAIT
             
+        self.target_action = LauncherActions.WAIT
+           
     @state()
     def __lowerIntake__(self):
         self.Launcher.lowerIntake()
         self.Launcher.spinIntakeIn()
         self.next_state('__wait__')
-
             
     @state()
     def __spinupLauncher__(self):
@@ -100,8 +101,7 @@ class LauncherController(StateMachine):
     def __raiseIntake__(self):
         self.Launcher.raiseIntake()
         self.Launcher.spindownIntake()
-        if self.Launcher.isPositionedIntake():
-            self.next_state('__wait__')
+        self.next_state('__wait__')
     
     @state()
     def __ampIntake__(self):

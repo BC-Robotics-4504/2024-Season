@@ -17,14 +17,14 @@ class RobotConfig:
 
     # Launcher Parameters
     shooting_flywheel_speed: float = 1.0
-    shooting_flywheel_threshold_speed: float = 540.0
+    shooting_flywheel_threshold_speed: float = 550.0
     shooting_flywheel_tolerance = 3.0
     
     shooting_max_distance: float = 10.0
     intake_forward_rolling_speed: float = 0.2
     intake_reverse_rolling_speed: float = -0.2
     intake_feed_speaker_speed: float = 0.35
-    intake_feed_delay: float = 1.0
+    intake_feed_delay: float = 0.5
     
     
     intake_lowered_position: float = 0.58
