@@ -4,7 +4,6 @@ Author: Josh Bacon, FRC703
 '''
 import ntcore
 from enum import Enum
-import typing
 from typing import Tuple
 
 
@@ -70,7 +69,7 @@ class Limelight:
     __nt = None
     _active_pipeline = 0
 
-    def __init__(self, nt=None, camera=False, light=False):
+    def __init__(self, name='limelight', nt=None, camera=False, light=False):
         """
         Creates an instance of a limelight
 
@@ -86,7 +85,7 @@ class Limelight:
             self.__nt = nt
         else:
             inst = ntcore.NetworkTableInstance.getDefault()
-            self.__nt = inst.getTable("limelight")
+            self.__nt = inst.getTable(name)
             
         self._enabled = camera
         self._light = light
@@ -270,6 +269,7 @@ class Limelight:
         self.__nt.putNumber("pipeline", pipeline)
 
     def snapshot(self, snapshotMode: SnapshotMode):
+        
         """
         Allow users to take snapshots during a match
 

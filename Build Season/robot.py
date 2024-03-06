@@ -43,16 +43,16 @@ class MyRobot(MagicRobot):
     def createObjects(self):
         # Swerve Drive Hardware Config
         self.SwerveDrive_FrontLeftAngleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1, 
-                                                               absolute_encoder=True, z_offset=0)
+                                                               absolute_encoder=True, z_offset=-0.2)
         self.SwerveDrive_FrontLeftSpeedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.SwerveDrive_RearLeftAngleMotor = SparkMaxTurning(8, inverted=False, gear_ratio=1, wheel_diameter=1, 
-                                                              absolute_encoder=True, z_offset=0)
+                                                              absolute_encoder=True, z_offset=-0.35)
         self.SwerveDrive_RearLeftSpeedMotor = SparkMaxDriving(7, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.SwerveDrive_RearRightAngleMotor = SparkMaxTurning(2, inverted=False, gear_ratio=1, wheel_diameter=1, 
-                                                               absolute_encoder=True, z_offset=0)
+                                                               absolute_encoder=True, z_offset=-0.15)
         self.SwerveDrive_RearRightSpeedMotor = SparkMaxDriving(1, inverted=False, gear_ratio=1, wheel_diameter=1)
         self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1, 
-                                                                absolute_encoder=True, z_offset=0)
+                                                                absolute_encoder=True, z_offset=-0.25)
         self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=1)
 
         # Launcher Hardware Config
@@ -76,6 +76,7 @@ class MyRobot(MagicRobot):
 
         # Vision Hardware Config
         self.Vision_LimeLight = Limelight() 
+        self.Vision_LimeLightFront = Limelight(name='limelight-front')
                
         pass
 
@@ -88,7 +89,7 @@ class MyRobot(MagicRobot):
         pass
 
     def teleopPeriodic(self):
-
+        print(self.Vision.getTargetDistance())
         # Move drivetrain based on Left X/Y and Right X/Y controller inputs
         Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
 
@@ -96,9 +97,11 @@ class MyRobot(MagicRobot):
 
         # Actuate Launcher
         if self.HMI.getA():
+            self.Vision.enableFrontCamera()
             self.LauncherController.lowerIntake()
 
         if self.HMI.getB():
+            self.Vision.disableFrontCamera()
             self.LauncherController.raiseIntake()
             
         if self.HMI.getY():

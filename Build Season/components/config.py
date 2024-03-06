@@ -13,7 +13,7 @@ class RobotConfig:
     chassis_width: float = 0.7366 # 29 in to m
 
     # Swerve Drive Parameters
-    speed_clamp: float = 0.35
+    speed_clamp: float = 0.65
 
     # Launcher Parameters
     shooting_flywheel_speed: float = 1.0
@@ -42,5 +42,9 @@ class RobotConfig:
     camera_angle: float = 0
     camera_mount_height: float = 0.25
     apriltag_target_height: float = 1.25
+    
+    front_camera_angle: float = 0
+    front_camera_mount_height: float = 0.25
+    front_apriltag_target_height: float = 1.25
     
     

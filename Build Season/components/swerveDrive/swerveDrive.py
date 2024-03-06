@@ -97,7 +97,7 @@ class SparkMaxDriving:
     """
     
     # PID coefficients
-    kP = 1e-4
+    kP = 0.5
     kI = 0
     kD = 0
     kIz = 0
