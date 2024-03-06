@@ -14,6 +14,7 @@ class RobotConfig:
 
     # Swerve Drive Parameters
     speed_clamp: float = 0.65
+    max_driving_speed = 50 #m/s
 
     # Launcher Parameters
     shooting_flywheel_speed: float = 1.0
@@ -25,7 +26,6 @@ class RobotConfig:
     intake_reverse_rolling_speed: float = -0.2
     intake_feed_speaker_speed: float = 0.35
     intake_feed_delay: float = 0.5
-    
     
     intake_lowered_position: float = 0.58
     intake_raised_position: float = 1.3

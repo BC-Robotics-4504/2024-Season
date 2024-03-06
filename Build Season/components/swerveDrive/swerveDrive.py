@@ -2,6 +2,8 @@ import math
 import rev
 from components.config import RobotConfig
 
+from wpimath.filter import SlewRateLimiter
+
 class SparkMaxTurning:
     """Swerve Drive SparkMax Class
     Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
@@ -142,7 +144,7 @@ class SparkMaxDriving:
         self.controller.setFeedbackDevice(self.encoder)
         
         self.encoder.setPositionConversionFactor(0.1016)
-        self.encoder.setVelocityConversionFactor(0.0008463260209216138)
+        self.encoder.setVelocityConversionFactor(math.pi*wheel_diameter*gear_ratio)
         
         # PID parameters
         self.controller.setP(self.kP)
@@ -152,7 +154,7 @@ class SparkMaxDriving:
         self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
         self.distance_to_rotations = gear_ratio / (math.pi * self.wheel_diameter)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
-        self.motor.setSmartCurrentLimit(40)
+        self.motor.setSmartCurrentLimit(60)
         
         #self.controller.burnFlash()    
 
@@ -166,7 +168,8 @@ class SparkMaxDriving:
         return vel
 
     def setSpeed(self, speed):
-        self.motor.set(speed)
+        # self.motor.set(speed)
+        self.controller.setReference(speed, rev.CANSparkMax.ControlType.kVelocity) #TODO: Changed this.
         return None
     
     def atDistance(self):
@@ -213,6 +216,10 @@ class SwerveDrive:
     __frontRightDistance__: float = 0
     move_changed: bool = False
     distance_changed: bool = False
+
+    LxSlewRateLimiter = SlewRateLimiter(0.5)
+    LySlewRateLimiter = SlewRateLimiter(0.5)
+    W0SlewRateLimiter = SlewRateLimiter(0.5)
     
     def clearFaults(self):
         self.FrontLeftAngleMotor.clearFaults()
@@ -228,9 +235,12 @@ class SwerveDrive:
     def move(self, Lx, Ly, Rx): 
 
         # Check negatives and positives here for Lx, Ly, and Rx
-        Vx0 = -Lx
-        Vy0 = Ly
-        w0 = -Rx
+        # Vx0 = -Lx 
+        # Vy0 = Ly
+        # w0 = -Rx
+        Vx0 = self.LxSlewRateLimiter.calculate(-Lx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
+        Vy0 = self.LySlewRateLimiter.calculate(Ly)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
+        w0 = self.W0SlewRateLimiter.calculate(-Rx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
         
         Vxp = Vx0 + w0*math.pi*self.RobotConfig.chassis_length
         Vxn = Vx0 - w0*math.pi*self.RobotConfig.chassis_length
