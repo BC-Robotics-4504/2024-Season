@@ -333,7 +333,7 @@ class SwerveDrive:
                 self.FrontLeftAngleMotor.setAbsPosition(-flipped_angle)
             self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__)
 
-            # Front right
+            # Rear left
             rl_pos = self.RearLeftAngleMotor.getAbsPosition()
             closest_angle = self.closestAngle(rl_pos, self.__rearLeftAngle__)
             flipped_angle = self.closestAngle(rl_pos, self.__rearLeftAngle__ + math.pi)
