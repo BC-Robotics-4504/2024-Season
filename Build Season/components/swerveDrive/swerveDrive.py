@@ -231,17 +231,6 @@ class SwerveDrive:
         self.FrontRightAngleMotor.clearFaults()
         self.FrontRightSpeedMotor.clearFaults()
         return False
-    
-
-    # def closestAngle(a, b):
-    #     #get direction
-    #     two_pi = math.pi*2
-    #     dir = b%(two_pi) - a%(two_pi)
-
-    #     # convert from -360 to 360 to -180 to 180
-    #     if abs(dir) > math.pi:
-    #         dir = -math.copysign(two_pi, dir) + dir
-    #     return dir
 
     def move(self, Lx, Ly, Rx): 
 
@@ -253,7 +242,7 @@ class SwerveDrive:
         # TODO: Try to prevent wheels turning back when not moving
         if abs(Rx) < RobotConfig.movement_deadzone:
             return False
-
+        
         Vx0 = self.LxSlewRateLimiter.calculate(-Lx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
         Vy0 = self.LySlewRateLimiter.calculate(Ly)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
         w0 = self.W0SlewRateLimiter.calculate(-Rx) #TODO: Check this. Added slew rate limiter and velocity PID
@@ -317,23 +306,74 @@ class SwerveDrive:
             return True
         
         return False
+    
+    def closestAngle(current_angle, setpoint):
+        #get direction
+        two_pi = math.pi*2
+        dir = setpoint%(two_pi) - current_angle%(two_pi)
+
+        # convert from -2*pi to 2*pi to -pi to pi
+        if abs(dir) > math.pi:
+            dir = -math.copysign(two_pi, dir) + dir
+        return dir
         
     def execute(self):
         if self.move_changed:
 
             self.clampSpeed()
+            
+            # TODO: see if this helps...
+            # Front left (https://compendium.readthedocs.io/en/latest/tasks/drivetrains/swerve.html)
+            fl_pos = self.FrontLeftAngleMotor.getAbsPosition()
+            closest_angle = self.closestAngle(fl_pos, self.__frontLeftAngle__)
+            flipped_angle = self.closestAngle(fl_pos, self.__frontLeftAngle__ + math.pi)
+            if abs(closest_angle) <= abs(flipped_angle):
+                self.FrontLeftAngleMotor.setAbsPosition(closest_angle)
+            else:
+                self.FrontLeftAngleMotor.setAbsPosition(-flipped_angle)
+            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__)
 
-            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__) 
-            self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            # Front right
+            rl_pos = self.RearLeftAngleMotor.getAbsPosition()
+            closest_angle = self.closestAngle(rl_pos, self.__rearLeftAngle__)
+            flipped_angle = self.closestAngle(rl_pos, self.__rearLeftAngle__ + math.pi)
+            if abs(closest_angle) <= abs(flipped_angle):
+                self.RearLeftAngleMotor.setAbsPosition(closest_angle)
+            else:
+                self.RearLeftAngleMotor.setAbsPosition(-flipped_angle)
+            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__)
 
-            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__) 
-            self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
+            # Rear right
+            rr_pos = self.RearRightAngleMotor.getAbsPosition()
+            closest_angle = self.closestAngle(rr_pos, self.__rearRightAngle__)
+            flipped_angle = self.closestAngle(rr_pos, self.__rearRightAngle__ + math.pi)
+            if abs(closest_angle) <= abs(flipped_angle):
+                self.RearRightAngleMotor.setAbsPosition(closest_angle)
+            else:
+                self.RearRightAngleMotor.setAbsPosition(-flipped_angle)
+            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__)
 
-            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__) 
-            self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
+            # Front right
+            fr_pos = self.FrontRightAngleMotor.getAbsPosition()
+            closest_angle = self.closestAngle(fr_pos, self.__frontRightAngle__)
+            flipped_angle = self.closestAngle(fr_pos, self.__frontRightAngle__ + math.pi)
+            if abs(closest_angle) <= abs(flipped_angle):
+                self.FrontRightAngleMotor.setAbsPosition(closest_angle)
+            else:
+                self.FrontRightAngleMotor.setAbsPosition(-flipped_angle)
+            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__)
 
-            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
-            self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
+            # self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            # self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__) 
+
+            # self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
+            # self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__) 
+
+            # self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
+            # self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__) 
+            
+            # self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
+            # self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
 
             self.move_changed = False
             
