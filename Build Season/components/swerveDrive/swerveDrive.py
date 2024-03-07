@@ -321,6 +321,18 @@ class SwerveDrive:
         if self.move_changed:
 
             self.clampSpeed()
+
+            self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
+            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__) 
+
+            self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
+            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__) 
+
+            self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
+            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__) 
+            
+            self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
+            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
             
             # # TODO: see if this helps...
             # # Front left (https://compendium.readthedocs.io/en/latest/tasks/drivetrains/swerve.html)
@@ -362,18 +374,6 @@ class SwerveDrive:
             # else:
             #     self.FrontRightAngleMotor.setAbsPosition(-flipped_angle)
             # self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__)
-
-            self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
-            self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__) 
-
-            self.RearLeftAngleMotor.setAbsPosition(self.__rearLeftAngle__)
-            self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__) 
-
-            self.RearRightAngleMotor.setAbsPosition(self.__rearRightAngle__)
-            self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__) 
-            
-            self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
-            self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
 
             self.move_changed = False
             
