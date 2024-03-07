@@ -15,6 +15,7 @@ class RobotConfig:
     # Swerve Drive Parameters
     speed_clamp: float = 0.65
     max_driving_speed = 50 #m/s
+    movement_deadzone = 0.02
 
     # Launcher Parameters
     shooting_flywheel_speed: float = 1.0

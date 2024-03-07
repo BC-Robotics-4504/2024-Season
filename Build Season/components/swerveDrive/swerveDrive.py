@@ -231,6 +231,17 @@ class SwerveDrive:
         self.FrontRightAngleMotor.clearFaults()
         self.FrontRightSpeedMotor.clearFaults()
         return False
+    
+
+    # def closestAngle(a, b):
+    #     #get direction
+    #     two_pi = math.pi*2
+    #     dir = b%(two_pi) - a%(two_pi)
+
+    #     # convert from -360 to 360 to -180 to 180
+    #     if abs(dir) > math.pi:
+    #         dir = -math.copysign(two_pi, dir) + dir
+    #     return dir
 
     def move(self, Lx, Ly, Rx): 
 
@@ -238,6 +249,11 @@ class SwerveDrive:
         # Vx0 = -Lx 
         # Vy0 = Ly
         # w0 = -Rx
+
+        # TODO: Try to prevent wheels turning back when not moving
+        if abs(Rx) < RobotConfig.movement_deadzone:
+            return False
+
         Vx0 = self.LxSlewRateLimiter.calculate(-Lx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
         Vy0 = self.LySlewRateLimiter.calculate(Ly)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
         w0 = self.W0SlewRateLimiter.calculate(-Rx) #TODO: Check this. Added slew rate limiter and velocity PID
