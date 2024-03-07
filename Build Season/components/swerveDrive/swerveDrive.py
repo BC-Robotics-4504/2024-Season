@@ -240,7 +240,7 @@ class SwerveDrive:
         # w0 = -Rx
         Vx0 = self.LxSlewRateLimiter.calculate(-Lx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
         Vy0 = self.LySlewRateLimiter.calculate(Ly)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
-        w0 = self.W0SlewRateLimiter.calculate(-Rx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
+        w0 = self.W0SlewRateLimiter.calculate(-Rx) #TODO: Check this. Added slew rate limiter and velocity PID
         
         Vxp = Vx0 + w0*math.pi*self.RobotConfig.chassis_length
         Vxn = Vx0 - w0*math.pi*self.RobotConfig.chassis_length
