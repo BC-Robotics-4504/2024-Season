@@ -10,10 +10,10 @@ class SparkMaxTurning:
     """
     
     # PID coefficients
-    kP = 0.32
+    kP = 0.25
     kI = 1e-4
     kD = 1
-    kIz = 0.30
+    kIz = 0
     kFF = 0
     kMaxOutput = 1
     kMinOutput = -1
@@ -52,13 +52,14 @@ class SparkMaxTurning:
         self.motor.restoreFactoryDefaults()
         self.motor.setInverted(not inverted)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
-        self.motor.setSmartCurrentLimit(25)
+        self.motor.setSmartCurrentLimit(40)
 
         self.SMcontroller = self.motor.getPIDController()
         self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
         self.encoder.setInverted(inverted)
         self.encoder.setPositionConversionFactor(2*math.pi)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
+        self.encoder.setZeroOffset(z_offset)
         
         self.SMcontroller.setFeedbackDevice(self.encoder)
         self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
@@ -86,7 +87,7 @@ class SparkMaxTurning:
         self.motor.clearFaults()
     
     def setAbsPosition(self, position):
-        self.SMcontroller.setReference(position-self.zOffset, rev.CANSparkMax.ControlType.kPosition)
+        self.SMcontroller.setReference(position, rev.CANSparkMax.ControlType.kPosition)
         return False
     
     def getAbsPosition(self):
@@ -99,13 +100,13 @@ class SparkMaxDriving:
     """
     
     # PID coefficients
-    kP = 0.5
+    kP = 6e-5 
     kI = 0
     kD = 0
     kIz = 0
-    kFF = 0 #FIXME: try tuning this for better driving performance
-    kMaxOutput = 1
-    kMinOutput = -1
+    kFF = 0.00015
+    kMaxOutput = 1000
+    kMinOutput = -1000
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -139,20 +140,16 @@ class SparkMaxDriving:
         self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
          
-        self.encoder = self.motor.getEncoder()
-        self.controller = self.motor.getPIDController()
-        self.controller.setFeedbackDevice(self.encoder)
         
-        self.encoder.setPositionConversionFactor(0.1016)
-        self.encoder.setVelocityConversionFactor(math.pi*wheel_diameter*gear_ratio)
+        self.controller = self.motor.getPIDController()
+        self.encoder = self.motor.getEncoder()
         
         # PID parameters
-        self.controller.setP(self.kP)
-        self.controller.setI(self.kI)
-        self.controller.setD(self.kD)
-        self.controller.setFF(self.kFF)
-        self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput)
-        self.distance_to_rotations = gear_ratio / (math.pi * self.wheel_diameter)
+        self.controller.setP(self.kP, slotID=0)
+        self.controller.setI(self.kI, slotID=0)
+        self.controller.setD(self.kD, slotID=0)
+        self.controller.setFF(self.kFF, slotID=0)
+        self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput, slotID=0)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self.motor.setSmartCurrentLimit(60)
         
@@ -235,34 +232,32 @@ class SwerveDrive:
     def move(self, Lx, Ly, Rx): 
 
         # Check negatives and positives here for Lx, Ly, and Rx
-        # Vx0 = -Lx 
-        # Vy0 = Ly
-        # w0 = -Rx
-
-        # TODO: Try to prevent wheels turning back when not moving
-        if abs(Rx) < RobotConfig.movement_deadzone:
-            return False
+        Vx0 = -Lx*self.RobotConfig.max_driving_speed*self.RobotConfig.drive_wheel_diameter*math.pi
+        Vy0 = Ly*self.RobotConfig.max_driving_speed*self.RobotConfig.drive_wheel_diameter*math.pi
+        w0 = Rx*RobotConfig.max_angular_speed*math.pi
         
-        Vx0 = self.LxSlewRateLimiter.calculate(-Lx)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
-        Vy0 = self.LySlewRateLimiter.calculate(Ly)*RobotConfig.max_driving_speed #TODO: Check this. Added slew rate limiter and velocity PID
-        w0 = self.W0SlewRateLimiter.calculate(-Rx) #TODO: Check this. Added slew rate limiter and velocity PID
-        
-        Vxp = Vx0 + w0*math.pi*self.RobotConfig.chassis_length
-        Vxn = Vx0 - w0*math.pi*self.RobotConfig.chassis_length
-        Vyp = Vy0 + w0*math.pi*self.RobotConfig.chassis_width
-        Vyn = Vy0 - w0*math.pi*self.RobotConfig.chassis_width
+        Vxp = Vx0 + w0*self.RobotConfig.chassis_length
+        Vxn = Vx0 - w0*self.RobotConfig.chassis_length
+        Vyp = Vy0 + w0*self.RobotConfig.chassis_width
+        Vyn = Vy0 - w0*self.RobotConfig.chassis_width
 
         self.__frontLeftAngle__ = math.atan2(Vyp, Vxp)
-        self.__frontLeftSpeed__ = math.hypot(Vyp, Vxp)
+        self.__frontLeftSpeed__ = math.hypot(Vyp, Vxp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
         self.__rearLeftAngle__ = math.atan2(Vyp, Vxn)
-        self.__rearLeftSpeed__ = math.hypot(Vyp, Vxn)
+        self.__rearLeftSpeed__ = math.hypot(Vyp, Vxn)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
         self.__rearRightAngle__ = math.atan2(Vyn, Vxn)
-        self.__rearRightSpeed__ = math.hypot(Vyn, Vxn)
+        self.__rearRightSpeed__ = math.hypot(Vyn, Vxn)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
         self.__frontRightAngle__ = math.atan2(Vyn, Vxp)
-        self.__frontRightSpeed__ = math.hypot(Vyn, Vxp)
+        self.__frontRightSpeed__ = math.hypot(Vyn, Vxp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
+        
+        print('=======================================')
+        print(f'[+] RL Angle: {self.__rearLeftAngle__}')
+        print(f'[+] RR Angle: {self.__rearRightAngle__}'), 
+        print(f'[+] FL Angle: {self.__frontLeftAngle__}')
+        print(f'[+] FR Angle: {self.__frontRightAngle__}\n')
 
         self.move_changed = True
         
@@ -320,7 +315,7 @@ class SwerveDrive:
     def execute(self):
         if self.move_changed:
 
-            self.clampSpeed()
+            # self.clampSpeed()
 
             self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
             self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__) 
@@ -333,47 +328,6 @@ class SwerveDrive:
             
             self.FrontRightAngleMotor.setAbsPosition(self.__frontRightAngle__)
             self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
-            
-            # # TODO: see if this helps...
-            # # Front left (https://compendium.readthedocs.io/en/latest/tasks/drivetrains/swerve.html)
-            # fl_pos = self.FrontLeftAngleMotor.getAbsPosition()
-            # closest_angle = self.closestAngle(fl_pos, self.__frontLeftAngle__)
-            # flipped_angle = self.closestAngle(fl_pos, self.__frontLeftAngle__ + math.pi)
-            # if abs(closest_angle) <= abs(flipped_angle):
-            #     self.FrontLeftAngleMotor.setAbsPosition(closest_angle)
-            # else:
-            #     self.FrontLeftAngleMotor.setAbsPosition(-flipped_angle)
-            # self.FrontLeftSpeedMotor.setSpeed(self.__frontLeftSpeed__)
-
-            # # Rear left
-            # rl_pos = self.RearLeftAngleMotor.getAbsPosition()
-            # closest_angle = self.closestAngle(rl_pos, self.__rearLeftAngle__)
-            # flipped_angle = self.closestAngle(rl_pos, self.__rearLeftAngle__ + math.pi)
-            # if abs(closest_angle) <= abs(flipped_angle):
-            #     self.RearLeftAngleMotor.setAbsPosition(closest_angle)
-            # else:
-            #     self.RearLeftAngleMotor.setAbsPosition(-flipped_angle)
-            # self.RearLeftSpeedMotor.setSpeed(self.__rearLeftSpeed__)
-
-            # # Rear right
-            # rr_pos = self.RearRightAngleMotor.getAbsPosition()
-            # closest_angle = self.closestAngle(rr_pos, self.__rearRightAngle__)
-            # flipped_angle = self.closestAngle(rr_pos, self.__rearRightAngle__ + math.pi)
-            # if abs(closest_angle) <= abs(flipped_angle):
-            #     self.RearRightAngleMotor.setAbsPosition(closest_angle)
-            # else:
-            #     self.RearRightAngleMotor.setAbsPosition(-flipped_angle)
-            # self.RearRightSpeedMotor.setSpeed(self.__rearRightSpeed__)
-
-            # # Front right
-            # fr_pos = self.FrontRightAngleMotor.getAbsPosition()
-            # closest_angle = self.closestAngle(fr_pos, self.__frontRightAngle__)
-            # flipped_angle = self.closestAngle(fr_pos, self.__frontRightAngle__ + math.pi)
-            # if abs(closest_angle) <= abs(flipped_angle):
-            #     self.FrontRightAngleMotor.setAbsPosition(closest_angle)
-            # else:
-            #     self.FrontRightAngleMotor.setAbsPosition(-flipped_angle)
-            # self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__)
 
             self.move_changed = False
             

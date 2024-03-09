@@ -278,7 +278,7 @@ class Launcher:
         return None
     
     def feedShooterAmp(self):
-        self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_amp_shooting_speed)
+        self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_amp_shooting_speed+0.02)
         self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_amp_shooting_speed) 
         return None
     
