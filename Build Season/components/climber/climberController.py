@@ -17,7 +17,7 @@ class ClimberController(StateMachine):
         self.__actionRaise__ = True
 
     def lowerClimber(self):
-        self.__actionaLower__ = True
+        self.__actionLower__ = True
 
     def runClimber(self):
         self.engage()
@@ -25,20 +25,20 @@ class ClimberController(StateMachine):
     @state(first=True)
     def __wait__(self):
         if self.__actionLower__:
-            self.next_state('__lowerIntake__')
+            self.next_state('__lowerClimber__')
 
         elif self.__actionRaise__:
-            self.next_state('__raiseIntake__')
+            self.next_state('__raiseClimber__')
 
     @state(must_finish=True)
-    def __raiseIntake__(self):
+    def __raiseClimber__(self):
         if self.Climber.ClimberPosition != ClimberPositions.RAISED:
             self.Climber.raiseClimber()
         else:
             self.next_state('__wait__')
 
     @state(must_finish=True)
-    def __lowerIntake__(self):
+    def __lowerClimber__(self):
         if self.Climber.ClimberPosition != ClimberPositions.LOWERED:
             self.Climber.lowerClimber()
         else:

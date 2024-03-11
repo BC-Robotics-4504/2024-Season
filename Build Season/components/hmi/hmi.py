@@ -12,19 +12,30 @@ class HMI:
     def __init__(self):
         self.changed = True
         
+        # Analog Sticks
+
         self.leftX = 0.
         self.leftY = 0.
         self.rightX = 0.
         self.rightY = 0.
         
+        # Buttons
         self.A = False
         self.B = False
-        self.RB = False
-        self.LB = False
-        self.RT = 0.
-        self.LT = 0.
         self.X = False
         self.Y = False
+
+        # Bumpers
+        self.RB = False
+        self.LB = False
+
+        # Triggers
+        self.RT = 0.
+        self.LT = 0.
+   
+        # Other
+        self.start = False
+    
         
 
     def updateAnalogSticks(self):
@@ -44,6 +55,7 @@ class HMI:
         self.LT = self.xbox.getLeftTriggerAxis()
         self.RB = self.xbox.getRightBumper()
         self.LB = self.xbox.getLeftBumper()
+        self.start = self.xbox.getStartButton()
         return None
     
     def getA(self):
@@ -85,6 +97,11 @@ class HMI:
         LB = self.LB
         self.LB = False
         return  LB
+    
+    def getStart(self):
+        START = self.start
+        self.start = False
+        return START
 
     def getAnalogSticks(self):
         return self.leftX, self.leftY, self.rightX, self.rightY
