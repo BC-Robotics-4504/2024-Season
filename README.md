@@ -16,122 +16,77 @@ robotpy installer install robotpy[all]
 
 ## Hardware Configuration
 
-### Intake Pivot
+### Swerve Drive
 
-- **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** (1x):
-  - Drives [Neo Brushless Motor V1.1](https://www.revrobotics.com/rev-21-1650/)
+- **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** (8x):
+  - Drives [MK4i Swerve Module](https://www.swervedrivespecialties.com/products/mk4i-swerve-module) (4x)
 
-| Position | Value | Unit |
-| --- | --- | --- |
-| CAN ID | 12 |  |
-| Gear Ratio | 1:64 |  |
-| Sprocket Diameter | 0.0762 (3) | m (in) |
-| Retracted | 0 | m |
-| Mid-Extended | 0.06 | m |
-| Extended | 0.12 | m|
+| Component                 | Type             | ID/Details | Inverted | Gear Ratio | Wheel Diameter | Absolute Encoder | Z-Offset   |
+|---------------------------|------------------|------------|----------|------------|----------------|------------------|------------|
+| Front Left Angle Motor    | SparkMaxTurning  | 6          | No       | 1          | 1              | Yes              | 5.7535123  |
+| Front Left Speed Motor    | SparkMaxDriving  | 5          | No       | 1          | 0.1143         |                  |            |
+| Rear Left Angle Motor     | SparkMaxTurning  | 8          | No       | 1          | 1              | Yes              | 5.6867370  |
+| Rear Left Speed Motor     | SparkMaxDriving  | 7          | No       | 1          | 0.1143         |                  |            |
+| Rear Right Angle Motor    | SparkMaxTurning  | 2          | No       | 1          | 1              | Yes              | 5.5975077  |
+| Rear Right Speed Motor    | SparkMaxDriving  | 1          | No       | 1          | 0.1143         |                  |            |
+| Front Right Angle Motor   | SparkMaxTurning  | 4          | No       | 1          | 1              | Yes              | 0.0182671  |
+| Front Right Speed Motor   | SparkMaxDriving  | 3          | No       | 1          | 0.1143         |                  |            |
 
-- **[Pneumatic Hub](https://www.revrobotics.com/rev-11-1852/)**:
-  - CAN ID `11`
-  - Double solenoid
+### Launcher
 
-### Elevator
+- **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** ():
+  - Drives [Neo 550 Brushless Motor](https://www.revrobotics.com/rev-21-1651/)
 
-- **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** (1x, +1 spare):
-  - Drives [Neo Brushless Motor V1.1](https://www.revrobotics.com/rev-21-1650/)
+| Component            | Type                | ID/Details | Inverted | Gear Ratio | Follower CAN ID |
+|----------------------|---------------------|------------|----------|------------|-----------------|
+| Launcher Spinner Left | SparkMaxDualSpinner | 10         | Yes      |            |                 |
+| Launcher Spinner Right | SparkMaxDualSpinner | 12        | No       |            |                 |
+| Intake Spinner Left  | SparkMaxDualSpinner | 14         | Yes      |            |                 |
+| Intake Spinner Right | SparkMaxDualSpinner | 13         | Yes      |            |                 |
+| Intake Pivot         | SparkMaxPivot       | 9          | No       | 4          | 15              |
 
-| Position | Value | Unit |
-| --- | --- | --- |
-| CAN ID | 13 |  |
-| Gear Ratio | 1:20 |  |
-| Sprocket Diameter | 0.0508 (2) | m (in) |
-| Ground (Default)| 0 | m |
-| Score Low | 0.25 | m |
-| Score Mid | 0.40 | m |
-| Score Extra-Mid | 0.8 | m |
-| Score High | 1.0620 | m |
+### Climber
 
-### Drivetrain
-
-- **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** (4x):
-  - *LEFT SIDE*:  
-    - Drives 2x [Neo Brushless Motor V1.1](https://www.revrobotics.com/rev-21-1650/)
-    - [2 Motor Gearbox](https://www.revrobotics.com/rev-21-2099/)
-    - Inverted
-
-| Position | Value | Unit |
-| --- | --- | --- |
-| Leader CAN ID | 2 |  |
-| Follower CAN ID | 1 |  |
-| Gear Ratio | (68/30)x(52/11) |  |
-| Wheel Diameter | 0.1524 (6) | m (in) |
-
-- *RIGHT SIDE*:  
-  - Drives 2x [Neo Brushless Motor V1.1](https://www.revrobotics.com/rev-21-1650/)
-  - [2 Motor Gearbox](https://www.revrobotics.com/rev-21-2099/)
-  - Non-inverted
-
-| Position | Value | Unit |
-| --- | --- | --- |
-| Leader CAN ID | 3 |  |
-| Follower CAN ID | 4 |  |
-| Gear Ratio | (68/30)x(52/11)|  |
-| Wheel Diameter | 0.1524 (6) | m (in) |
+- **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** (2x):
+  
+| Component            | Type          | ID/Details | Inverted |
+|----------------------|---------------|------------|----------|
+| Climber Motor Left   | SparkMaxClimb | 16         | No       |
+| Climber Motor Right  | SparkMaxClimb | 17         | Yes      |
 
 ### Robot IP Address
 
 `10.45.4.1`  
 
-### Sensors
-
-- **[Pigeon 2.0](https://www.google.com/search?client=safari&rls=en&q=pigeon+2.0&ie=UTF-8&oe=UTF-8)**:
-  - CAN ID `15`
-  - Orientation: Z up, X forward, Y right
-
-| Sensor Direction | Robot Direction |
-| --- | --- |
-| +X | Right |
-| +Y | Forward |
-| +Z | Up |
+### Vision
 
 - **[Limelight 2.0](https://docs.limelightvision.io/en/latest/)**:
-  - Static IP address `10.4.45.11`
-
-- **[PhotonVision (RPi)](https://photonvision.org)**:
-  - Static IP address `10.4.45.12`
-  - Camera Name `MSWebCam`
+  - Static IP address (Front) `10.4.45.11`
+  - Static IP address (Rear)  `10.4.45.12`
+  
+| Component       | Type      | IP         | Name           |
+|-----------------|-----------|------------|----------------|
+| Limelight       | Limelight |`10.4.45.11`| limelight      |
+| Limelight Front | Limelight |`10.4.45.12`| limelight-front|
 
 ## Robot Controls
 
 ### **[GameSir G7 Wired Controller](https://www.amazon.com/dp/B0BM9HRCCV?ref_=cm_sw_r_apin_dp_ER34REM3C1FQSY0W5MQR)**
 
 - Input device ID `0`
-- **Left Joystick**: Move Robot along the Y-axis
-- **Right Joystick**: Moves robot along X-axis
-- **Right Trigger**: Open Grabber
-- **Left Trigger**: Closes Grabber
-- **Y**: Score a High Goal  
-- **B**: Score a Mid Goal  
-- **A**: Return superstructure to default positon  
-- **Back**: Fully retracts superstructure and disables break
-- **Start**: Fully retracts superstructure  
-- **D-Pad Up**: Pickup from loading zone
-
-## Game Controller Functionality  
-
-- **<Score_High>**: Score a high goal
-- **<Score_Mid>**: Score a medium goal
-- **<Score_Low>**: Score a low goal
-- **<controller_floor>**: Picks up a gamepiece from the ground  
-- **<controller_station>**: Picks up a gamepiece from the loading zone  
-- **<controller_autonomous>**: Controls autonomous mode
-
+- **Left Joystick (Lx, Ly)**: Controls the robot's movement in the field. The X-axis (Lx) translates to movement in the x-direction while the Y-axis translates to movement in the y-direction.
+- **Right Joystick (Rx)**: Controls the robot's rotation on the field. The X-axis (Rx) influences the angular velocity of the robot.
+- **Right Trigger (RT)**: Engages the launcher to shoot.
+- **Left Trigger (LT)**: Engages auto-alignment with the AprilTag. When pressed beyond a certain threshold(.35), it activates the alignment process for precise targeting.
+- **Y Button**: Positions the intake to score in the amp.
+- **B Button**: Deactivates the front camera, raises the intake.
+- **A Button**: Activates the front camera and lowers the intake.
 
 ## Autonomous Operation
 
   **Our autonomous plan is as follows...**
 
-  1. Backup .5 meters
-  2. Extend grabber and elevator
-  3. Move up .5 meters
-  4. Score a gamepiece (preferably cube)
-  5. Backup 3 meters and exit the communtity (when .5 meters is reached the superstructure retracts.)
+  1. Backup to shooting positon
+  2. Shoot preloaded game piece
+  3. Backup 2.75844 meters to exit community
+  
