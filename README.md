@@ -4,18 +4,19 @@
 
 BC Robotics (Team #4504) has designed their 2024 FIRST Robotics submission using [Robotpy](https://robotpy.readthedocs.io/en/stable/install/robot.html) with the [MagicBot Framework](https://robotpy.readthedocs.io/en/stable/frameworks/magicbot.html). To keep the relevant libraries current, the following code will need to be run regularly in a terminal interface:
 
-```shd
+```bash
 python -m pip install --upgrade pip
 python -m pip install robotpy wpilib
 robotpy installer download-python
 robotpy installer install-python
+robotpy sync
 robotpy installer download robotpy[all]
 robotpy installer install robotpy[all]
 ```
 
 ## Hardware Configuration
 
-### Grabber Arm
+### Intake Pivot
 
 - **[SparkMax](https://www.revrobotics.com/rev-11-2158/)** (1x):
   - Drives [Neo Brushless Motor V1.1](https://www.revrobotics.com/rev-21-1650/)
