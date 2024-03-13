@@ -11,14 +11,14 @@ class SparkMaxClimb:
     """
     
     # PID coefficients
-    kP = 0.32
-    kI = 1e-4
-    kD = 1
-    kIz = 0.30
-    kFF = 0
+    kP = 0.1
+    kI = 0
+    kD = 0
+    kIz = 0
+    kFF = 0.000156
     kMaxOutput = 1
     kMinOutput = -1
-    maxRPM = 5700
+    maxRPM = 1000
 
     # Smart Motion Coefficients
     maxVel = 2000  # rpm
@@ -55,18 +55,17 @@ class SparkMaxClimb:
         self.motor.restoreFactoryDefaults()
         self.motor.setInverted(not inverted)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
-        self.motor.setSmartCurrentLimit(25)
+        self.motor.setSmartCurrentLimit(60)
 
         self.SMcontroller = self.motor.getPIDController()
-        self.encoder = self.motor.getAbsoluteEncoder(rev.SparkMaxAbsoluteEncoder.Type.kDutyCycle)
-        self.encoder.setInverted(inverted)
+        self.encoder = self.motor.getEncoder()
         self.encoder.setPositionConversionFactor(2*math.pi)
         self.encoder.setVelocityConversionFactor(.104719755119659771)
         
         self.SMcontroller.setFeedbackDevice(self.encoder)
         self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
-        self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
-        self.SMcontroller.setPositionPIDWrappingMaxInput(2*math.pi) #TODO: does this need to be removed?
+        # self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
+        # self.SMcontroller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
         
         # PID parameters
         self.SMcontroller.setP(self.kP)
@@ -91,7 +90,7 @@ class SparkMaxClimb:
         position:position to set the motor controller to
         
         """
-        self.target_position = position-self.zOffset
+        self.target_position = position
         self.SMcontroller.setReference(self.target_position, rev.CANSparkMax.ControlType.kPosition)
         return False
     
@@ -113,61 +112,36 @@ class SparkMaxClimb:
             return True
         return False
 
-class ClimberPositions(Enum):
-    RAISED = 1
-    LOWERING = 2
-    LOWERED = 3
-    RAISING = 4
-
 class Climber:
     RobotConfig: RobotConfig
 
     ClimberMotorL: SparkMaxClimb
     ClimberMotorR: SparkMaxClimb
 
-    ClimberPosition: ClimberPositions
-    __climberChanged__: bool = False
-
-    def __init__(self):
-        self.ClimberPosition = ClimberPositions.LOWERED
-        pass        
+    __climberChanged__: bool = False       
 
     def raiseClimber(self):
         """Climber.raiseClimber() -> None
         
         Raise the climber."""  
-        if self.ClimberPosition != ClimberPositions.RAISED:
-            self.ClimberPosition = ClimberPositions.RAISING
-            self.__climberChanged__ = True
+        rotations = self.RobotConfig.climbing_min_distance/self.RobotConfig.climbing_m_per_rot
+        self.ClimberMotorL.setPosition(-rotations)
+        self.ClimberMotorR.setPosition(-rotations)
         return None
 
     def lowerClimber(self):  
         """Climber.lowerClimber() -> None
         
         Lower the climber."""
-        if self.ClimberPosition != ClimberPositions.LOWERED:
-            self.ClimberPosition = ClimberPositions.LOWERING
-            self.__climberChanged__ = True
+        rotations = self.RobotConfig.climbing_max_distance/self.RobotConfig.climbing_m_per_rot
+        self.ClimberMotorL.setPosition(rotations)
+        self.ClimberMotorR.setPosition(rotations)
         return None
 
     def execute(self):
         """Climber.execute() -> None
         
         Execute the climber commands."""
-        if self.__climberChanged__:
-            if self.ClimberPosition == ClimberPositions.LOWERING:
-                self.ClimberMotorL.setPosition(0.0)
-                self.ClimberMotorR.setPosition(0.0)
-                atPositionL = self.ClimberMotorL.atPosition()
-                atPositionR = self.ClimberMotorR.atPosition()
-                if atPositionL and atPositionR:
-                    self.ClimberPosition = ClimberPositions.LOWERED
-
-            if self.ClimberPosition == ClimberPositions.RAISING:
-                self.ClimberMotorL.setPosition(self.RobotConfig.climbing_max_distance)
-                self.ClimberMotorR.setPosition(self.RobotConfig.climbing_max_distance)
-                atPositionL = self.ClimberMotorL.atPosition()
-                atPositionR = self.ClimberMotorR.atPosition()
-                if atPositionL and atPositionR:
-                    self.ClimberPosition = ClimberPositions.RAISED
+        self.leftArmPosition = self.ClimberMotorL.getPosition()
+        self.rightArmPosition = self.ClimberMotorR.getPosition()
 

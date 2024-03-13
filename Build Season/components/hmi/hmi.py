@@ -37,12 +37,15 @@ class HMI:
         # Triggers
         self.RT = 0.
         self.LT = 0.
+        
+        #Dpad
+        self.DpadUp = False
+        self.DpadDown = False
    
         # Other
         self.start = False
         self.rightStickButton = False
         self.leftStickButton = False
-    
         
 
     def updateAnalogSticks(self):
@@ -55,7 +58,7 @@ class HMI:
         self.rightX = self.xbox.getRightX()
         self.rightY = self.xbox.getRightY()
         return False
-    
+        
     def updateButtons(self):
         """HMI.updateButtons() -> None
         
@@ -71,6 +74,15 @@ class HMI:
         self.start = self.xbox.getStartButton()
         self.rightStickButton = self.xbox.getRightStickButtonPressed()
         self.leftStickButton = self.xbox.getLeftStickButtonPressed()
+        rawDpad = self.xbox.getPOV()
+        
+        if rawDpad != -1:
+            if rawDpad == 0 or rawDpad == 315 or rawDpad == 45: #Dpad up
+                self.DpadUp = True
+                
+            if rawDpad == 135 or rawDpad == 180 or rawDpad == 225: #Dpad down
+                self.DpadDown = True
+
         return None
     
     def getA(self):
@@ -168,6 +180,16 @@ class HMI:
         
         return the state of the analog sticks."""
         return self.leftX, self.leftY, self.rightX, self.rightY
+    
+    def getDpadUp(self):
+        DPAD_UP = self.DpadUp
+        self.DpadUp = False
+        return DPAD_UP
+    
+    def getDpadDown(self):
+        DPAD_DOWN = self.DpadDown
+        self.DpadDown = False
+        return DPAD_DOWN
 
     def execute(self):
         self.updateAnalogSticks()

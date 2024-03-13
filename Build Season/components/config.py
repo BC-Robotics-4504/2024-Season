@@ -43,7 +43,9 @@ class RobotConfig:
     
 
     # Climber Parameters
-    climbing_max_distance: float = 0.5
+    climbing_m_per_rot: float = (0.0013/25)
+    climbing_max_distance: float = 0.254
+    climbing_min_distance: float = 0
 
     # Vision Parameters
     camera_angle: float = 0

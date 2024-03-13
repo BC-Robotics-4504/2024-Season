@@ -1,10 +1,18 @@
-from magicbot import StateMachine, timed_state, state
+from enum import Enum
+from magicbot import StateMachine, state
 
-from components.climber.climber import Climber, ClimberPositions
+from components.climber.climber import Climber
+
+class ClimberActions(Enum):
+    RAISE_ARMS = 1
+    LOWER_ARMS = 2
+    WAIT = 3
 
 class ClimberController(StateMachine):
     MODE_NAME = "Climber Controller"
     DEFAULT = False
+    
+    target_action = ClimberActions.WAIT
 
     Climber: Climber
 
@@ -14,32 +22,30 @@ class ClimberController(StateMachine):
     __actionLower__ = False
 
     def raiseClimber(self):
-        self.__actionRaise__ = True
+        self.target_action = ClimberActions.RAISE_ARMS
 
     def lowerClimber(self):
-        self.__actionLower__ = True
+        self.target_action = ClimberActions.LOWER_ARMS
 
     def runClimber(self):
         self.engage()
 
     @state(first=True)
     def __wait__(self):
-        if self.__actionLower__:
+        if self.target_action:
             self.next_state('__lowerClimber__')
 
-        elif self.__actionRaise__:
+        elif self.target_action:
             self.next_state('__raiseClimber__')
+            
+        self.target_action = ClimberActions.WAIT
 
-    @state(must_finish=True)
+    @state()
     def __raiseClimber__(self):
-        if self.Climber.ClimberPosition != ClimberPositions.RAISED:
-            self.Climber.raiseClimber()
-        else:
-            self.next_state('__wait__')
+        self.Climber.raiseClimber()
+        self.next_state('__wait__')
 
-    @state(must_finish=True)
+    @state()
     def __lowerClimber__(self):
-        if self.Climber.ClimberPosition != ClimberPositions.LOWERED:
-            self.Climber.lowerClimber()
-        else:
-            self.next_state('__wait__')
+        self.Climber.lowerClimber()
+        self.next_state('__wait__')

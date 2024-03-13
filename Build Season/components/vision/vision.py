@@ -61,8 +61,11 @@ class Vision:
         
     def checkSpeakerRange(self):
         """checkSpeakerRange() -> None
-        
         Check if the target is in range of the speakers. If it is, turn on the LimeLight LEDs. If it is not, turn off the LimeLight LED's."""
+        
+        if self.target_distance is None:
+            return False
+        
         if self.target_distance >= self.RobotConfig.min_target_range and self.target_distance <=self.RobotConfig.max_target_range:
             self.LimeLight.light(LEDState.ON)
             self.LimeLightFront.light(LEDState.ON)

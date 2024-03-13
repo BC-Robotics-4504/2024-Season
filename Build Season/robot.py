@@ -73,8 +73,8 @@ class MyRobot(MagicRobot):
         self.Launcher_LimitSwitch = wpilib.DigitalInput(0)
         
         # Climber Hardware Config
-        self.Climber_ClimberMotorL = SparkMaxClimb(16) #FIXME!!!
-        self.Climber_ClimberMotorR = SparkMaxClimb(17, inverted=True) #FIXME!!!
+        self.Climber_ClimberMotorL = SparkMaxClimb(16)
+        self.Climber_ClimberMotorR = SparkMaxClimb(17, inverted=True)
 
         # HMI Hardware Config
         self.HMI_xbox = wpilib.XboxController(0)
@@ -134,7 +134,15 @@ class MyRobot(MagicRobot):
             #     self.LauncherController.spindownLauncher()
 
         self.LauncherController.runLauncher()
+        
+        #3.) Actuate Climber
+        if self.HMI.getDpadUp():
+            self.ClimberController.raiseClimber()
 
+        elif self.HMI.getDpadDown():
+            self.ClimberController.lowerClimber()
+
+        self.ClimberController.runClimber()
 
         '''
         SmartDashboard Setup
@@ -156,27 +164,6 @@ class MyRobot(MagicRobot):
         wpilib.SmartDashboard.putBoolean('Intake Camera Active', self.controlGain > 0)
 
         wpilib.SmartDashboard.putBoolean('Speaker In Range', self.Vision.inRange)
-
-
-        # # elif self.HMI.getLB():
         
-        # if self.HMI.getRightStickButton():
-        #     self.ClimberController.raiseClimber()
-        
-        # elif self.HMI.getLeftStickButton():
-        #     self.ClimberController.lowerClimber()
-
-        
-
-        
-        # #3.) Actuate Climber
-        # if self.HMI.getRB():
-        #     self.ClimberController.raiseClimber()
-
-        # elif self.HMI.getLB():
-        #     self.ClimberController.lowerClimber()
-
-        # self.ClimberController.runClimber()
-
 if __name__ == "__main__":
     wpilib.run(MyRobot)
