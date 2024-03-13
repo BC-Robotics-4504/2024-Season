@@ -32,13 +32,15 @@ class MyRobot(MagicRobot):
     Launcher: Launcher
     LauncherController: LauncherController
 
-    # # Climber Component Code    
-    # Climber: Climber
-    # ClimberController: ClimberController
+    # Climber Component Code    
+    Climber: Climber
+    ClimberController: ClimberController
 
     # Vision Componenet Code
     Vision: Vision
     Alignment: AutoAlignment
+    
+    controlGain: float = 1
 
     def createObjects(self):
         # Swerve Drive Hardware Config
@@ -68,8 +70,8 @@ class MyRobot(MagicRobot):
         self.Launcher_LimitSwitch = wpilib.DigitalInput(0)
         
         # Climber Hardware Config
-        # self.Climber_ClimberMotorL = SparkMaxClimb(14) #FIXME!!!
-        # self.Climber_ClimberMotorR = SparkMaxClimb(15, inverted=True) #FIXME!!!
+        self.Climber_ClimberMotorL = SparkMaxClimb(16) #FIXME!!!
+        self.Climber_ClimberMotorR = SparkMaxClimb(17, inverted=True) #FIXME!!!
 
         # HMI Hardware Config
         self.HMI_xbox = wpilib.XboxController(0)
@@ -89,9 +91,15 @@ class MyRobot(MagicRobot):
         pass
 
     def teleopPeriodic(self):
-        print(self.Vision.getTargetDistance())
+        
+        # if self.Vision.getTargetDistance() is not None:
+        #     print(self.Vision.getTargetDistance())
         # Move drivetrain based on Left X/Y and Right X/Y controller inputs
         Lx, Ly, Rx, _ = self.HMI.getAnalogSticks()
+        
+        # Rx *= self.controlGain
+        Lx *= self.controlGain
+        Ly *= self.controlGain
 
         self.SwerveDrive.move(Lx, Ly, Rx)
 
@@ -99,10 +107,12 @@ class MyRobot(MagicRobot):
         if self.HMI.getA():
             self.Vision.enableFrontCamera()
             self.LauncherController.lowerIntake()
+            self.controlGain = -1
 
         if self.HMI.getB():
             self.Vision.disableFrontCamera()
             self.LauncherController.raiseIntake()
+            self.controlGain = 1
             
         if self.HMI.getY():
             self.LauncherController.raiseIntakeAmp()
@@ -112,11 +122,20 @@ class MyRobot(MagicRobot):
             
         if self.HMI.getLT() > 0.35:
             self.Alignment.align()
-                        
-        # elif self.HMI.getLB():
-        #     self.LauncherController.spindownLauncher()
+            #     self.LauncherController.spindownLauncher()
 
         self.LauncherController.runLauncher()
+            
+        # # elif self.HMI.getLB():
+        
+        # if self.HMI.getRightStickButton():
+        #     self.ClimberController.raiseClimber()
+        
+        # elif self.HMI.getLeftStickButton():
+        #     self.ClimberController.lowerClimber()
+
+        
+
         
         # #3.) Actuate Climber
         # if self.HMI.getRB():

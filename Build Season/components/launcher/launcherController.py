@@ -26,6 +26,7 @@ class LauncherController(StateMachine):
     Launcher: Launcher
 
     isEngaged = False
+    isShooting = False
     
     timer = Timer()
     timer.start()
@@ -38,12 +39,17 @@ class LauncherController(StateMachine):
         
     def raiseIntakeAmp(self):
         self.target_action = LauncherActions.SHOOT_AMP
+        self.isShooting = False
 
     def shootSpeaker(self):
         self.target_action = LauncherActions.SHOOT_SPEAKER
+        self.isShooting = True
 
     def runLauncher(self):
         self.engage()
+
+    def currentlyShooting(self):
+        return self.isShooting
 
     '''
     STATE MACHINE DEFINITIONS ===================================
@@ -87,6 +93,7 @@ class LauncherController(StateMachine):
         self.Launcher.feedShooterSpeaker()
         if self.timer.hasElapsed(self.RobotConfig.intake_feed_delay):
             self.timer.stop()
+            self.isShooting = False
             self.next_state('__spindownLauncher__')
             
     @state()
@@ -113,6 +120,7 @@ class LauncherController(StateMachine):
         self.Launcher.feedShooterAmp()
         if self.timer.hasElapsed(self.RobotConfig.intake_feed_delay):
             self.timer.stop()
+            self.isShooting = False
             self.next_state('__raiseIntake__')            
         
 

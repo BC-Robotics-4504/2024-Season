@@ -6,10 +6,10 @@ from components.launcher.launcherController import LauncherController
 
 # this is one of your components
 
-
+BACKUP_DISTANCE = 2.75844
 
 class DefaultAuto(AutonomousStateMachine):
-    
+     
     SwerveDrive : SwerveDrive
     LauncherController: LauncherController
     MODE_NAME = "Default Auto"
@@ -25,12 +25,13 @@ class DefaultAuto(AutonomousStateMachine):
     @state(must_finish=True)
     def __shoot__(self):
         self.LauncherController.shootSpeaker()
-        self.next_state('__driveBackwards__')
+        if not self.LauncherController.currentlyShooting():
+            self.next_state('__driveBackwards__')
         return False
 
     @state(must_finish=True)
     def __driveBackwards__(self):
-        self.SwerveDrive.goDistance(-3.0, 0, 0)
+        self.SwerveDrive.goDistance(BACKUP_DISTANCE, 0, 0)
         print(f"[{time.time()}] ================================= I am moving =======================================")
         if self.SwerveDrive.atDistance():
             self.next_state('stop')

@@ -39,6 +39,15 @@ class Vision:
         
     def disableFrontCamera(self):
         self.front_camera_active = False
+        
+    def checkSpeakerRange(self):
+        if self.target_distance >= self.RobotConfig.min_target_range and self.target_distance <=self.RobotConfig.max_target_range:
+            self.LimeLight.light(LEDState.ON)
+            self.LimeLightFront.light(LEDState.ON)
+        else:
+            self.LimeLight.light(LEDState.OFF)
+            self.LimeLightFront.light(LEDState.OFF)           
+                       
 
     def execute(self):
         if not self.front_camera_active:
@@ -53,6 +62,9 @@ class Vision:
                 self.horizontal_offset = self.LimeLight.horizontal_offset
                 self.vertical_offset = self.LimeLight.vertical_offset
                 
+                self.checkSpeakerRange()
+                
+
             else:
                 self.LimeLight.light(LEDState.OFF)
                 

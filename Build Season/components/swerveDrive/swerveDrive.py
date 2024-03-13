@@ -73,24 +73,29 @@ class SparkMaxTurning:
         self.SMcontroller.setIZone(self.kIz)
         self.SMcontroller.setFF(self.kFF)
         self.SMcontroller.setOutputRange(self.kMinOutput, self.kMaxOutput)
-
-        # # Smart Motion Parameters
-        # self.SMcontroller.setSmartMotionMaxVelocity(self.maxVel, self.smartMotionSlot)
-        # self.SMcontroller.setSmartMotionMinOutputVelocity(self.minVel, self.smartMotionSlot)
-        # self.SMcontroller.setSmartMotionMaxAccel(self.maxAcc, self.smartMotionSlot)
-        # self.SMcontroller.setSmartMotionAllowedClosedLoopError(self.allowedErr, self.smartMotionSlot)
         
         #self.controller.burnFlash()    
         self.clearFaults()
     
     def clearFaults(self):
+        """SparkMaxTurning.clearFaults()
+        
+        Clears the faults of the turning SparkMax
+        """
         self.motor.clearFaults()
     
     def setAbsPosition(self, position):
+        """SparkMaxTurning.setAbsPosition()
+        
+        Sets the absoulute positon of the encoder"""
         self.SMcontroller.setReference(position, rev.CANSparkMax.ControlType.kPosition)
         return False
     
     def getAbsPosition(self):
+        """SparkMaxTurning.getAbsPosition()
+        
+        Gets the absolute positon of the encoder
+        """
         rotation = self.encoder.getPosition()
         return rotation
 
@@ -140,7 +145,6 @@ class SparkMaxDriving:
         self.motor = rev.CANSparkMax(canID, rev.CANSparkMax.MotorType.kBrushless)  
         self.motor.restoreFactoryDefaults()
          
-        
         self.controller = self.motor.getPIDController()
         self.encoder = self.motor.getEncoder()
         
@@ -153,35 +157,57 @@ class SparkMaxDriving:
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self.motor.setSmartCurrentLimit(60)
         
-        #self.controller.burnFlash()    
-
         self.clearFaults()
 
     def clearFaults(self):
+        """SparkMaxDriving.clearFaults()
+        
+        Clears the faults of the speed SparkMax"""
         self.motor.clearFaults()
     
     def getSpeed(self):
+        """SparkMaxDriving.getSpeed()
+        
+        Gets the current speed of the swerve modules
+        """
         vel = -self.encoder.getVelocity()  # rpm
         return vel
 
     def setSpeed(self, speed):
+        """
+        SparkMaxDriving.setSpeed()
+        
+        Sets the speed of the swerve modules """
         # self.motor.set(speed)
-        self.controller.setReference(speed, rev.CANSparkMax.ControlType.kVelocity) #TODO: Changed this.
+        self.controller.setReference(speed, rev.CANSparkMax.ControlType.kVelocity) #NOTE: Changed this.
         return None
     
     def atDistance(self):
+        """SparkMaxDriving.atDistance()
+        
+        Checks if the robot has travlled to the specfied distance"""
         currentDistance = self.encoder.getPosition()
         if abs(currentDistance-self.targetDistance) <= self.tolerance:
             return True
         return False
-    
-    def setDistance(self, targetDistance):
+
+    def setDistance(self, targetDistance: float):
+        """SparkMaxDriving.setDistance()
+        
+        Sets a distance for the robot to travel 
+        
+        ::params: 
+        targetDistance: Distance for the robot to travel
+        """
         self.targetDistance = targetDistance
         self.encoder.setPosition(0)
         self.controller.setReference(targetDistance, rev.CANSparkMax.ControlType.kPosition)
         return False
 
 class SwerveDrive:
+    """ SwerveDrive Class 
+
+    """
     RobotConfig: RobotConfig
 
     FrontLeftAngleMotor: SparkMaxTurning
@@ -216,9 +242,12 @@ class SwerveDrive:
 
     LxSlewRateLimiter = SlewRateLimiter(0.5)
     LySlewRateLimiter = SlewRateLimiter(0.5)
-    W0SlewRateLimiter = SlewRateLimiter(0.5)
+    RxSlewRateLimiter = SlewRateLimiter(1)
     
     def clearFaults(self):
+        """SwerveDrive.clearFaults()
+        Clears faults on all of the SparkMax modules
+        """
         self.FrontLeftAngleMotor.clearFaults()
         self.FrontLeftSpeedMotor.clearFaults()
         self.RearLeftAngleMotor.clearFaults()
@@ -229,18 +258,27 @@ class SwerveDrive:
         self.FrontRightSpeedMotor.clearFaults()
         return False
 
-    def move(self, Lx, Ly, Rx): 
+    def move(self, Lx: float, Ly: float, Rx: float): 
+        """SwerveDrive.move(Lx: float, Ly: float, Rx: float)
 
+        ::params::
+        Lx: Magnitude to move in the x direction in range, negative is forward [-1, 1]
+        Ly: Magnitude to move in the y direction in range, positive is left [-1, 1]
+        Rx: Magnitude of rotational speed where counter-clockwise is positive [-1, 1]
+        """
+        # Rx = self.RxSlewRateLimiter.calculate(Rx)
         # Check negatives and positives here for Lx, Ly, and Rx
         Vx0 = -Lx*self.RobotConfig.max_driving_speed*self.RobotConfig.drive_wheel_diameter*math.pi
         Vy0 = Ly*self.RobotConfig.max_driving_speed*self.RobotConfig.drive_wheel_diameter*math.pi
-        w0 = Rx*RobotConfig.max_angular_speed*math.pi
+        w0 = -Rx*RobotConfig.max_angular_speed*math.pi
         
+        # Calculate component vectors for the swerve modeule
         Vxp = Vx0 + w0*self.RobotConfig.chassis_length
         Vxn = Vx0 - w0*self.RobotConfig.chassis_length
         Vyp = Vy0 + w0*self.RobotConfig.chassis_width
         Vyn = Vy0 - w0*self.RobotConfig.chassis_width
 
+        # Calculate the speed and angle for each swerve motor
         self.__frontLeftAngle__ = math.atan2(Vyp, Vxp)
         self.__frontLeftSpeed__ = math.hypot(Vyp, Vxp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
@@ -252,18 +290,26 @@ class SwerveDrive:
 
         self.__frontRightAngle__ = math.atan2(Vyn, Vxp)
         self.__frontRightSpeed__ = math.hypot(Vyn, Vxp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
-        
-        print('=======================================')
-        print(f'[+] RL Angle: {self.__rearLeftAngle__}')
-        print(f'[+] RR Angle: {self.__rearRightAngle__}'), 
-        print(f'[+] FL Angle: {self.__frontLeftAngle__}')
-        print(f'[+] FR Angle: {self.__frontRightAngle__}\n')
 
+        # Normalizes speed to maximum allowable speed for each wheel
+        self.normalizeSpeeds()
+
+        # Enable the move to be changed when "execute()" is run
         self.move_changed = True
         
         return False
     
-    def goDistance(self, target_distance, target_angle, target_rotations):
+    def goDistance(self, target_distance: float, target_angle: float, target_rotations: float):
+        """SwerveDrive.gotDistance(target_distance: float, target_angle: float, target_rotations: float)
+        
+        Calculates the angle and speed for a robot to move autonomusly a certain distance and at a target angle. 
+
+        ::params::
+        target_distance: The target distance the robot should travel autonomously range[0, 2*math.pi]
+        target_angle: the target angle the robot should be at once the autonomous movement ends
+        target_rotations: How many time should the robot spin before the autonomous movement ends.
+
+        """
         
         Xp = target_distance * math.cos(target_angle) + math.pi * self.RobotConfig.chassis_length * target_rotations
         Xn = target_distance * math.cos(target_angle) - math.pi * self.RobotConfig.chassis_length * target_rotations
@@ -285,13 +331,35 @@ class SwerveDrive:
         self.distance_changed = True
         
     def clampSpeed(self):
+        """SwerveDrive.clampSpeed()
+        
+        Clamps the speed of the swerve drive"""
         self.__frontLeftSpeed__ *= self.RobotConfig.speed_clamp
         self.__frontRightSpeed__ *= self.RobotConfig.speed_clamp
         self.__rearLeftSpeed__ *= self.RobotConfig.speed_clamp
         self.__rearRightSpeed__ *= self.RobotConfig.speed_clamp
         return None
+    
+    def normalizeSpeeds(self):
+        """SwerveDrive.normalizeSpeeds()
+
+        Normalizes the speed vectors for each wheel"""
+        maxSpeed = max([self.__frontLeftSpeed__, self.__frontRightSpeed__,
+                        self.__rearLeftSpeed__, self.__rearRightSpeed__])
+        if maxSpeed > self.RobotConfig.max_driving_speed:
+            scalar = self.RobotConfig.max_driving_speed/maxSpeed
+            self.__frontLeftSpeed__ *= scalar
+            self.__frontRightSpeed__ *= scalar
+            self.__rearRightSpeed__ *= scalar
+            self.__rearLeftSpeed__ *= scalar
+            return True
+        
+        return False
 
     def atDistance(self):
+        """SwerveDrive.atDistance()
+
+        Checks if each wheel has traveled a specified distance"""
         FL = self.FrontLeftSpeedMotor.atDistance()
         FR = self.FrontRightSpeedMotor.atDistance()
         RL = self.RearLeftSpeedMotor.atDistance()
@@ -302,7 +370,15 @@ class SwerveDrive:
         
         return False
     
-    def closestAngle(current_angle, setpoint):
+    def closestAngle(current_angle: float, setpoint: float):
+        """SwerveDrive.closestAngle()
+
+        Calculates the shortest direction to turn from a current angle to a desired setpoint angle.
+        
+        ::params: 
+        current_angle: The current angle of the swerve module.
+        setpoint: The desired angle for the swerve module to move to.
+        """
         #get direction
         two_pi = math.pi*2
         dir = setpoint%(two_pi) - current_angle%(two_pi)
@@ -313,6 +389,10 @@ class SwerveDrive:
         return dir
         
     def execute(self):
+
+        """SwerveDrive.execute()
+        Updates the postion of the absolute encoders and the speed of each swerve module"""
+
         if self.move_changed:
 
             # self.clampSpeed()

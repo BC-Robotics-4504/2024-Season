@@ -35,6 +35,8 @@ class HMI:
    
         # Other
         self.start = False
+        self.rightStickButton = False
+        self.leftStickButton = False
     
         
 
@@ -56,6 +58,8 @@ class HMI:
         self.RB = self.xbox.getRightBumper()
         self.LB = self.xbox.getLeftBumper()
         self.start = self.xbox.getStartButton()
+        self.rightStickButton = self.xbox.getRightStickButtonPressed()
+        self.leftStickButton = self.xbox.getLeftStickButtonPressed()
         return None
     
     def getA(self):
@@ -102,6 +106,16 @@ class HMI:
         START = self.start
         self.start = False
         return START
+    
+    def getRightStickButton(self):
+        RSB = self.rightStickButton
+        self.rightStickButton = False
+        return RSB
+    
+    def getLeftStickButton(self):
+        LSB = self.leftStickButton
+        self.leftStickButton = False
+        return LSB
 
     def getAnalogSticks(self):
         return self.leftX, self.leftY, self.rightX, self.rightY

@@ -8,6 +8,10 @@ class RobotConfig:
     REFERENCE: https://docs.python.org/3/library/dataclasses.html
     """
 
+    # Targeting Distance
+    max_target_range: float = 3.37
+    min_target_range: float = 2.60
+
     # Robot Geometry Parameters
     chassis_length: float = 0.7366 # 29 in to m
     chassis_width: float = 0.7366 # 29 in to m
@@ -15,7 +19,7 @@ class RobotConfig:
     # Swerve Drive Parameters
     speed_clamp: float = 0.65
     max_driving_speed = 2500 #rpm
-    max_angular_speed = 2500 #rpm
+    max_angular_speed = 240 #rpm
     movement_deadzone = 0.02
     drive_wheel_diameter: float = 0.114 #m
 

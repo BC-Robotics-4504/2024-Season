@@ -7,7 +7,7 @@ from components.config import RobotConfig
 
 class SparkMaxClimb:
     """Swerve Drive SparkMax Class
-    Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
+    Custom class for configuring SparkMaxes used in Climber mechanism 
     """
     
     # PID coefficients
