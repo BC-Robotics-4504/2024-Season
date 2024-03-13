@@ -134,7 +134,30 @@ class MyRobot(MagicRobot):
             #     self.LauncherController.spindownLauncher()
 
         self.LauncherController.runLauncher()
-            
+
+
+        '''
+        SmartDashboard Setup
+        '''
+        # Add stuff to SmartDashboard
+        wpilib.SmartDashboard.putNumber('LF Speed', self.SwerveDrive_FrontLeftSpeedMotor.getSpeed())
+        wpilib.SmartDashboard.putNumber('LF Angle', self.SwerveDrive_FrontLeftAngleMotor.getAbsPosition())
+        wpilib.SmartDashboard.putNumber('RF Speed', self.SwerveDrive_FrontRightSpeedMotor.getSpeed())
+        wpilib.SmartDashboard.putNumber('RF Angle', self.SwerveDrive_FrontRightAngleMotor.getAbsPosition())
+        wpilib.SmartDashboard.putNumber('LR Speed', self.SwerveDrive_RearLeftSpeedMotor.getSpeed())
+        wpilib.SmartDashboard.putNumber('LR Angle', self.SwerveDrive_RearLeftAngleMotor.getAbsPosition())
+        wpilib.SmartDashboard.putNumber('RR Speed', self.SwerveDrive_RearRightSpeedMotor.getSpeed())
+        wpilib.SmartDashboard.putNumber('RR Angle', self.SwerveDrive_RearRightAngleMotor.getAbsPosition())
+
+        wpilib.SmartDashboard.putNumberArray('L/R Flywheels', [self.Launcher.currentL_launcher_speed,
+                                                               self.Launcher.currentR_launcher_speed])  
+        
+        wpilib.SmartDashboard.putBoolean('Shooting Camera Active', self.controlGain < 0)
+        wpilib.SmartDashboard.putBoolean('Intake Camera Active', self.controlGain > 0)
+
+        wpilib.SmartDashboard.putBoolean('Speaker In Range', self.Vision.inRange)
+
+
         # # elif self.HMI.getLB():
         
         # if self.HMI.getRightStickButton():

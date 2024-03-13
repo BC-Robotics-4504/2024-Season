@@ -14,6 +14,7 @@ class Vision:
     valid_target = False
     
     front_camera_active = False
+    inRange = False
     
     def getTargetDistance(self):
         """getTargetDistance() -> float or None
@@ -65,10 +66,12 @@ class Vision:
         if self.target_distance >= self.RobotConfig.min_target_range and self.target_distance <=self.RobotConfig.max_target_range:
             self.LimeLight.light(LEDState.ON)
             self.LimeLightFront.light(LEDState.ON)
+            self.inRange = True
+
         else:
             self.LimeLight.light(LEDState.OFF)
-            self.LimeLightFront.light(LEDState.OFF)           
-                       
+            self.LimeLightFront.light(LEDState.OFF)
+            self.inRange = True        
 
     def execute(self):
         
