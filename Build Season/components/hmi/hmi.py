@@ -10,6 +10,11 @@ class HMI:
     xbox: wpilib.XboxController
     
     def __init__(self):
+        
+        """ HMI.__init__() -> None
+        
+        Initialize the HMI object."""
+        
         self.changed = True
         
         # Analog Sticks
@@ -41,6 +46,9 @@ class HMI:
         
 
     def updateAnalogSticks(self):
+        """HMI.updateAnalogSticks() -> False
+        
+        Update the analog sticks on the controller."""
         # Get input from analog sticks 
         self.leftX = self.xbox.getLeftX()
         self.leftY = self.xbox.getLeftY()
@@ -49,6 +57,9 @@ class HMI:
         return False
     
     def updateButtons(self):
+        """HMI.updateButtons() -> None
+        
+        Update the buttons on the controller."""
         self.A = self.xbox.getAButton()
         self.B = self.xbox.getBButton()
         self.X = self.xbox.getXButton()
@@ -63,61 +74,99 @@ class HMI:
         return None
     
     def getA(self):
+        """HMI.getA() -> bool
+        
+        return the state of the A button."""
         A = self.A
         self.A = False
         return A
     
     def getX(self):
+        """HMI.getX() -> bool
+        
+        return the state of the X button."""
         X = self.X
         self.X = False
         return X
     
     def getY(self):
+        """HMI.getY() -> bool
+        
+        return the state of the Y button."""
         Y = self.Y
         self.Y = False
         return Y
     
     def getB(self):
+        """HMI.getB() -> bool
+        
+        return the state of the B button."""
         B = self.B
         self.B = False
         return B
     
     def getRT(self):
+        """" HMI.getRT() -> float
+        
+        return the value of the right trigger."""
         RT = self.RT
         self.RT = 0
         return RT
     
     def getLT(self):
+        """getLT() -> float
+        
+        return the value of the left trigger.
+        """
         LT = self.LT
         self.LT = 0
         return LT
     
     def getRB(self):
+        """HMI.getRB() -> bool
+        
+        return the state of the right bumper."""
         RB = self.RB
         self.RB = False
         return RB
     
     def getLB(self):
+        """HMI.getLB() -> bool
+        
+        return the state of the left bumper."""
         LB = self.LB
         self.LB = False
         return  LB
     
     def getStart(self):
+        """HMI.getStart() -> bool
+        
+        return the state of the start button."""
         START = self.start
         self.start = False
         return START
     
     def getRightStickButton(self):
+        """HMI.getRightStickButton() -> bool
+        
+        return the state of the right stick button. """
+        
         RSB = self.rightStickButton
         self.rightStickButton = False
         return RSB
     
     def getLeftStickButton(self):
+        """HMIgetLeftStickButton() -> bool
+        
+        return the state of the left stick button."""
         LSB = self.leftStickButton
         self.leftStickButton = False
         return LSB
 
     def getAnalogSticks(self):
+        """HMI.getAnalogSticks() -> (float, float, float, float)
+        
+        return the state of the analog sticks."""
         return self.leftX, self.leftY, self.rightX, self.rightY
 
     def execute(self):

@@ -97,18 +97,33 @@ class SparkMaxPivot:
             self.follower_motor = None
     
     def clearFaults(self):
+        """SparkMaxPivot.clearFaults() -> None
+        
+        Clear the faults on the motor controller."""
         self.motor.clearFaults()
     
     def setPosition(self, position):
+        """SparkMaxPivot.setPosition(position: float) -> None
+        
+        Set the position of the motor controller.
+        
+        ::params:
+        position: float : The position to set the motor controller to."""
         self.target_position = position-self.zOffset
         self.SMcontroller.setReference(self.target_position, rev.CANSparkMax.ControlType.kPosition)
         return False
     
     def getPosition(self):
+        """SparkMaxPivot.getPosition() -> float
+        
+        Get the position of the motor controller."""
         rotation = self.encoder.getPosition()
         return rotation
     
     def atPosition(self, tolerance=0.05):
+        """SparkMaxPivot.atPosition(tolerance: float) -> bool
+        
+        Check if the motor controller is at the target position."""
         err = self.target_position - self.getPosition()
         if abs(err) <= tolerance:
             return True
@@ -170,17 +185,33 @@ class SparkMaxDualSpinner:
         self.clearFaults()
     
     def clearFaults(self):
+        """SparkMaxDualSpinner.clearFaults() -> None
+        
+        Clear the faults on the motor controller."""
         self.motor.clearFaults()
     
     def setSpeed(self, speed):
+        """SparkMaxDualSpinner.setSpeed(speed: float) -> None
+        
+        Set the speed of the motor controller.
+        
+        ::params:
+        speed: float : The speed to set the motor controller to."""
+    
         self.target_speed = speed
         self.motor.set(speed)
         return False
     
     def getSpeed(self):
+        """SparkMaxDualSpinner.getSpeed() -> float
+        
+        Gets the current speed of the motor controller."""
         return self.encoder.getVelocity()
     
     def atSpeed(self, tolerance=0.02):
+        """SparkMaxDualSpinner.atSpeed(tolerance: float) -> bool
+        
+        Check if the motor controller is at speed."""
         err = self.target_speed - self.getSpeed()
         if abs(err) <= tolerance:
             return True
@@ -210,6 +241,9 @@ class Launcher:
         pass
     
     def isPositionedIntake(self):
+        """Launcher.isPositionedIntake() -> bool
+        
+        Check if the intake is in the correct postition."""
         if self.target_intake_position is None:
             return False
         
@@ -219,6 +253,9 @@ class Launcher:
         return False 
     
     def isNoteInIntake(self):
+        """Launcher.isNoteInIntake() -> bool
+        
+        Check if a note is in the intake."""
         note_in_intake = not self.LimitSwitch.get()
         is_lowered = self.target_intake_position == self.RobotConfig.intake_lowered_position
         if is_lowered and note_in_intake:
@@ -226,16 +263,25 @@ class Launcher:
         return False
     
     def lowerIntake(self):  
+        """Launcher.lowerIntake() -> None
+        
+        Lower the intake."""
         self.target_intake_position = self.RobotConfig.intake_lowered_position
         self.IntakePivot.setPosition(self.RobotConfig.intake_lowered_position)
         return None      
     
     def raiseIntake(self):
+        """Launcher.raiseIntake() -> None
+        
+        Raise the intake."""
         self.target_intake_position = self.RobotConfig.intake_raised_position
         self.IntakePivot.setPosition(self.RobotConfig.intake_raised_position)   
         return None
     
     def isLauncherAtSpeed(self):
+        """Launcher.isLauncherAtSpeed() -> bool
+        
+        Check if the launcher is at speed."""
         errL = self.currentL_launcher_speed > self.RobotConfig.shooting_flywheel_threshold_speed
         errR = self.currentR_launcher_speed > self.RobotConfig.shooting_flywheel_threshold_speed
         if errL and errR:
@@ -243,46 +289,70 @@ class Launcher:
         return False
     
     def spinupShooter(self):
+        """Launcher.spinupShooter() -> None
+        
+        Spin the launcher up."""
         self.LauncherSpinnerL.setSpeed(self.RobotConfig.shooting_flywheel_speed)
         self.LauncherSpinnerR.setSpeed(self.RobotConfig.shooting_flywheel_speed)
         return None
     
     def spindownLauncher(self):
+        """Launcher.spindownLauncher() -> None
+        
+        Spin the launcher down."""
         self.LauncherSpinnerL.setSpeed(0.0)
         self.LauncherSpinnerR.setSpeed(0.0)  
         return None  
     
     def feedShooterSpeaker(self):
+        """Launcher.feedShooterSpeaker() -> None
+        
+        Feed the shooter when shooter is spinning up to shoot speaker."""
         self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_feed_speaker_speed)
         self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_feed_speaker_speed) 
         return None   
     
     def spindownIntake(self):
-        self.IntakeSpinnerL.setSpeed(0.0)
-        self.IntakeSpinnerR.setSpeed(0.0)
-        return None    
-    
-    def spindownIntake(self):
+        """Launcher.spindownIntake() -> None
+        
+        Spin the intake down."""
         self.IntakeSpinnerL.setSpeed(0.0)
         self.IntakeSpinnerR.setSpeed(0.0)
         return None
     
+    #def spindownIntake(self): #! Duplicate method
+    #     self.IntakeSpinnerL.setSpeed(0.0)
+    #     self.IntakeSpinnerR.setSpeed(0.0)
+    #     return None    
+    
     def spinIntakeIn(self):
+        """Launcher.spinIntakeIn() -> None
+        
+        Spin the intake in."""
         self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
         self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_reverse_rolling_speed)
         return None
     
     def ampIntake(self):
+        """Launcher.ampIntake() -> None
+        
+        Raise the intake to the amp position."""
         self.target_intake_position = self.RobotConfig.intake_amp_position
         self.IntakePivot.setPosition(self.RobotConfig.intake_amp_position)
         return None
     
     def feedShooterAmp(self):
+        """Launcher.feedShooterAmp() -> None
+        
+        Feed the shooter when shooter is spinning up to shoot amp."""
         self.IntakeSpinnerL.setSpeed(self.RobotConfig.intake_amp_shooting_speed+0.02)
         self.IntakeSpinnerR.setSpeed(self.RobotConfig.intake_amp_shooting_speed) 
         return None
     
     def execute(self):
+        """Launcher.execute() -> None
+        
+        Updates position and speed of the Launcher."""
         self.current_intake_position = self.IntakePivot.getPosition()
         self.currentL_launcher_speed = self.LauncherSpinnerL.getSpeed()
         self.currentR_launcher_speed = self.LauncherSpinnerR.getSpeed()      

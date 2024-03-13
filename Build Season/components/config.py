@@ -4,7 +4,7 @@ from dataclasses import dataclass  # * Why do we need this import statement?
 @dataclass
 class RobotConfig:
     """Drivetrain Configuration
-    Custom class for configuring SparkMaxes used in Swerve Drive Drivetrain
+    Custom class for configuring values that are repeatedly in the robot code
     REFERENCE: https://docs.python.org/3/library/dataclasses.html
     """
 

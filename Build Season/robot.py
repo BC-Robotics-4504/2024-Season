@@ -43,6 +43,9 @@ class MyRobot(MagicRobot):
     controlGain: float = 1
 
     def createObjects(self):
+        """MyRobot.createObjects() -> None
+        
+        Create motors and other hardware components here."""
         # Swerve Drive Hardware Config
         self.SwerveDrive_FrontLeftAngleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1, 
                                                                absolute_encoder=True, z_offset=5.7535123)
@@ -86,12 +89,18 @@ class MyRobot(MagicRobot):
     #     pass
 
     def teleopInit(self):
+        """MyRobot.teleopInit() -> None
+        
+        Called once each time the robot enters teleoperated mode.
+        """
         self.SwerveDrive.clearFaults()
         self.LauncherController.raiseIntake()
         pass
 
     def teleopPeriodic(self):
+        """MyRobot.teleopPeriodic() -> None
         
+        Called repeatedly during teleoperated mode."""
         # if self.Vision.getTargetDistance() is not None:
         #     print(self.Vision.getTargetDistance())
         # Move drivetrain based on Left X/Y and Right X/Y controller inputs
