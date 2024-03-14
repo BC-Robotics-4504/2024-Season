@@ -18,7 +18,7 @@ class RobotConfig:
 
     # Swerve Drive Parameters
     speed_clamp: float = 0.65
-    max_driving_speed = 2500 #rpm
+    max_driving_speed = 5000 #rpm
     max_angular_speed = 240 #rpm
     movement_deadzone = 0.02
     drive_wheel_diameter: float = 0.114 #m

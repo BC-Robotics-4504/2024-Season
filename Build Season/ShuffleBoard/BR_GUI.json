@@ -112,11 +112,7 @@
               "Y-axis/Automatic bounds": true,
               "Y-axis/Upper bound": 1.0,
               "Y-axis/Lower bound": -1.0,
-              "Y-axis/Unit": "ul",
-              "Visible data/SmartDashboard/LF Angle": true,
-              "Visible data/SmartDashboard/LR Angle": true,
-              "Visible data/SmartDashboard/RF Angle": true,
-              "Visible data/SmartDashboard/RR Angle": true
+              "Y-axis/Unit": "ul"
             }
           },
           "4,0": {
@@ -138,11 +134,7 @@
               "Y-axis/Automatic bounds": true,
               "Y-axis/Upper bound": 1.0,
               "Y-axis/Lower bound": -1.0,
-              "Y-axis/Unit": "ul",
-              "Visible data/SmartDashboard/LF Speed": true,
-              "Visible data/SmartDashboard/LR Speed": true,
-              "Visible data/SmartDashboard/RF Speed": true,
-              "Visible data/SmartDashboard/RR Speed": true
+              "Y-axis/Unit": "ul"
             }
           },
           "2,3": {
@@ -179,11 +171,22 @@
                   "Y-axis/Automatic bounds": true,
                   "Y-axis/Upper bound": 1.0,
                   "Y-axis/Lower bound": -1.0,
-                  "Y-axis/Unit": "ul",
-                  "Visible data/SmartDashboard/L/R Flywheels[0]": true,
-                  "Visible data/SmartDashboard/L/R Flywheels[1]": true
+                  "Y-axis/Unit": "ul"
                 }
               }
+            }
+          },
+          "7,3": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///SmartDashboard/Autonomous Mode",
+              "_title": "Autonomous Mode",
+              "_glyph": 148,
+              "_showGlyph": false
             }
           }
         }
