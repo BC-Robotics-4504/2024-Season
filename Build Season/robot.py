@@ -1,6 +1,8 @@
 import wpilib
 from magicbot import MagicRobot
 
+import rev
+
 from components.config import RobotConfig
 
 from components.hmi.hmi import HMI
@@ -131,20 +133,13 @@ class MyRobot(MagicRobot):
             
         if self.HMI.getLT() > 0.35:
             self.Alignment.align()
-            #self.LauncherController.spindownLauncher()
         
         # #3.) Actuate Climber
         if self.HMI.getDpadUp():
-            self.ClimberController.raiseClimber()
-
+            self.Climber.raiseClimber()
+        
         elif self.HMI.getDpadDown():
-            self.ClimberController.lowerClimber()
-        
-        elif self.HMI.getLeftStickButton and self.HMI.getRightStickButton():
-            self.Climber.holdClimber()
-        
-        #Runs CLIMBER state machine
-        self.ClimberController.runClimber()
+            self.Climber.lowerClimber()
         
         #Runs LAUNCHER state machine
         self.LauncherController.runLauncher()

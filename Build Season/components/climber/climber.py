@@ -11,14 +11,14 @@ class SparkMaxClimb:
     """
     
     # PID coefficients
-    kP = 0.1
-    kI = 0
+    kP = 5e-3
+    kI = 5e-8
     kD = 0
     kIz = 0
-    kFF = 0.000156
-    kMaxOutput = 1
-    kMinOutput = -1
-    maxRPM = 1000
+    kFF = 0
+    kMaxOutput = 2500
+    kMinOutput = -2500
+    maxRPM = 2500
 
     # Smart Motion Coefficients
     maxVel = 2000  # rpm
@@ -59,21 +59,21 @@ class SparkMaxClimb:
 
         self.SMcontroller = self.motor.getPIDController()
         self.encoder = self.motor.getEncoder()
-        self.encoder.setPositionConversionFactor(2*math.pi)
-        self.encoder.setVelocityConversionFactor(.104719755119659771)
+        self.encoder.setPosition(0)
+        self.encoder.setPositionConversionFactor(1)
+        self.encoder.setVelocityConversionFactor(1)
         
-        self.SMcontroller.setFeedbackDevice(self.encoder)
-        self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
+        # self.SMcontroller.setPositionPIDWrappingEnabled(True) #TODO: does this need to be removed?
         # self.SMcontroller.setPositionPIDWrappingMinInput(0) #TODO: does this need to be removed?
         # self.SMcontroller.setPositionPIDWrappingMaxInput(1) #TODO: does this need to be removed?
         
         # PID parameters
-        self.SMcontroller.setP(self.kP)
-        self.SMcontroller.setI(self.kI)
-        self.SMcontroller.setD(self.kD)
-        self.SMcontroller.setIZone(self.kIz)
-        self.SMcontroller.setFF(self.kFF)
-        self.SMcontroller.setOutputRange(self.kMinOutput, self.kMaxOutput)
+        self.SMcontroller.setP(self.kP, slotID=0)
+        self.SMcontroller.setI(self.kI, slotID=0)
+        self.SMcontroller.setD(self.kD, slotID=0)
+        self.SMcontroller.setIZone(self.kIz, slotID=0)
+        self.SMcontroller.setFF(self.kFF, slotID=0)
+        self.SMcontroller.setOutputRange(self.kMinOutput, self.kMaxOutput, slotID=0)
     
     def clearFaults(self):
         """SparkMaxClimb.clearFaults() -> None
@@ -111,6 +111,11 @@ class SparkMaxClimb:
         if abs(err) <= tolerance:
             return True
         return False
+    
+class ClimberState(Enum):
+    LOWERED = 1
+    RAISED = 2
+    LOCKED = 3
 
 class Climber:
     RobotConfig: RobotConfig
@@ -118,40 +123,57 @@ class Climber:
     ClimberMotorL: SparkMaxClimb
     ClimberMotorR: SparkMaxClimb
 
-    __climberChanged__: bool = False       
+    __climberChanged__: bool = False  
+    
+    climber_state = ClimberState.LOWERED   
+    
+    def lockClimber(self):
+        
+        if self.isLocked():
+            return None
+        
+        rotations = self.RobotConfig.climber_position_locked/self.RobotConfig.climbing_m_per_rot
+        self.ClimberMotorL.setPosition(rotations)
+        self.ClimberMotorR.setPosition(rotations)
+        
+        self.climber_state = ClimberState.LOCKED
+        return False
+    
+    def isLocked(self):
+        if self.climber_state == ClimberState.LOCKED:
+            return True
+        return False
 
     def raiseClimber(self):
         """Climber.raiseClimber() -> None
         
         Raise the climber."""  
-        rotations = self.RobotConfig.climber_position_raised/self.RobotConfig.climbing_m_per_rot
-        self.ClimberMotorL.setPosition(-rotations)
-        self.ClimberMotorR.setPosition(-rotations)
+        
+        if self.isLocked():
+            return None
+        
+        if self.climber_state != ClimberState.RAISED:
+            rotations = self.RobotConfig.climber_position_raised/self.RobotConfig.climbing_m_per_rot
+            self.ClimberMotorL.setPosition(-rotations)
+            self.ClimberMotorR.setPosition(-rotations)
+            self.climber_state = ClimberState.RAISED
         return None
-    
 
     def lowerClimber(self):  
         """Climber.lowerClimber() -> None
         
         Lower the climber."""
-        rotations = self.RobotConfig.climber_position_low/self.RobotConfig.climbing_m_per_rot
-        self.ClimberMotorL.setPosition(rotations)
-        self.ClimberMotorR.setPosition(rotations)
-        return None
-    
-    def holdClimber(self):
-        """Climber.HoldsClimber() -> None
         
-        Holds the climbe on the chain."""
+        if self.isLocked():
+            return None
         
-        rotations = self.RobotConfig.climber_position_hold/self.RobotConfig.climbing_m_per_rot
-        self.ClimberMotorL.setPosition(rotations)
-        self.ClimberMotorR.setPosition(rotations)
+        if self.climber_state != ClimberState.LOWERED:
+            rotations = self.RobotConfig.climber_position_low/self.RobotConfig.climbing_m_per_rot
+            # print(rotations, self.RobotConfig., self.RobotConfig.climbing_m_per_rot)
+            self.ClimberMotorL.setPosition(rotations)
+            self.ClimberMotorR.setPosition(rotations)
+            self.climber_state = ClimberState.LOWERED
         return None
-    
-    def isAtPosition(self):
-         if self.ClimberMotorL.atPosition() and self.ClimberMotorR.atPosition():
-             return True
 
     def execute(self):
         """Climber.execute() -> None
