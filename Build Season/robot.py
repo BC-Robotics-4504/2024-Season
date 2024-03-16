@@ -32,7 +32,7 @@ class MyRobot(MagicRobot):
     Launcher: Launcher
     LauncherController: LauncherController
 
-    # Climber Component Code    
+    # # Climber Component Code    
     Climber: Climber
     ClimberController: ClimberController
 
@@ -49,16 +49,16 @@ class MyRobot(MagicRobot):
         # Swerve Drive Hardware Config
         self.SwerveDrive_FrontLeftAngleMotor = SparkMaxTurning(6, inverted=False, gear_ratio=1, wheel_diameter=1, 
                                                                absolute_encoder=True, z_offset=5.7535123)
-        self.SwerveDrive_FrontLeftSpeedMotor = SparkMaxDriving(5, inverted=False, gear_ratio=1, wheel_diameter=0.1143)
-        self.SwerveDrive_RearLeftAngleMotor = SparkMaxTurning(8, inverted=False, gear_ratio=1, wheel_diameter=1, 
+        self.SwerveDrive_FrontLeftSpeedMotor = SparkMaxDriving(5, inverted=False, wheel_diameter=0.1143)
+        self.SwerveDrive_RearLeftAngleMotor = SparkMaxTurning(8, inverted=False, wheel_diameter=1, 
                                                               absolute_encoder=True, z_offset=5.6867370)
-        self.SwerveDrive_RearLeftSpeedMotor = SparkMaxDriving(7, inverted=False, gear_ratio=1, wheel_diameter=0.1143)
-        self.SwerveDrive_RearRightAngleMotor = SparkMaxTurning(2, inverted=False, gear_ratio=1, wheel_diameter=1, 
+        self.SwerveDrive_RearLeftSpeedMotor = SparkMaxDriving(7, inverted=False, wheel_diameter=0.1143)
+        self.SwerveDrive_RearRightAngleMotor = SparkMaxTurning(2, inverted=False, wheel_diameter=1, 
                                                                absolute_encoder=True, z_offset=5.5975077)
-        self.SwerveDrive_RearRightSpeedMotor = SparkMaxDriving(1, inverted=False, gear_ratio=1, wheel_diameter=0.1143)
-        self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, gear_ratio=1, wheel_diameter=1, 
+        self.SwerveDrive_RearRightSpeedMotor = SparkMaxDriving(1, inverted=False, wheel_diameter=0.1143)
+        self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, wheel_diameter=1, 
                                                                 absolute_encoder=True, z_offset=0.0182671)
-        self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, gear_ratio=1, wheel_diameter=0.1143)
+        self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, wheel_diameter=0.1143)
 
         # Launcher Hardware Config
         self.Launcher_LauncherSpinnerL = SparkMaxDualSpinner(10, inverted=True)
@@ -72,7 +72,7 @@ class MyRobot(MagicRobot):
         
         self.Launcher_LimitSwitch = wpilib.DigitalInput(0)
         
-        # Climber Hardware Config
+        #  Climber Hardware Config
         self.Climber_ClimberMotorL = SparkMaxClimb(16)
         self.Climber_ClimberMotorR = SparkMaxClimb(17, inverted=True)
 
@@ -131,19 +131,23 @@ class MyRobot(MagicRobot):
             
         if self.HMI.getLT() > 0.35:
             self.Alignment.align()
-            #     self.LauncherController.spindownLauncher()
-
-        self.LauncherController.runLauncher()
+            #self.LauncherController.spindownLauncher()
         
-        #3.) Actuate Climber
+        # #3.) Actuate Climber
         if self.HMI.getDpadUp():
             self.ClimberController.raiseClimber()
 
         elif self.HMI.getDpadDown():
             self.ClimberController.lowerClimber()
-
+        
+        elif self.HMI.getLeftStickButton and self.HMI.getRightStickButton():
+            self.Climber.holdClimber()
+        
+        #Runs CLIMBER state machine
         self.ClimberController.runClimber()
-
+        
+        #Runs LAUNCHER state machine
+        self.LauncherController.runLauncher()
         '''
         SmartDashboard Setup
         '''

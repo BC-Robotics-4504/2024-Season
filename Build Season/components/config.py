@@ -27,6 +27,7 @@ class RobotConfig:
     shooting_flywheel_speed: float = 1.0
     shooting_flywheel_threshold_speed: float = 550.0
     shooting_flywheel_tolerance = 3.0
+    shooting_abort_delay = 2.0
     
     shooting_max_distance: float = 10.0
     intake_forward_rolling_speed: float = 0.2
@@ -35,7 +36,7 @@ class RobotConfig:
     intake_feed_delay: float = 0.5
     
     intake_lowered_position: float = 0.58
-    intake_raised_position: float = 1.3
+    intake_raised_position: float = 1.32
     intake_tolerance: float = 0.03
     intake_amp_position: float = 1.09
     intake_amp_shooting_speed: float = 0.24
@@ -43,9 +44,12 @@ class RobotConfig:
     
 
     # Climber Parameters
-    climbing_m_per_rot: float = (0.0013/25)
-    climbing_max_distance: float = 0.254
+    climbing_m_per_rot: float = (0.0016/25)
+    climbing_max_distance: float = 0.0254
     climbing_min_distance: float = 0
+    climber_position_raised: float = 0
+    climber_position_low: float = 0.184 # Meters
+    climber_position_hold : float = 0.0254 # Meters
 
     # Vision Parameters
     camera_angle: float = 0

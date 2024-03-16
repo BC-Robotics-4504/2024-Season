@@ -83,7 +83,7 @@ class LauncherController(StateMachine):
     @state()
     def __spinupLauncher__(self):
         self.Launcher.spinupShooter()
-        if self.Launcher.isLauncherAtSpeed():
+        if self.Launcher.isLauncherAtSpeed() or self.timer.hasElapsed(self.RobotConfig.shooting_abort_delay):
             self.timer.restart()
             self.next_state_now('__launchNoteSpeaker__')
             

@@ -124,19 +124,34 @@ class Climber:
         """Climber.raiseClimber() -> None
         
         Raise the climber."""  
-        rotations = self.RobotConfig.climbing_min_distance/self.RobotConfig.climbing_m_per_rot
+        rotations = self.RobotConfig.climber_position_raised/self.RobotConfig.climbing_m_per_rot
         self.ClimberMotorL.setPosition(-rotations)
         self.ClimberMotorR.setPosition(-rotations)
         return None
+    
 
     def lowerClimber(self):  
         """Climber.lowerClimber() -> None
         
         Lower the climber."""
-        rotations = self.RobotConfig.climbing_max_distance/self.RobotConfig.climbing_m_per_rot
+        rotations = self.RobotConfig.climber_position_low/self.RobotConfig.climbing_m_per_rot
         self.ClimberMotorL.setPosition(rotations)
         self.ClimberMotorR.setPosition(rotations)
         return None
+    
+    def holdClimber(self):
+        """Climber.HoldsClimber() -> None
+        
+        Holds the climbe on the chain."""
+        
+        rotations = self.RobotConfig.climber_position_hold/self.RobotConfig.climbing_m_per_rot
+        self.ClimberMotorL.setPosition(rotations)
+        self.ClimberMotorR.setPosition(rotations)
+        return None
+    
+    def isAtPosition(self):
+         if self.ClimberMotorL.atPosition() and self.ClimberMotorR.atPosition():
+             return True
 
     def execute(self):
         """Climber.execute() -> None

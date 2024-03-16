@@ -110,8 +110,8 @@ class SparkMaxDriving:
     kD = 0
     kIz = 0
     kFF = 0.00015
-    kMaxOutput = 1000
-    kMinOutput = -1000
+    kMaxOutput = 2500
+    kMinOutput = -2500
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -120,8 +120,8 @@ class SparkMaxDriving:
     minVel = 0
     allowedErr = 0
     
-    targetDistance = 0
-    tolerance = 0.01
+    targetDistance = 5.5
+    tolerance = 0.1
 
     def __init__(
         self,
@@ -147,6 +147,10 @@ class SparkMaxDriving:
          
         self.controller = self.motor.getPIDController()
         self.encoder = self.motor.getEncoder()
+        
+        self.encoder.setPositionConversionFactor(1)
+        self.encoder.setVelocityConversionFactor(1)
+        self.encoder.setPosition(0)
         
         # PID parameters
         self.controller.setP(self.kP, slotID=0)
@@ -189,6 +193,7 @@ class SparkMaxDriving:
         currentDistance = self.encoder.getPosition()
         if abs(currentDistance-self.targetDistance) <= self.tolerance:
             return True
+        
         return False
 
     def setDistance(self, targetDistance: float):
@@ -200,9 +205,12 @@ class SparkMaxDriving:
         targetDistance: Distance for the robot to travel
         """
         self.targetDistance = targetDistance
-        self.encoder.setPosition(0)
         self.controller.setReference(targetDistance, rev.CANSparkMax.ControlType.kPosition)
         return False
+
+    def resetEncoder(self):
+        self.encoder.setPosition(0)
+        return 0
 
 class SwerveDrive:
     """ SwerveDrive Class 
@@ -317,18 +325,24 @@ class SwerveDrive:
         Yn = target_distance * math.sin(target_angle) - math.pi * self.RobotConfig.chassis_width * target_rotations
 
         self.__frontLeftAngle__ = math.atan2(Yp, Xp)
-        self.__frontLeftDistance__ = math.hypot(Yp, Xp)
+        self.__frontLeftDistance__ = math.hypot(Yp, Xp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
         self.__rearLeftAngle__ = math.atan2(Yp, Xn)
-        self.__rearLeftDistance__ = math.hypot(Yp, Xn)
+        self.__rearLeftDistance__ = math.hypot(Yp, Xn)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
         self.__rearRightAngle__ = math.atan2(Yn, Xn)
-        self.__rearRightDistance__ = math.hypot(Yn, Xn)
+        self.__rearRightDistance__ = math.hypot(Yn, Xn)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
         self.__frontRightAngle__ = math.atan2(Yn, Xp)
-        self.__frontRightDistance__ = math.hypot(Yn, Xp)
-        
+        self.__frontRightDistance__ = math.hypot(Yn, Xp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
+                
         self.distance_changed = True
+        
+    def resetEncoders(self):
+        self.RearLeftSpeedMotor.resetEncoder()
+        self.RearRightSpeedMotor.resetEncoder()
+        self.FrontLeftSpeedMotor.resetEncoder()
+        self.FrontRightSpeedMotor.resetEncoder()
         
     def clampSpeed(self):
         """SwerveDrive.clampSpeed()
@@ -364,7 +378,7 @@ class SwerveDrive:
         FR = self.FrontRightSpeedMotor.atDistance()
         RL = self.RearLeftSpeedMotor.atDistance()
         RR = self.RearRightSpeedMotor.atDistance()
-        
+
         if FL and FR and RL and RR:
             return True
         
