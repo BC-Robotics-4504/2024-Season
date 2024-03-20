@@ -11,12 +11,12 @@ class SparkMaxTurning:
     
     # PID coefficients
     kP = 0.25
-    kI = 1e-5
+    kI = 0
     kD = 0
     kIz = 0
     kFF = 0
-    kMaxOutput = 1
-    kMinOutput = -1
+    kMaxOutput = 2*math.pi
+    kMinOutput = -2*math.pi
     maxRPM = 5700
 
     # Smart Motion Coefficients
@@ -105,17 +105,26 @@ class SparkMaxDriving:
     """
     
     # PID coefficients
-    kP = 6e-5 
-    kI = 0
-    kD = 0
-    kIz = 0
-    kFF = 0.00015
-    kMaxOutput = 2500
-    kMinOutput = -2500
+    kP0 = 6e-5 
+    kI0 = 0
+    kD0 = 0
+    kIz0 = 0
+    kFF0 = 0.00015
+    kMaxOutput0 = 3_500
+    kMinOutput0 = -3_500
+    
+    kP1 = 1e-2
+    kI1 = 1e-5
+    kD1 = 0
+    kIz1 = 0
+    kFF1 = 0
+    kMaxOutput1 = 2_000
+    kMinOutput1 = -2_200  
+     
     maxRPM = 5700
 
     # Smart Motion Coefficients
-    maxVel = 2000  # rpm
+    maxVel = 3500  # rpm
     maxAcc = 1000
     minVel = 0
     allowedErr = 0
@@ -153,11 +162,18 @@ class SparkMaxDriving:
         self.encoder.setPosition(0)
         
         # PID parameters
-        self.controller.setP(self.kP, slotID=0)
-        self.controller.setI(self.kI, slotID=0)
-        self.controller.setD(self.kD, slotID=0)
-        self.controller.setFF(self.kFF, slotID=0)
-        self.controller.setOutputRange(self.kMinOutput, self.kMaxOutput, slotID=0)
+        self.controller.setP(self.kP0, slotID=0)
+        self.controller.setI(self.kI0, slotID=0)
+        self.controller.setD(self.kD0, slotID=0)
+        self.controller.setFF(self.kFF0, slotID=0)
+        self.controller.setOutputRange(self.kMinOutput0, self.kMaxOutput0, slotID=0)
+        
+        self.controller.setP(self.kP1, slotID=1)
+        self.controller.setI(self.kI1, slotID=1)
+        self.controller.setD(self.kD1, slotID=1)
+        self.controller.setFF(self.kFF1, slotID=1)
+        self.controller.setOutputRange(self.kMinOutput1, self.kMaxOutput1, slotID=1)
+        
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)
         self.motor.setSmartCurrentLimit(60)
         
@@ -183,7 +199,7 @@ class SparkMaxDriving:
         
         Sets the speed of the swerve modules """
         # self.motor.set(speed)
-        self.controller.setReference(speed, rev.CANSparkMax.ControlType.kVelocity) #NOTE: Changed this.
+        self.controller.setReference(speed, rev.CANSparkMax.ControlType.kVelocity, pidSlot=0) #NOTE: Changed this.
         return None
     
     def atDistance(self):
@@ -191,6 +207,7 @@ class SparkMaxDriving:
         
         Checks if the robot has travlled to the specfied distance"""
         currentDistance = self.encoder.getPosition()
+        print(currentDistance)
         if abs(currentDistance-self.targetDistance) <= self.tolerance:
             return True
         
@@ -205,7 +222,7 @@ class SparkMaxDriving:
         targetDistance: Distance for the robot to travel
         """
         self.targetDistance = targetDistance
-        self.controller.setReference(targetDistance, rev.CANSparkMax.ControlType.kPosition)
+        self.controller.setReference(targetDistance, rev.CANSparkMax.ControlType.kPosition, pidSlot=1)
         return False
 
     def resetEncoder(self):
@@ -307,7 +324,7 @@ class SwerveDrive:
         
         return False
     
-    def goDistance(self, target_distance: float, target_angle: float, target_rotations: float):
+    def goDistance(self, Rx0: float, Ry0: float, r0: float):
         """SwerveDrive.gotDistance(target_distance: float, target_angle: float, target_rotations: float)
         
         Calculates the angle and speed for a robot to move autonomusly a certain distance and at a target angle. 
@@ -318,22 +335,26 @@ class SwerveDrive:
         target_rotations: How many time should the robot spin before the autonomous movement ends.
 
         """
+        Rx0 *= self.RobotConfig.drive_wheel_diameter*math.pi
+        Ry0 *= self.RobotConfig.drive_wheel_diameter*math.pi
+        r0 *= -math.pi
         
-        Xp = target_distance * math.cos(target_angle) + math.pi * self.RobotConfig.chassis_length * target_rotations
-        Xn = target_distance * math.cos(target_angle) - math.pi * self.RobotConfig.chassis_length * target_rotations
-        Yp = target_distance * math.sin(target_angle) + math.pi * self.RobotConfig.chassis_width * target_rotations
-        Yn = target_distance * math.sin(target_angle) - math.pi * self.RobotConfig.chassis_width * target_rotations
-
-        self.__frontLeftAngle__ = math.atan2(Yp, Xp)
+        # Calculate component vectors for the swerve modeule
+        Xp = Rx0 + r0*self.RobotConfig.chassis_length
+        Xn = Rx0 - r0*self.RobotConfig.chassis_length
+        Yp = Ry0 + r0*self.RobotConfig.chassis_width
+        Yn = Ry0 - r0*self.RobotConfig.chassis_width        
+        
+        self.__frontLeftAngle__ = math.atan2(Yp, Xp)+math.pi/2
         self.__frontLeftDistance__ = math.hypot(Yp, Xp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
-        self.__rearLeftAngle__ = math.atan2(Yp, Xn)
+        self.__rearLeftAngle__ = math.atan2(Yp, Xn)+math.pi/2
         self.__rearLeftDistance__ = math.hypot(Yp, Xn)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
-        self.__rearRightAngle__ = math.atan2(Yn, Xn)
+        self.__rearRightAngle__ = math.atan2(Yn, Xn)+math.pi/2
         self.__rearRightDistance__ = math.hypot(Yn, Xn)/(math.pi*self.RobotConfig.drive_wheel_diameter)
 
-        self.__frontRightAngle__ = math.atan2(Yn, Xp)
+        self.__frontRightAngle__ = math.atan2(Yn, Xp)+math.pi/2
         self.__frontRightDistance__ = math.hypot(Yn, Xp)/(math.pi*self.RobotConfig.drive_wheel_diameter)
                 
         self.distance_changed = True
@@ -424,9 +445,9 @@ class SwerveDrive:
             self.FrontRightSpeedMotor.setSpeed(self.__frontRightSpeed__) 
 
             self.move_changed = False
-            
+        
         if self.distance_changed:
-
+            
             self.FrontLeftSpeedMotor.setDistance(self.__frontLeftDistance__) 
             self.FrontLeftAngleMotor.setAbsPosition(self.__frontLeftAngle__)
 

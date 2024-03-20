@@ -19,7 +19,7 @@ class RobotConfig:
     # Swerve Drive Parameters
     speed_clamp: float = 0.65
     max_driving_speed = 5000 #rpm
-    max_angular_speed = 240 #rpm
+    max_angular_speed = 600 #rpm
     movement_deadzone = 0.02
     drive_wheel_diameter: float = 0.114 #m
 
@@ -48,7 +48,7 @@ class RobotConfig:
     climbing_max_distance: float = 0.0254
     climbing_min_distance: float = 0
     climber_position_raised: float = 0
-    climber_position_low: float = 0.16 # Meters
+    climber_position_low: float = 0.135 # Meters
     climber_position_locked : float = 0.16 # Meters
 
     # Vision Parameters

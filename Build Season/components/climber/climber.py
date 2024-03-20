@@ -125,7 +125,7 @@ class Climber:
 
     __climberChanged__: bool = False  
     
-    climber_state = ClimberState.LOWERED   
+    climber_state = ClimberState.RAISED  
     
     def lockClimber(self):
         
