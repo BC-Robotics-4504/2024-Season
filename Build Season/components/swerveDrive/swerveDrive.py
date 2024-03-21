@@ -48,7 +48,7 @@ class SparkMaxTurning:
         # https://docs.reduxrobotics.com/canandcoder/spark-max
         # https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/src/main/java/frc/robot/subsystems/MAXSwerveModule.java
 
-        self.motor = rev.CANSparkMax(self.canID, rev.CANSparkMax.MotorType.kBrushless)  
+        self.motor = rev.CANSparkMax(self.canID, rev.CANSparkMax.MotorType.kBrushless) 
         self.motor.restoreFactoryDefaults()
         self.motor.setInverted(not inverted)
         self.motor.setIdleMode(rev.CANSparkMax.IdleMode.kBrake)

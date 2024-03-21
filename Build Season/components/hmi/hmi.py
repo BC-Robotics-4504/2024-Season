@@ -66,12 +66,12 @@ class HMI:
         self.A = self.xbox.getAButton()
         self.B = self.xbox.getBButton()
         self.X = self.xbox.getXButton()
+        self.start = self.xbox.getStartButton()
         self.Y = self.xbox.getYButton()
         self.RT = self.xbox.getRightTriggerAxis()
         self.LT = self.xbox.getLeftTriggerAxis()
         self.RB = self.xbox.getRightBumper()
         self.LB = self.xbox.getLeftBumper()
-        self.start = self.xbox.getStartButton()
         self.rightStickButton = self.xbox.getRightStickButtonPressed()
         self.leftStickButton = self.xbox.getLeftStickButtonPressed()
         rawDpad = self.xbox.getPOV()
@@ -149,6 +149,11 @@ class HMI:
         LB = self.LB
         self.LB = False
         return  LB
+    
+    # def getSelect(self):
+    #     SELECT = self.selectButton
+    #     self.selectButton = False
+    #     return SELECT
     
     def getStart(self):
         """HMI.getStart() -> bool

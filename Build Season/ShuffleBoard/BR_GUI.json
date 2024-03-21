@@ -112,7 +112,11 @@
               "Y-axis/Automatic bounds": true,
               "Y-axis/Upper bound": 1.0,
               "Y-axis/Lower bound": -1.0,
-              "Y-axis/Unit": "ul"
+              "Y-axis/Unit": "ul",
+              "Visible data/SmartDashboard/LF Angle": true,
+              "Visible data/SmartDashboard/LR Angle": true,
+              "Visible data/SmartDashboard/RF Angle": true,
+              "Visible data/SmartDashboard/RR Angle": true
             }
           },
           "4,0": {
@@ -134,7 +138,11 @@
               "Y-axis/Automatic bounds": true,
               "Y-axis/Upper bound": 1.0,
               "Y-axis/Lower bound": -1.0,
-              "Y-axis/Unit": "ul"
+              "Y-axis/Unit": "ul",
+              "Visible data/SmartDashboard/LF Speed": true,
+              "Visible data/SmartDashboard/LR Speed": true,
+              "Visible data/SmartDashboard/RF Speed": true,
+              "Visible data/SmartDashboard/RR Speed": true
             }
           },
           "2,3": {
@@ -171,7 +179,9 @@
                   "Y-axis/Automatic bounds": true,
                   "Y-axis/Upper bound": 1.0,
                   "Y-axis/Lower bound": -1.0,
-                  "Y-axis/Unit": "ul"
+                  "Y-axis/Unit": "ul",
+                  "Visible data/SmartDashboard/L/R Flywheels[0]": true,
+                  "Visible data/SmartDashboard/L/R Flywheels[1]": true
                 }
               }
             }

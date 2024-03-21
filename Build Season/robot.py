@@ -1,8 +1,6 @@
 import wpilib
 from magicbot import MagicRobot
 
-import rev
-
 from components.config import RobotConfig
 
 from components.hmi.hmi import HMI
@@ -140,6 +138,9 @@ class MyRobot(MagicRobot):
         
         elif self.HMI.getDpadDown():
             self.Climber.lowerClimber()
+            
+        elif self.HMI.getStart():
+            self.Climber.lockClimber()
         
         #Runs LAUNCHER state machine
         self.LauncherController.runLauncher()
