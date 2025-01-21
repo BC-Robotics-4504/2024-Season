@@ -110,21 +110,21 @@ class SparkMaxDriving:
     kD0 = 0
     kIz0 = 0
     kFF0 = 0.00015
-    kMaxOutput0 = 3_500
-    kMinOutput0 = -3_500
+    kMaxOutput0 = 5_000
+    kMinOutput0 = -5_000
     
     kP1 = 1e-2
-    kI1 = 1e-5
+    kI1 = 1e-7
     kD1 = 0
     kIz1 = 0
     kFF1 = 0
-    kMaxOutput1 = 2_000
-    kMinOutput1 = -2_200  
+    kMaxOutput1 = 3_000
+    kMinOutput1 = -3_000  
      
     maxRPM = 5700
 
     # Smart Motion Coefficients
-    maxVel = 3500  # rpm
+    maxVel = 5_000  # rpm
     maxAcc = 1000
     minVel = 0
     allowedErr = 0
@@ -207,7 +207,6 @@ class SparkMaxDriving:
         
         Checks if the robot has travlled to the specfied distance"""
         currentDistance = self.encoder.getPosition()
-        print(currentDistance)
         if abs(currentDistance-self.targetDistance) <= self.tolerance:
             return True
         

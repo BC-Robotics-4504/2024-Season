@@ -67,6 +67,7 @@ class LauncherController(StateMachine):
             self.next_state('__lowerIntake__')
             
         if self.target_action == LauncherActions.SHOOT_SPEAKER:
+            self.timer.restart()
             self.next_state('__spinupLauncher__')
             
         if self.target_action == LauncherActions.SHOOT_AMP:

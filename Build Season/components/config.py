@@ -49,7 +49,7 @@ class RobotConfig:
     climbing_min_distance: float = 0
     climber_position_raised: float = 0
     climber_position_low: float = 0.135 # Meters
-    climber_position_locked : float = 0.165 # Meters
+    climber_position_locked : float = 0.17 # Meters
 
     # Vision Parameters
     camera_angle: float = 0

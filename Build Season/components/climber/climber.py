@@ -12,7 +12,7 @@ class SparkMaxClimb:
     
     # PID coefficients
     kP = 5e-3
-    kI = 5e-8
+    kI = 5e-7
     kD = 0
     kIz = 0
     kFF = 0

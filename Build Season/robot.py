@@ -57,7 +57,7 @@ class MyRobot(MagicRobot):
                                                                absolute_encoder=True, z_offset=5.5975077)
         self.SwerveDrive_RearRightSpeedMotor = SparkMaxDriving(1, inverted=False, wheel_diameter=0.1143)
         self.SwerveDrive_FrontRightAngleMotor = SparkMaxTurning(4, inverted=False, wheel_diameter=1, 
-                                                                absolute_encoder=True, z_offset=0.0182671)
+                                                                absolute_encoder=True, z_offset=0.101)
         self.SwerveDrive_FrontRightSpeedMotor = SparkMaxDriving(3, inverted=False, wheel_diameter=0.1143)
 
         # Launcher Hardware Config
@@ -95,11 +95,12 @@ class MyRobot(MagicRobot):
         """
         self.SwerveDrive.clearFaults()
         self.LauncherController.raiseIntake()
+        self.Climber.lowerClimber()
         pass
 
     def teleopPeriodic(self):
         """MyRobot.teleopPeriodic() -> None
-        
+        q
         Called repeatedly during teleoperated mode."""
         # if self.Vision.getTargetDistance() is not None:
         #     print(self.Vision.getTargetDistance())
@@ -148,18 +149,17 @@ class MyRobot(MagicRobot):
         SmartDashboard Setup
         '''
         # Add stuff to SmartDashboard
-        wpilib.SmartDashboard.putNumber('LF Speed', self.SwerveDrive_FrontLeftSpeedMotor.getSpeed())
-        wpilib.SmartDashboard.putNumber('LF Angle', self.SwerveDrive_FrontLeftAngleMotor.getAbsPosition())
-        wpilib.SmartDashboard.putNumber('RF Speed', self.SwerveDrive_FrontRightSpeedMotor.getSpeed())
-        wpilib.SmartDashboard.putNumber('RF Angle', self.SwerveDrive_FrontRightAngleMotor.getAbsPosition())
-        wpilib.SmartDashboard.putNumber('LR Speed', self.SwerveDrive_RearLeftSpeedMotor.getSpeed())
-        wpilib.SmartDashboard.putNumber('LR Angle', self.SwerveDrive_RearLeftAngleMotor.getAbsPosition())
-        wpilib.SmartDashboard.putNumber('RR Speed', self.SwerveDrive_RearRightSpeedMotor.getSpeed())
-        wpilib.SmartDashboard.putNumber('RR Angle', self.SwerveDrive_RearRightAngleMotor.getAbsPosition())
+        # wpilib.SmartDashboard.putNumber('LF Speed', self.SwerveDrive_FrontLeftSpeedMotor.getSpeed())
+        # wpilib.SmartDashboard.putNumber('LF Angle', self.SwerveDrive_FrontLeftAngleMotor.getAbsPosition())
+        # wpilib.SmartDashboard.putNumber('RF Speed', self.SwerveDrive_FrontRightSpeedMotor.getSpeed())
+        # wpilib.SmartDashboard.putNumber('RF Angle', self.SwerveDrive_FrontRightAngleMotor.getAbsPosition())
+        # wpilib.SmartDashboard.putNumber('LR Speed', self.SwerveDrive_RearLeftSpeedMotor.getSpeed())
+        # wpilib.SmartDashboard.putNumber('LR Angle', self.SwerveDrive_RearLeftAngleMotor.getAbsPosition())
+        # wpilib.SmartDashboard.putNumber('RR Speed', self.SwerveDrive_RearRightSpeedMotor.getSpeed())
+        # wpilib.SmartDashboard.putNumber('RR Angle', self.SwerveDrive_RearRightAngleMotor.getAbsPosition())
 
-        wpilib.SmartDashboard.putNumberArray('L/R Flywheels', [self.Launcher.currentL_launcher_speed,
-                                                               self.Launcher.currentR_launcher_speed])  
-        
+        # wpilib.SmartDashboard.putNumberArray('L/R Flywheels', [self.Launcher.currentL_launcher_speed,
+        #                                                        self.Launcher.currentR_launcher_speed])  
         wpilib.SmartDashboard.putBoolean('Shooting Camera Active', self.controlGain < 0)
         wpilib.SmartDashboard.putBoolean('Intake Camera Active', self.controlGain > 0)
 
